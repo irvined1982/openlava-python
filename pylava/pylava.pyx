@@ -17,7 +17,6 @@ cdef class TransferFile:
 	property options:
 		def __get__(self):
 			return self._xf.options
-	
 
 cdef class Submit:
 	cdef submit * _sub
@@ -382,10 +381,6 @@ cdef class Job:
 	property resource_usage_last_update_time_datetime_utc:
 		def __get__(self):
 			return datetime.utcfromtimestamp(self.resource_usage_last_update_time)
-	
-
-
-
 
 cdef class OpenLava:
 	def __cinit__(self,app_name):
@@ -416,15 +411,3 @@ cdef class OpenLava:
 		return job
 	def close_job_info(self):
 		pylava.lsb_closejobinfo()
-
-	def get_all_jobs(self):
-		options=0x0000
-		options | 0x0001
-		return self.get_job_list(options)
-
-	def get_job_list(self, job_id=0,job_name="", user="all", queue="", host="", options=0,):
-		num_jobs=self.open_job_info(job_id=job_id, job_name=job_name, user=user, queue=queue, host=host, options=options)
-		jobs=[]
-		for i in range(num_jobs):
-			jobs.append(self.read_job_info())
-		return jobs

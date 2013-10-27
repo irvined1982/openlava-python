@@ -1,9 +1,12 @@
 from pylava import OpenLava
-
-f=OpenLava("Masdf")
+import sys
+from openlava.jobs import JobList
+from openlava.connection import OpenLavaConnection
+f=OpenLavaConnection.get_connection()
 print "Cluster name: %s" % f.get_cluster_name()
 print "Master host name: %s" %f.get_master_name()
-for job in f.get_all_jobs():
+for i in JobList():
+	job=i.job
 	print "User: %s" % job.user
 	print "Status: %s" % job.status
 	print "Status Name: %s" % job.status.name
