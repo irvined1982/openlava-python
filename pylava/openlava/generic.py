@@ -33,6 +33,96 @@ class StateNumeric:
 				statuses.append(cls(key))
 		return statuses
 
+class HostAttribute(StateNumeric):
+	states={
+			0x1:{
+				'name':'H_ATTR_CHKPNTABLE',
+				'description': "This host can checkpoint jobs.  ",
+				},
+			0x2:{
+				'name':'H_ATTR_CHKPNT_COPY',
+				'description': "This host provides kernel support for checkpoint copy. ",
+				},
+	}
+class HostStatus(StateNumeric):
+	states={
+			0x0:{
+				'name':'HOST_STAT_OK',
+				'description': "Ready to accept and run jobs.  ",
+				},
+			0x01:{
+				'name':'HOST_STAT_BUSY',
+				'description': "The host load is greater than a scheduling threshold.  In this status, no new job will be scheduled to run on this host.  ",
+				},
+			0x02:{
+				'name':'HOST_STAT_WIND',
+				'description': "The host dispatch window is closed.  In this status, no new job will be accepted.  ",
+				},
+			0x04:{
+				'name':'HOST_STAT_DISABLED',
+				'description': "The host has been disabled by the LSF administrator and will not accept jobs.  In this status, no new job will be scheduled to run on this host.  ",
+				},
+			0x08:{
+				'name':'HOST_STAT_LOCKED',
+				'description': "The host is locked by a exclusive task.  In this status, no new job will be scheduled to run on this host.  ",
+				},
+			0x10:{
+				'name':'HOST_STAT_FULL',
+				'description': "Great than job limit.  The host has reached its job limit. In this status, no new job will be scheduled to run on this host.  ",
+				},
+			0x20:{
+				'name':'HOST_STAT_UNREACH',
+				'description': "The sbatchd on this host is unreachable.  ",
+				},
+			0x40:{
+				'name':'HOST_STAT_UNAVAIL',
+				'description': "The LIM and sbatchd on this host are unavailable.  ",
+				},
+			0x80:{
+				'name':'HOST_STAT_UNLICENSED',
+				'description': "The host does not have an LSF license.  ",
+				},
+			0x100:{
+				'name':'HOST_STAT_NO_LIM',
+				'description': "The host is running an sbatchd but not a LIM.  ",
+				},
+			0x200:{
+				'name':'HOST_STAT_EXCLUSIVE',
+				'description': "Running exclusive job.  ",
+				},
+			0x400:{
+				'name':'HOST_STAT_LOCKED_MASTER',
+				'description': "Lim locked by master LIM.  ",
+				},
+			0x800:{
+				'name':'HOST_STAT_REMOTE_DISABLED',
+				'description': "Close a remote lease host.  This flag is used together with HOST_STAT_DISABLED.  ",
+				},
+			0x1000:{
+				'name':'HOST_STAT_LEASE_INACTIVE',
+				'description': "Close a remote lease host due to the lease is renewing or terminating.  ",
+				},
+			0x4000:{
+				'name':'HOST_STAT_DISABLED_RES',
+				'description': "Host is disabled by RES.  ",
+				},
+			0x8000:{
+				'name':'HOST_STAT_DISABLED_RMS',
+				'description': "Host is disabled by RMS.  ",
+				},
+			0x10000:{
+				'name':'HOST_STAT_LOCKED_EGO',
+				'description': "The host is disabled by EGO.  ",
+				},
+			0x20000:{
+				'name':'HOST_CLOSED_BY_ADMIN',
+				'description': "If none of the above hold, hStatus is set to HOST_STAT_OK to indicate that the host is ready to accept and run jobs.  ",
+				},
+			0x40000:{
+				'name':'HOST_STAT_CU_EXCLUSIVE',
+				'description': "Running cu exclusive job. ",
+				},
+			}
 class QueueAttribute(StateNumeric):
 	states={
 			0x01:{

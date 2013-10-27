@@ -1,8 +1,97 @@
 cimport pylava
-from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute
+from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
+
+cdef class HostInfo:
+	cdef hostInfoEnt *_h
+	cdef _from_struct(self, hostInfoEnt * h):
+		self._h=h
+
+	property host_name:
+		def __get__(self):
+			return u"%s" % self._h.host
+
+	property status:
+		def __get__(self):
+			return HostStatus(self._h.hStatus)
+
+#	property *busySched:
+#		def __get__(self):
+#			return self.hq.*busySched
+
+#	property *busyStop:
+#		def __get__(self):
+#			return self._h.*busyStop
+
+	property cpu_factor:
+		def __get__(self):
+			return self._h.cpuFactor
+
+#	property nIdx:
+#		def __get__(self):
+#			return self._h.nIdx
+
+#	property *load:
+#		def __get__(self):
+#			return self._h.*load
+
+#	property *loadSched:
+#		def __get__(self):
+#			return self._h.*loadSched
+
+#	property *loadStop:
+#		def __get__(self):
+#			return self._h.*loadStop
+
+	property run_windows:
+		def __get__(self):
+			return u"%s" % self._h.windows
+
+	property user_job_limit:
+		def __get__(self):
+			return self._h.userJobLimit
+
+	property max_jobs:
+		def __get__(self):
+			return self._h.maxJobs
+
+	property num_jobs:
+		def __get__(self):
+			return self._h.numJobs
+
+	property num_running_jobs:
+		def __get__(self):
+			return self._h.numRUN
+
+	property num_system_suspended_jobs:
+		def __get__(self):
+			return self._h.numSSUSP
+
+	property num_user_suspended_jobs:
+		def __get__(self):
+			return self._h.numUSUSP
+
+	property migration_threshold:
+		def __get__(self):
+			return self._h.mig
+
+	property host_attributes:
+		def __get__(self):
+			return HostAttribute.get_status_list(self._h.attr)
+
+#	property real_load:
+#		def __get__(self):
+#			return self._h.realLoad
+
+	property num_reserved_slots:
+		def __get__(self):
+			return self._h.numRESERVE
+
+	property checkpoint_signal:
+		def __get__(self):
+			return self._h.chkSig
 
 cdef class QueueInfo:
 	cdef queueInfoEnt *_q
@@ -625,6 +714,24 @@ cdef class OpenLava:
 		return job
 	def close_job_info(self):
 		pylava.lsb_closejobinfo()
+	def get_host_info(self,host_names=[],):
+		cdef int num_hosts
+		cdef hostInfoEnt *host_info
+		cdef hostInfoEnt *h
+		num_hosts=0
+		host_info=pylava.lsb_hostinfo(NULL,&num_hosts)
+		hosts=[]
+		for i in range(num_hosts):
+			h=&host_info[i]
+			host=HostInfo()
+			host._from_struct(h)
+			if len(host_names)>0:
+				if host.host_name in host_names:
+					hosts.append(host)
+			else:
+				hosts.append(host)
+		return hosts
+
 	def get_queue_info(self,queue_names=[],host="",user_name=""):
 		cdef int num_queues
 		cdef queueInfoEnt *queue_info

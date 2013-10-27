@@ -1,6 +1,3 @@
-#cdef extern from "lsf.h":
-#	extern int lserrno
-
 cdef extern from "lsbatch.h":
 	ctypedef unsigned short u_short
 	ctypedef long time_t
@@ -9,6 +6,29 @@ cdef extern from "lsbatch.h":
 		char subFn[256]
 		char execFn[256]
 		int options
+
+	extern struct hostInfoEnt:
+		char   *host
+		int    hStatus
+		int    *busySched
+		int    *busyStop
+		float  cpuFactor
+		int    nIdx
+		float *load
+		float  *loadSched
+		float  *loadStop
+		char   *windows
+		int    userJobLimit
+		int    maxJobs
+		int    numJobs
+		int    numRUN
+		int    numSSUSP
+		int    numUSUSP
+		int    mig
+		int    attr
+		float *realLoad
+		int   numRESERVE
+		int   chkSig
 
 	extern struct submit:
 		int     options
@@ -161,3 +181,4 @@ cdef extern from "lsbatch.h":
 	extern jobInfoEnt * lsb_readjobinfo( int * )
 	extern void lsb_closejobinfo()
 	extern queueInfoEnt *lsb_queueinfo(char **queues, int *numQueues, char *hosts, char *users, int options)
+	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
