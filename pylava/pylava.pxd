@@ -99,6 +99,57 @@ cdef extern from "lsbatch.h":
 		u_short port
 		int     jobPriority
 
+	extern struct queueInfoEnt:
+		char   *queue
+		char   *description
+		int    priority
+		short  nice
+		char   *userList
+		char   *hostList
+		int    nIdx
+		float  *loadSched
+		float  *loadStop
+		int    userJobLimit
+		float  procJobLimit
+		char   *windows
+#		int    rLimits[LSF_RLIM_NLIMITS]
+		char   *hostSpec
+		int    qAttrib
+		int    qStatus
+		int    maxJobs
+		int    numJobs
+		int    numPEND
+		int    numRUN
+		int    numSSUSP
+		int    numUSUSP
+		int    mig
+		int    schedDelay
+		int    acceptIntvl
+		char   *windowsD
+		char   *defaultHostSpec
+		int    procLimit
+		char   *admins
+		char   *preCmd
+		char   *postCmd
+		char   *prepostUsername
+		char   *requeueEValues
+		int    hostJobLimit
+		char   *resReq
+		int    numRESERVE
+		int    slotHoldTime
+		char   *resumeCond
+		char   *stopCond
+		char   *jobStarter
+		char   *suspendActCmd
+		char   *resumeActCmd
+		char   *terminateActCmd
+#		int    sigMap[LSB_SIG_NUM]
+		char   *chkpntDir
+		int    chkpntPeriod
+#		int    defLimits[LSF_RLIM_NLIMITS]
+		int    minProcLimit
+		int    defProcLimit
+
 
 
 
@@ -109,3 +160,4 @@ cdef extern from "lsbatch.h":
 	extern int lsb_openjobinfo (long, char *, char *, char *, char *,int)
 	extern jobInfoEnt * lsb_readjobinfo( int * )
 	extern void lsb_closejobinfo()
+	extern queueInfoEnt *lsb_queueinfo(char **queues, int *numQueues, char *hosts, char *users, int options)

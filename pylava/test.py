@@ -102,4 +102,20 @@ for i in JobList():
 	print "Submit user priority: %s" % job.submit.user_priority
 	for r in job.pend_reasons:
 		print "Pending due to: %d: %s on %d hosts" % (r,r,r.count)
+	from openlava.queues import get_all_queues
+	for q in get_all_queues():
+		print "Queue Name: %s" % q.name
+		print "Queue Name Implicit: %s" % q
+		print "Queue Description: %s" % q.description
+		print "Queue Priority: %d" % q.priority
+		print "Queue Nice: %d" % q.nice
+		print "Allowed Users: %s" % q.allowed_users
+		print "Host List: %s" % q.host_list
+		print "User Job Limit: %d" % q.user_job_limit
+		print "Processor Job Limit: %d" % q.processor_job_limit
+		print "Queue Attributes:"
+		for a in q.queue_attributes:
+			print " %s" % a
+		print "Queue Status: %s" % q.status
+
 

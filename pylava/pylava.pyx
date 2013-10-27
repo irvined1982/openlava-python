@@ -1,8 +1,222 @@
 cimport pylava
-from openlava.generic import JobStatus,SuspReason,PendReason
+from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
+
+cdef class QueueInfo:
+	cdef queueInfoEnt *_q
+	cdef _from_struct(self, queueInfoEnt * q):
+		self._q=q
+	property name:
+		def __get__(self):
+			return u"%s" % self._q.queue
+	def __str__(self):
+		return "%s" % self.name
+	def __unicode__(self):
+		return u"%s" % self.name
+
+	property description:
+		def __get__(self):
+			return u"%s" % self._q.description
+
+	property priority:
+		def __get__(self):
+			return self._q.priority
+
+	property nice:
+		def __get__(self):
+			return self._q.nice
+
+	property allowed_users:
+		def __get__(self):
+			names=self._q.userList
+			return [u"%s" % u for u in names.split()]
+
+	property host_list:
+		def __get__(self):
+			hosts=self._q.hostList
+			return [u"%s" % h for h in hosts.split()]
+
+	property nIdx:
+		def __get__(self):
+			return self._q.nIdx
+
+	#property *loadSched;:
+	#	def __get__(self):
+	#		return self._q.*loadSched;
+
+	#property *loadStop:
+	#	def __get__(self):
+	#		return self._q.*loadStop
+
+	property user_job_limit:
+		def __get__(self):
+			return self._q.userJobLimit
+
+	property processor_job_limit:
+		def __get__(self):
+			return self._q.procJobLimit
+
+#	property *windows:
+#		def __get__(self):
+#			return self._q.*windows
+
+#	property rLimits[LSF_RLIM_NLIMITS]:
+#		def __get__(self):
+#			return self._q.rLimits[LSF_RLIM_NLIMITS]
+
+	property host_specification:
+		def __get__(self):
+			return u"%s" % self._q.hostSpec
+
+	property queue_attributes:
+		def __get__(self):
+			return QueueAttribute.get_status_list(self._q.qAttrib)
+
+	property status:
+		def __get__(self):
+			return QueueStatus(self._q.qStatus)
+	
+	property max_jobs:
+		def __get__(self):
+			return self._q.maxJobs
+
+	property num_jobs:
+		def __get__(self):
+			return self._q.numJobs
+
+	property num_pending_jobs:
+		def __get__(self):
+			return self._q.numPEND
+
+	property num_running_jobs:
+		def __get__(self):
+			return self._q.numRUN
+
+	property num_system_suspended_jobs:
+		def __get__(self):
+			return self._q.numSSUSP
+
+	property num_user_suspended_jobs:
+		def __get__(self):
+			return self._q.numUSUSP
+
+	property migration_threashold:
+		def __get__(self):
+			return self._q.mig
+
+	property scheduling_delay:
+		def __get__(self):
+			return self._q.schedDelay
+	property scheduling_delay_timedelta:
+		def __get__(self):
+			return datetime.timedelta(seconds=self.scheduling_delay)
+
+	property accept_interval:
+		def __get__(self):
+			return self._q.acceptIntvl
+	property accept_interval_timedelta:
+		def __get__(self):
+			return datetime.timedelta(seconds=self.accept_interval)
+
+	#property *windowsD:
+	#	def __get__(self):
+	#		return self._q.*windowsD
+
+	property default_host_specification:
+		def __get__(self):
+			return u"%s" % self._q.defaultHostSpec
+
+	property process_limit:
+		def __get__(self):
+			return self._q.procLimit
+
+	property queue_admins:
+		def __get__(self):
+			admins=self._q.admins
+			return [u"%s" % a for a in admins.split()]
+
+	property pre_execution_command:
+		def __get__(self):
+			return u"%s" % self._q.preCmd
+
+	property post_execution_command:
+		def __get__(self):
+			return u"%s" % self._q.postCmd
+
+	property pre_post_username:
+		def __get__(self):
+			return u"%s" % self._q.prepostUsername
+
+	property requeue_exit_values:
+		def __get__(self):
+			return u"%s" % self._q.requeueEValues
+
+	property host_job_limit:
+		def __get__(self):
+			return self._q.hostJobLimit
+
+	property resource_request:
+		def __get__(self):
+			return u"%s" % self._q.resReq
+
+	property reserved_slots:
+		def __get__(self):
+			return self._q.numRESERVE
+
+	property slot_hold_time:
+		def __get__(self):
+			return self._q.slotHoldTime
+
+	property resume_condition:
+		def __get__(self):
+			return u"%s" % self._q.resumeCond
+
+	property stop_condition:
+		def __get__(self):
+			return u"%s" % self._q.stopCond
+
+	property job_starter:
+		def __get__(self):
+			return u"%s" %self._q.jobStarter
+
+	property suspend_command:
+		def __get__(self):
+			return u"%s" % self._q.suspendActCmd
+
+	property resume_command:
+		def __get__(self):
+			return u"%s" % self._q.resumeActCmd
+
+	property terminate_command:
+		def __get__(self):
+			return u"%s" % self._q.terminateActCmd
+
+	#property sigMap[LSB_SIG_NUM]:
+	#	def __get__(self):
+	#		return self._q.sigMap[LSB_SIG_NUM]
+
+	property checkpoint_directory:
+		def __get__(self):
+			return u"%s" % self._q.chkpntDir
+
+	property checkpoint_period:
+		def __get__(self):
+			return self._q.chkpntPeriod
+
+	#property defLimits[LSF_RLIM_NLIMITS]:
+	#	def __get__(self):
+	#		return self._q.defLimits[LSF_RLIM_NLIMITS]
+
+	property min_processor_limit:
+		def __get__(self):
+			return self._q.minProcLimit
+
+	property default_processor_limit:
+		def __get__(self):
+			return self._q.defProcLimit
+
 
 cdef class TransferFile:
 	cdef xFile * _xf
@@ -411,3 +625,35 @@ cdef class OpenLava:
 		return job
 	def close_job_info(self):
 		pylava.lsb_closejobinfo()
+	def get_queue_info(self,queue_names=[],host="",user_name=""):
+		cdef int num_queues
+		cdef queueInfoEnt *queue_info
+		cdef queueInfoEnt   *qp
+		cdef char* h
+		cdef char* u
+
+		h=NULL
+		u=NULL
+		num_queues=0
+
+		if len(host)>0:
+			h=host
+		if len(user_name)>0:
+			u=user_name
+
+		queue_info=pylava.lsb_queueinfo(NULL, &num_queues, h, u,0)
+		queues=[]
+		for i in range(num_queues):
+			qp=&queue_info[i]
+			queue=QueueInfo()
+			queue._from_struct(qp)
+			if len(queue_names)>0:
+				if queue.name in queue_names:
+					queues.append(queue)
+			else:
+				queues.append(queue)
+		return queues
+
+
+	
+

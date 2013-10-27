@@ -25,6 +25,177 @@ class StateNumeric:
 	@property
 	def status(self):
 		return self._status
+	@classmethod
+	def get_status_list(cls, mask):
+		statuses=[]
+		for key in cls.states.keys():
+			if hex(key ^ mask)==key:
+				statuses.append(cls(key))
+		return statuses
+
+class QueueAttribute(StateNumeric):
+	states={
+			0x01:{
+				'name':'Q_ATTRIB_EXCLUSIVE',
+				'description': "This queue accepts jobs which request exclusive execution.  ",
+				},
+			0x02:{
+				'name':'Q_ATTRIB_DEFAULT',
+				'description': "This queue is a default LSF queue.  ",
+				},
+			0x04:{
+				'name':'Q_ATTRIB_FAIRSHARE',
+				'description': "This queue uses the FAIRSHARE scheduling policy.  The user shares are given in userShares.  ",
+				},
+			0x08:{
+				'name':'Q_ATTRIB_PREEMPTIVE',
+				'description': "This queue uses the PREEMPTIVE scheduling policy.  ",
+				},
+			0x10:{
+				'name':'Q_ATTRIB_NQS',
+				'description': "This is an NQS forward queue.  The target NQS queues are given in nqsQueues. For NQS forward queues, the hostList, procJobLimit, windows, mig and windowsD fields are meaningless.  ",
+				},
+			0x20:{
+				'name':'Q_ATTRIB_RECEIVE',
+				'description': "This queue can receive jobs from other clusters.  ",
+				},
+			0x40:{
+				'name':'Q_ATTRIB_PREEMPTABLE',
+				'description': "This queue uses a preemptable scheduling policy.  ",
+				},
+			0x80:{
+				'name':'Q_ATTRIB_BACKFILL',
+				'description': "This queue uses a backfilling policy.  ",
+				},
+			0x100:{
+				'name':'Q_ATTRIB_HOST_PREFER',
+				'description': "This queue uses a host preference policy.  ",
+				},
+			0x200:{
+				'name':'Q_ATTRIB_NONPREEMPTIVE',
+				'description': "This queue can't preempt any other another queue.  ",
+				},
+			0x400:{
+				'name':'Q_ATTRIB_NONPREEMPTABLE',
+				'description': "This queue can't be preempted from any queue.  ",
+				},
+			0x800:{
+				'name':'Q_ATTRIB_NO_INTERACTIVE',
+				'description': "This queue does not accept batch interactive jobs.  ",
+				},
+			0x1000:{
+				'name':'Q_ATTRIB_ONLY_INTERACTIVE',
+				'description': "This queue only accepts batch interactive jobs.  ",
+				},
+			0x2000:{
+				'name':'Q_ATTRIB_NO_HOST_TYPE',
+				'description': "No host type related resource name specified in resource requirement.  ",
+				},
+			0x4000:{
+				'name':'Q_ATTRIB_IGNORE_DEADLINE',
+				'description': "This queue disables deadline constrained resource scheduling.  ",
+				},
+			0x8000:{
+				'name':'Q_ATTRIB_CHKPNT',
+				'description': "Jobs may run as chkpntable.  ",
+				},
+			0x10000:{
+				'name':'Q_ATTRIB_RERUNNABLE',
+				'description': "Jobs may run as rerunnable.  ",
+				},
+			0x20000:{
+				'name':'Q_ATTRIB_EXCL_RMTJOB',
+				'description': "Excluding remote jobs when local jobs are present in the queue.  ",
+				},
+			0x40000:{
+				'name':'Q_ATTRIB_MC_FAST_SCHEDULE',
+				'description': "Turn on a multicluster fast scheduling policy.  ",
+				},
+			0x80000:{
+				'name':'Q_ATTRIB_ENQUE_INTERACTIVE_AHEAD',
+				'description': "Push interactive jobs in front of other jobs in queue.  ",
+				},
+			0xf00000:{
+				'name':'Q_MC_FLAG',
+				'description': "Flags used by MultiCluster.  ",
+				},
+			0x100000:{
+				'name':'Q_ATTRIB_LEASE_LOCAL',
+				'description': "Lease and local.  ",
+				},
+			0x200000:{
+				'name':'Q_ATTRIB_LEASE_ONLY',
+				'description': "Lease only; no local.  ",
+				},
+			0x300000:{
+				'name':'Q_ATTRIB_RMT_BATCH_LOCAL',
+				'description': "Remote batch and local.  ",
+				},
+			0x400000:{
+				'name':'Q_ATTRIB_RMT_BATCH_ONLY',
+				'description': "Remote batch only.  ",
+				},
+			0x1000000:{
+				'name':'Q_ATTRIB_RESOURCE_RESERVE',
+				'description': "Memory reservation.  ",
+				},
+			0x2000000:{
+				'name':'Q_ATTRIB_FS_DISPATCH_ORDER_QUEUE',
+				'description': "Cross-queue fairshare.  ",
+				},
+			0x4000000:{
+				'name':'Q_ATTRIB_BATCH',
+				'description': "Batch queue/partition.  ",
+				},
+			0x8000000:{
+				'name':'Q_ATTRIB_ONLINE',
+				'description': "Online partition.  ",
+				},
+			0x10000000:{
+				'name':'Q_ATTRIB_INTERRUPTIBLE_BACKFILL',
+				'description': "Interruptible backfill.  ",
+				},
+			0x20000000:{
+				'name':'Q_ATTRIB_APS',
+				'description': "Absolute Priority scheduling (APS) value.  ",
+				},
+			0x40000000:{
+				'name':'Q_ATTRIB_NO_HIGHER_RESERVE',
+				'description': "No queue with RESOURCE_RESERVE or SLOT_RESERVE has higher priority than this queue.  ",
+				},
+			0x80000000:{
+				'name':'Q_ATTRIB_NO_HOST_VALID',
+				'description': "No host valid. ",
+				},
+			}
+
+class QueueStatus(StateNumeric):
+	states={
+			0x01:{
+				'name':'QUEUE_STAT_OPEN',
+				'description':'The queue is open to accept newly submitted jobs.',
+				},
+			0x02:{
+				'name':'QUEUE_STAT_ACTIVE',
+				'description':'The queue is actively dispatching jobs.  The queue can be inactivated and reactivated by the LSF administrator using lsb_queuecontrol. The queue will also be inactivated when its run or dispatch window is closed. In this case it cannot be reactivated manually; it will be reactivated by the LSF system when its run and dispatch windows reopen.',
+				},
+			0x04:{
+				'name':'QUEUE_STAT_RUN',
+				'description':'The queue run and dispatch windows are open.  The initial state of a queue at LSF boot time is open and either active or inactive, depending on its run and dispatch windows.',
+				},
+			0x08:{
+				'name':'QUEUE_STAT_NOPERM',
+				'description':'Remote queue rejecting jobs.',
+				},
+			0x10:{
+				'name':'QUEUE_STAT_DISC',
+				'description':'Remote queue status is disconnected.',
+				},
+			0x20:{
+				'name':'QUEUE_STAT_RUNWIN_CLOSE',
+				'description':'Queue run windows are closed.',
+				},
+			}
 
 class SuspReason(StateNumeric):
 	states={
