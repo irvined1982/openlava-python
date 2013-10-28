@@ -1,5 +1,5 @@
 cimport pylava
-from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute
+from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute,LoadSched
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
@@ -17,13 +17,26 @@ cdef class HostInfo:
 		def __get__(self):
 			return HostStatus(self._h.hStatus)
 
-#	property *busySched:
-#		def __get__(self):
-#			return self.hq.*busySched
+	property busy_schedule_load:
+		def __get__(self):
+			items=[]
+			for i in range(10):
+				items.append(self._h.busySched[i])
+			return LoadSched(*items)
 
-#	property *busyStop:
-#		def __get__(self):
-#			return self._h.*busyStop
+	property busy_stop_load:
+		def __get__(self):
+			items=[]
+			for i in range(10):
+				items.append(self._h.busyStop[i])
+			return LoadSched(*items)
+
+	property load:
+		def __get__(self):
+			items=[]
+			for i in range(10):
+				items.append(self._h.load[i])
+			return LoadSched(*items)
 
 	property cpu_factor:
 		def __get__(self):
@@ -33,9 +46,6 @@ cdef class HostInfo:
 #		def __get__(self):
 #			return self._h.nIdx
 
-#	property *load:
-#		def __get__(self):
-#			return self._h.*load
 
 #	property *loadSched:
 #		def __get__(self):

@@ -1,3 +1,4 @@
+from datetime import timedelta
 class StateNumeric:
 	def __init__(self,status):
 		self._status=status
@@ -29,7 +30,7 @@ class StateNumeric:
 	def get_status_list(cls, mask):
 		statuses=[]
 		for key in cls.states.keys():
-			if hex(key ^ mask)==key:
+			if (key ^ mask) == key:
 				statuses.append(cls(key))
 		return statuses
 
@@ -1600,4 +1601,58 @@ class JobStatus(StateNumeric):
 				'description':"The slave batch daemon (sbatchd) on the host on which the job is processed has lost contact with the master batch daemon (mbatchd).",
 				},
 			}
+
+class LoadSched:
+	def __init__(self, run_queue_15s,run_queue_1m,run_queue_15m,cpu_utilization,paging_rate,disk_io_rate,login_users, idle_time, tmp_space, mem_free):
+		self._run_queue_15s=run_queue_15s
+		self._run_queue_1m=run_queue_1m
+		self._run_queue_15m=run_queue_15m
+		self._cpu_utilization=cpu_utilization
+		self._paging_rate=paging_rate
+		self._disk_io_rate=disk_io_rate
+		self._login_users=login_users
+		self._idle_time=idle_time
+		self._tmp_space=tmp_space
+		self._mem_free=mem_free
+	@property
+	def run_queue_15s(self):
+		return self._run_queue_15s
+	@property
+	def run_queue_1m(self):
+		return self._run_queue_1m
+	@property
+	def run_queue_15m(self):
+		return self._run_queue_15m
+	@property
+	def cpu_utilization(self):
+		return self._cpu_utilization
+	@property
+	def paging_rate(self):
+		return self._paging_rate
+	@property
+	def disk_io_rate(self):
+		return self._disk_io_rate
+	@property
+	def login_users(self):
+		return self._login_users
+	@property
+	def idle_time(self):
+		return self._idle_time
+	@property
+	def idle_time_timedelta(self):
+		return timedelta(minutes=self._idle_time)
+	@property
+	def tmp_space(self):
+		return self._tmp_space
+	@property
+	def mem_free(self):
+		return self._mem_free
+	def __len__(self):
+		return 10
+	def __getitem__(self,key):
+		items=['run_queue_15s','run_queue_1m','run_queue_15m','cpu_utilization','paging_rate','disk_io_rate','login_users', 'idle_time', 'tmp_space', 'mem_free']
+		name=items[key]
+		return getattr(self,name)
+
+
 
