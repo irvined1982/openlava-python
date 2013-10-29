@@ -123,3 +123,6 @@ for h in get_all_hosts():
 	print "Host Name: %s" % h.host_name
 	print "Host Status: %s" % h.status
 
+from openlava.users import get_all_users
+for u in get_all_users():
+	print "User Name: %s" % u.num_jobs

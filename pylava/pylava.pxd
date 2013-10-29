@@ -7,6 +7,18 @@ cdef extern from "lsbatch.h":
 		char execFn[256]
 		int options
 
+	extern struct userInfoEnt:
+		char   *user
+		float  procJobLimit
+		int    maxJobs
+		int    numStartJobs
+		int    numJobs
+		int    numPEND
+		int    numRUN
+		int    numSSUSP
+		int    numUSUSP
+		int    numRESERVE
+
 	extern struct hostInfoEnt:
 		char   *host
 		int    hStatus
@@ -182,3 +194,4 @@ cdef extern from "lsbatch.h":
 	extern void lsb_closejobinfo()
 	extern queueInfoEnt *lsb_queueinfo(char **queues, int *numQueues, char *hosts, char *users, int options)
 	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
+	extern userInfoEnt *lsb_userinfo(char **users, int *numUsers)

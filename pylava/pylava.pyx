@@ -5,6 +5,63 @@ from datetime import datetime
 cdef int lserrno
 
 
+cdef class UserInfo:
+	cdef userInfoEnt *_u
+	cdef _from_struct(self, userInfoEnt * u):
+		self._u=u
+	def to_dict(self):
+		items={}
+		for i in ['name','process_job_limit','max_jobs','num_start_jobs','num_jobs','num_pending_jobs','num_running_jobs','num_system_suspended_jobs','num_user_suspended_jobs','num_reserved_slots']:
+			items[i]=getattr(self,i)
+		return items
+
+	property name:
+		def __get__(self):
+			if self._u.user!=NULL:
+				return u"%s" % self._u.user
+			else:
+				return None
+	def __str__(self):
+		return "%s" % self.name
+	def __unicode__(self):
+		return u"%s" % self.name
+
+	property process_job_limit:
+		def __get__(self):
+			return self._u.procJobLimit
+
+	property max_jobs:
+		def __get__(self):
+			return self._u.maxJobs
+
+	property num_start_jobs:
+		def __get__(self):
+			return self._u.numStartJobs
+
+	property num_jobs:
+		def __get__(self):
+			return self._u.numJobs
+
+	property num_pending_jobs:
+		def __get__(self):
+			return self._u.numPEND
+
+	property num_running_jobs:
+		def __get__(self):
+			return self._u.numRUN
+
+	property num_system_suspended_jobs:
+		def __get__(self):
+			return self._u.numSSUSP
+
+	property num_user_suspended_jobs:
+		def __get__(self):
+			return self._u.numUSUSP
+
+	property num_reserved_slots:
+		def __get__(self):
+			return self._u.numRESERVE
+
 cdef class HostInfo:
 	cdef hostInfoEnt *_h
 	cdef _from_struct(self, hostInfoEnt * h):
@@ -214,6 +271,10 @@ cdef class QueueInfo:
 	property migration_threshold:
 		def __get__(self):
 			return self._q.mig
+	property migration_threshold_timedelta:
+		def __get__(self):
+			return timedelta(minutes=self.migration_threshold)
+
 
 	property scheduling_delay:
 		def __get__(self):
@@ -313,6 +374,9 @@ cdef class QueueInfo:
 	property checkpoint_period:
 		def __get__(self):
 			return self._q.chkpntPeriod
+	property checkpoint_period_timedelta:
+		def __get__(self):
+			return timedelta(minutes=self.checkpoint_period)
 
 	property soft_resource_limits:
 		def __get__(self):
@@ -760,6 +824,24 @@ cdef class OpenLava:
 		return job
 	def close_job_info(self):
 		pylava.lsb_closejobinfo()
+	
+	def get_user_info(self,user_names=[],):
+		cdef int num_users
+		cdef userInfoEnt *user_info
+		cdef userInfoEnt *u
+		num_users=0
+		user_info=pylava.lsb_userinfo(NULL,&num_users)
+		users=[]
+		for i in range(num_users):
+			u=&user_info[i]
+			user=UserInfo()
+			user._from_struct(u)
+			if len(user_names)>0:
+				if user.name in user_names:
+					users.append(user)
+			else:
+				users.append(user)
+		return users
 	def get_host_info(self,host_names=[],):
 		cdef int num_hosts
 		cdef hostInfoEnt *host_info
