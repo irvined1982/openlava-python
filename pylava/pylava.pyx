@@ -1,8 +1,9 @@
 cimport pylava
-from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute,LoadSched
+from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute,LoadSched,RLimit
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
+
 
 cdef class HostInfo:
 	cdef hostInfoEnt *_h
@@ -41,19 +42,6 @@ cdef class HostInfo:
 	property cpu_factor:
 		def __get__(self):
 			return self._h.cpuFactor
-
-#	property nIdx:
-#		def __get__(self):
-#			return self._h.nIdx
-
-
-#	property *loadSched:
-#		def __get__(self):
-#			return self._h.*loadSched
-
-#	property *loadStop:
-#		def __get__(self):
-#			return self._h.*loadStop
 
 	property run_windows:
 		def __get__(self):
@@ -102,11 +90,24 @@ cdef class HostInfo:
 	property checkpoint_signal:
 		def __get__(self):
 			return self._h.chkSig
+	def to_dict(self):
+		d={}
+		for i in ['host_name','status','busy_schedule_load','busy_stop_load','load','cpu_factor','run_windows','user_job_limit','max_jobs','num_jobs','num_running_jobs','num_system_suspended_jobs','num_user_suspended_jobs','migration_threshold','host_attributes','num_reserved_slots','checkpoint_signal']:
+			d[i]=getattr(self,i)
+		return d
+
+
 
 cdef class QueueInfo:
 	cdef queueInfoEnt *_q
 	cdef _from_struct(self, queueInfoEnt * q):
 		self._q=q
+	def to_dict(self):
+		items={}
+		for i in ['name','description','priority','nice','allowed_users','host_list','stop_scheduling_load','stop_job_load','user_job_limit','processor_job_limit','run_windows','hard_resource_limits','host_specification','queue_attributes','status','max_jobs','num_jobs','num_pending_jobs','num_running_jobs','num_system_suspended_jobs','num_user_suspended_jobs','migration_threshold','scheduling_delay','accept_interval','dispatch_window','default_host_specification','process_limit','queue_admins','pre_execution_command','post_execution_command','pre_post_username','requeue_exit_values','host_job_limit','resource_request','reserved_slots','slot_hold_time','resume_condition','stop_condition','job_starter','suspend_command','resume_command','terminate_command','checkpoint_directory','checkpoint_period','soft_resource_limits','min_processor_limit','default_processor_limit']:
+			items[i]=getattr(self,i)
+		return items
+
 	property name:
 		def __get__(self):
 			return u"%s" % self._q.queue
@@ -141,13 +142,19 @@ cdef class QueueInfo:
 		def __get__(self):
 			return self._q.nIdx
 
-	#property *loadSched;:
-	#	def __get__(self):
-	#		return self._q.*loadSched;
+	property stop_scheduling_load:
+		def __get__(self):
+			items=[]
+			for i in range(10):
+				items.append(self._q.loadSched[i])
+			return LoadSched(*items)
 
-	#property *loadStop:
-	#	def __get__(self):
-	#		return self._q.*loadStop
+	property stop_job_load:
+		def __get__(self):
+			items=[]
+			for i in range(10):
+				items.append(self._q.loadStop[i])
+			return LoadSched(*items)
 
 	property user_job_limit:
 		def __get__(self):
@@ -157,13 +164,16 @@ cdef class QueueInfo:
 		def __get__(self):
 			return self._q.procJobLimit
 
-#	property *windows:
-#		def __get__(self):
-#			return self._q.*windows
+	property run_windows:
+		def __get__(self):
+			return self._q.windows
 
-#	property rLimits[LSF_RLIM_NLIMITS]:
-#		def __get__(self):
-#			return self._q.rLimits[LSF_RLIM_NLIMITS]
+	property hard_resource_limits:
+		def __get__(self):
+			lims=[]
+			for i in range(11):
+				lims.append(self._q.rLimits[i])
+			return RLimit(*lims)
 
 	property host_specification:
 		def __get__(self):
@@ -201,7 +211,7 @@ cdef class QueueInfo:
 		def __get__(self):
 			return self._q.numUSUSP
 
-	property migration_threashold:
+	property migration_threshold:
 		def __get__(self):
 			return self._q.mig
 
@@ -219,9 +229,9 @@ cdef class QueueInfo:
 		def __get__(self):
 			return datetime.timedelta(seconds=self.accept_interval)
 
-	#property *windowsD:
-	#	def __get__(self):
-	#		return self._q.*windowsD
+	property dispatch_window:
+		def __get__(self):
+			return self._q.windowsD
 
 	property default_host_specification:
 		def __get__(self):
@@ -304,9 +314,12 @@ cdef class QueueInfo:
 		def __get__(self):
 			return self._q.chkpntPeriod
 
-	#property defLimits[LSF_RLIM_NLIMITS]:
-	#	def __get__(self):
-	#		return self._q.defLimits[LSF_RLIM_NLIMITS]
+	property soft_resource_limits:
+		def __get__(self):
+			lims=[]
+			for i in range(11):
+				lims.append(self._q.defLimits[i])
+			return RLimit(*lims)
 
 	property min_processor_limit:
 		def __get__(self):
@@ -335,6 +348,11 @@ cdef class Submit:
 	cdef submit * _sub
 	cdef _from_struct(self,submit * sub):
 		self._sub=sub
+	def to_dict(self):
+		items={}
+		for i in ['options','options2','job_name','queue_name','num_asked_hosts','asked_hosts','requested_resources','resource_limits','host_specification','num_processors','dependency_condition','begin_time','termination_time','signal_value','input_file','output_file','error_file','command','checkpoint_period','checkpoint_dir','num_transfer_files','transfer_files','pre_execution_command','email_user','delete_options','delete_options2','project_name','max_num_processors','login_shell','user_priority']:
+			items[i]=getattr(self,i)
+		return items
 	property options:
 		def __get__(self):
 			return self._sub.options
@@ -359,9 +377,12 @@ cdef class Submit:
 	property requested_resources:
 		def __get__(self):
 			return u"%s" % self._sub.resReq
-	#property resource_limits:
-	#	def __get__(self):
-	#		return self._sub.rlimits
+	property resource_limits:
+		def __get__(self):
+			lims=[]
+			for i in range(11):
+				lims.append(self._sub.rLimits[i])
+			return RLimit(*lims)
 	property host_specification:
 		def __get__(self):
 			return u"%s" % self._sub.hostSpec
@@ -454,6 +475,11 @@ cdef class PIDInfo:
 	cdef pidInfo * _pinfo
 	cdef _from_struct(self, pidInfo * pinfo):
 		self._pinfo=pinfo
+	def to_dict(self):
+		items={}
+		for i in ['process_id','parent_process_id','group_id','cray_job_id']:
+			items[i]=getattr(self,i)
+		return items
 	property process_id:
 		def __get__(self):
 			return self._pinfo.pid
@@ -471,6 +497,11 @@ cdef class RUsage:
 	cdef jRusage * _ru
 	cdef _from_struct(self, jRusage * ru):
 		self._ru=ru
+	def to_dict(self):
+		items={}
+		for i in ['resident_memory_usage','virtual_memory_usage','user_time','system_time','num_active_processes','active_processes','num_active_process_groups','active_process_groups']:
+			items[i]=getattr(self,i)
+		return items
 	property resident_memory_usage:
 		def __get__(self):
 			return self._ru.mem
@@ -515,6 +546,11 @@ cdef class Job:
 	cdef jobInfoEnt * _job
 	cdef _from_struct(self, jobInfoEnt * job):
 		self._job=job
+	def to_dict(self):
+		items={}
+		for i in ['pend_reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
+			items[i]=getattr(self,i)
+		return items
 
 	property pend_reasons:
 		def __get__(self):

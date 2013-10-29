@@ -33,6 +33,8 @@ class StateNumeric:
 			if (key ^ mask) == key:
 				statuses.append(cls(key))
 		return statuses
+	def to_dict(self):
+		return {'name':self.name,'description':self.description,'status':self._status}
 
 class HostAttribute(StateNumeric):
 	states={
@@ -1602,6 +1604,73 @@ class JobStatus(StateNumeric):
 				},
 			}
 
+class RLimit:
+	def __init__(self, cpu,file_size,data,stack,core,rss,nofile,openmax,swap,run,process):
+		self._cpu=cpu
+		self._file_size=file_size
+		self._data=data
+		self._stack=stack
+		self._core=core
+		self._rss=rss
+		self._nofile=nofile
+		self._openmax=openmax
+		self._swap=swap
+		self._run=run
+		self._process=process
+	def to_dict(self):
+		items={}
+		for i in ['cpu','file_size','data','stack','core','rss','run','process','swap','nofile','open_files']:
+			items[i]=getattr(self,i)
+		return items
+
+	@property
+	def cpu(self):
+		return self._cpu
+
+	@property
+	def file_size(self):
+		return self._file_size
+
+	@property
+	def data(self):
+		return self._data
+
+	@property
+	def stack(self):
+		return self._stack
+
+	@property
+	def core(self):
+		return self._core
+
+	@property
+	def rss(self):
+		return self._rss
+
+	@property
+	def run(self):
+		return self._run
+
+	@property
+	def process(self):
+		return self._process
+
+	@property
+	def swap(self):
+		return self._swap
+
+	@property
+	def nofile(self):
+		return self._nofile
+
+	@property
+	def open_files(self):
+		return self._openmax
+
+class LoadSched:
+	def __init__(self, run_queue_15s,run_queue_1m,run_queue_15m,cpu_utilization,paging_rate,disk_io_rate,login_users, idle_time, tmp_space, mem_free):
+		self._run_queue_15s=run_queue_15s
+		self._run_queue_1m=run_queue_1m
 class LoadSched:
 	def __init__(self, run_queue_15s,run_queue_1m,run_queue_15m,cpu_utilization,paging_rate,disk_io_rate,login_users, idle_time, tmp_space, mem_free):
 		self._run_queue_15s=run_queue_15s
@@ -1653,6 +1722,13 @@ class LoadSched:
 		items=['run_queue_15s','run_queue_1m','run_queue_15m','cpu_utilization','paging_rate','disk_io_rate','login_users', 'idle_time', 'tmp_space', 'mem_free']
 		name=items[key]
 		return getattr(self,name)
+	def to_dict(self):
+		d={}
+		items=['run_queue_15s','run_queue_1m','run_queue_15m','cpu_utilization','paging_rate','disk_io_rate','login_users', 'idle_time', 'tmp_space', 'mem_free']
+		for i in items:
+			d[i]=getattr(self,i)
+		return d
+
 
 
 

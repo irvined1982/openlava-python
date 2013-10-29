@@ -113,6 +113,7 @@ for q in get_all_queues():
 	print "Host List: %s" % q.host_list
 	print "User Job Limit: %d" % q.user_job_limit
 	print "Processor Job Limit: %d" % q.processor_job_limit
+	print q.soft_resource_limits.cpu
 	print "Queue Attributes:"
 	for a in q.queue_attributes:
 		print " %s" % a

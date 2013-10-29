@@ -38,7 +38,7 @@ cdef extern from "lsbatch.h":
 		int     numAskedHosts
 		char    **askedHosts
 		char    *resReq
-#		iint     rLimits[LSF_RLIM_NLIMITS]
+		int     rLimits[11]
 		char    *hostSpec
 		int     numProcessors
 		char    *dependCond
@@ -132,7 +132,7 @@ cdef extern from "lsbatch.h":
 		int    userJobLimit
 		float  procJobLimit
 		char   *windows
-#		int    rLimits[LSF_RLIM_NLIMITS]
+		int    rLimits[11]
 		char   *hostSpec
 		int    qAttrib
 		int    qStatus
@@ -166,7 +166,7 @@ cdef extern from "lsbatch.h":
 #		int    sigMap[LSB_SIG_NUM]
 		char   *chkpntDir
 		int    chkpntPeriod
-#		int    defLimits[LSF_RLIM_NLIMITS]
+		int    defLimits[11]
 		int    minProcLimit
 		int    defProcLimit
 
