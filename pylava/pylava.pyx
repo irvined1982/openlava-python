@@ -1,5 +1,5 @@
 cimport pylava
-from python_lava import JobStatus
+from open_lava import JobStatus
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
@@ -197,10 +197,6 @@ cdef class RUsage:
 			for i in range(self.num_active_process_groups):
 				g.append(self._ru.pgid[i])
 			return g
-	
-	
-
-
 
 cdef class Job:
 	cdef jobInfoEnt * _job
@@ -402,3 +398,4 @@ cdef class OpenLava:
 		job=Job()
 		job._from_struct(j)
 		return job
+
