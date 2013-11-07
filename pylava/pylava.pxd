@@ -108,5 +108,4 @@ cdef extern from "lsbatch.h":
 	extern char *ls_getmastername()
 	extern int lsb_openjobinfo (long, char *, char *, char *, char *,int)
 	extern jobInfoEnt * lsb_readjobinfo( int * )
-	
-
+	extern void lsb_closejobinfo()

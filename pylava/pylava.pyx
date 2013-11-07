@@ -1,5 +1,5 @@
 cimport pylava
-from open_lava import JobStatus
+from openlava.generic import JobStatus,SuspReason,PendReason
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
@@ -198,11 +198,29 @@ cdef class RUsage:
 				g.append(self._ru.pgid[i])
 			return g
 
+
 cdef class Job:
 	cdef jobInfoEnt * _job
 	cdef _from_struct(self, jobInfoEnt * job):
 		self._job=job
 
+	property pend_reasons:
+		def __get__(self):
+			v={
+			}
+			for i in range(self._job.numReasons):
+				reason=self._job.reasonTb[i]
+				reason=reason & 0x00000000000ffff
+				if self._job.status==0x01: # pend
+					r=PendReason(reason)
+				if self._job.status==0x02: # psusp
+					r=SuspReason(reason)
+				try:
+					v[r.name].count+=1
+				except:
+					v[r.name]=r
+					v[r.name].count=1
+			return v.values()
 	property submit:
 		def __get__(self):
 			s=Submit()
@@ -382,20 +400,31 @@ cdef class OpenLava:
 			user="all",
 			queue="", 
 			host="", 
-			all_jobs=False, 
-			unfinished_jobs=True, 
-			done_jobs=False, 
-			pending_jobs=False, 
-			suspended_jobs=False, 
-			last_job=False
+			options=0,
 			):
-		num_jobs= pylava.lsb_openjobinfo(job_id,job_name,user,queue,host,0)
-		assert num_jobs>=0, "Unable to lsb_openjobinfo"
+
+		num_jobs= pylava.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
+		if num_jobs<0:
+			raise ValueError("No Jobs Found")
+		return num_jobs
 	def read_job_info(self):
-		cdef int * foo
+		cdef int * more
 		cdef jobInfoEnt * j
-		j=pylava.lsb_readjobinfo(foo)
+		j=pylava.lsb_readjobinfo(more)
 		job=Job()
 		job._from_struct(j)
 		return job
+	def close_job_info(self):
+		pylava.lsb_closejobinfo()
 
+	def get_all_jobs(self):
+		options=0x0000
+		options | 0x0001
+		return self.get_job_list(options)
+
+	def get_job_list(self, job_id=0,job_name="", user="all", queue="", host="", options=0,):
+		num_jobs=self.open_job_info(job_id=job_id, job_name=job_name, user=user, queue=queue, host=host, options=options)
+		jobs=[]
+		for i in range(num_jobs):
+			jobs.append(self.read_job_info())
+		return jobs

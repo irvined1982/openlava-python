@@ -9,7 +9,7 @@ setup(
 	author="David Irvine",
 	author_email="irvined@gmail.com",
     cmdclass = {'build_ext': build_ext},
-	packages=['open_lava'],
+	packages=['openlava'],
     ext_modules = [
 		Extension("pylava", ["pylava.pyx"],
 			extra_objects=['/opt/openlava/lib/liblsf.a','/opt/openlava/lib/liblsbatch.a'],
