@@ -6,26 +6,6 @@ cdef int lserrno
 
 
 
-cdef LS_UNS_LONG_INT get_array_index(LS_LONG_INT job_id):
-	cdef LS_UNS_LONG_INT array_index
-	if job_id == -1:
-		array_index=0
-	else:
-		array_index=( job_id >> 32 ) & 0x0FFFF
-	return array_index
-
-cdef LS_UNS_LONG_INT get_job_id(LS_LONG_INT job_id):
-	cdef LS_UNS_LONG_INT id
-	if job_id==-1:
-		id=-1
-	else:
-		id=job_id & 0x0FFFFFFFF
-	return id
-
-cdef LS_LONG_INT create_job_id(LS_LONG_INT job_id, LS_UNS_LONG_INT array_index):
-	cdef LS_LONG_INT id
-	id=((array_index << 32) | job_id)
-	return id
 
 cdef class UserInfo:
 	cdef userInfoEnt *_u
@@ -730,11 +710,11 @@ cdef class Job:
 
 	property job_id:
 		def __get__(self):
-			return pylava.get_job_id(self._job.jobId)
+			return OpenLava.get_job_id(self._job.jobId)
 
 	property array_id:
 		def __get__(self):
-			return pylava.get_array_index(self._job.jobId)
+			return OpenLava.get_array_index(self._job.jobId)
 
 	property full_id:
 		def __get__(self):
@@ -919,6 +899,28 @@ cdef class OpenLava:
 				queues.append(queue)
 		return queues
 
+	@classmethod
+	def get_array_index(cls, LS_LONG_INT job_id):
+		cdef LS_UNS_LONG_INT array_index
+		if job_id == -1:
+			array_index=0
+		else:
+			array_index=( job_id >> 32 ) & 0x0FFFF
+		return array_index
 
-	
+	@classmethod
+	def get_job_id(cls, LS_LONG_INT job_id):
+		cdef LS_UNS_LONG_INT id
+		if job_id==-1:
+			id=-1
+		else:
+			id=job_id & 0x0FFFFFFFF
+		return id
 
+	@classmethod
+	def  create_job_id(cls, LS_LONG_INT job_id, LS_UNS_LONG_INT array_index):
+		cdef LS_LONG_INT id
+		id=array_index
+		id=id << 32
+		id=id | job_id
+		return id

@@ -1,7 +1,8 @@
 from openlava.connection import OpenLavaConnection
 
-def get_job_by_id(job_id):
+def get_job_by_id(job_id, array_id=0):
 	lava=OpenLavaConnection.get_connection()
+	job_id=lava.create_job_id(job_id,array_id)
 	num_jobs=lava.open_job_info(job_id=job_id)
 	if num_jobs<1:
 		raise ValueError("Job Not Found")
@@ -9,7 +10,7 @@ def get_job_by_id(job_id):
 	lava.close_job_info()
 	return job
 class JobList():
-	def __init__(self, job_id=0,job_name="", user="all", queue="", host="", options=0):
+	def __init__(self, job_id=0,  job_name="", user="all", queue="", host="", options=0):
 		self._lava=OpenLavaConnection.get_connection()
 		self._job_id=job_id
 		self._job_name=job_name
