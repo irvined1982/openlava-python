@@ -2,6 +2,8 @@ cdef extern from "lsbatch.h":
 	ctypedef unsigned short u_short
 	ctypedef long time_t
 	ctypedef long long int LS_LONG_INT
+	ctypedef unsigned long long LS_UNS_LONG_INT
+
 	extern struct xFile:
 		char subFn[256]
 		char execFn[256]
