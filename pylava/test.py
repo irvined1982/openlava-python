@@ -64,8 +64,6 @@ for i in JobList():
 	for g in job.resource_usage.active_process_groups:
 		print "Process Group: %d" % g
 	
-	print "Submit Options: %d" % job.submit.options
-	print "Submit Options2: %d" % job.submit.options2
 	print "Submit Job Name: %s" % job.submit.job_name
 	print "Submit Queue Name: %s" % job.submit.queue_name
 	print "Submit Num Asked Hosts: %s" % job.submit.num_asked_hosts
@@ -94,8 +92,6 @@ for i in JobList():
 		print "Transfer: %s to %s with options %s" % (f.submission_file_name, f.execution_file_name, f.options)
 	print "Submit Pre Execution Command: %s" % job.submit.pre_execution_command
 	print "Submit Email User: %s" % job.submit.email_user
-	print "Submit Delete Options: %s" % job.submit.delete_options
-	print "Submit Delete Options 2:: %s" % job.submit.delete_options2
 	print "Submit Project Name: %s" % job.submit.project_name
 	print "Submit Max Num Processors: %s" % job.submit.max_num_processors
 	print "Submit login shell: %s" % job.submit.login_shell

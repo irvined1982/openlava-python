@@ -26,6 +26,14 @@ class StateNumeric:
 	@property
 	def status(self):
 		return self._status
+	@property
+	def friendly(self):
+		try:
+			return u"%s" % self.states[self._status]['friendly']
+		except:
+			return u""
+
+
 	@classmethod
 	def get_status_list(cls, mask):
 		statuses=[]

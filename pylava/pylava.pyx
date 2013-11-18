@@ -1,5 +1,5 @@
 cimport pylava
-from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute,LoadSched,RLimit
+from openlava.generic import JobStatus,SuspReason,PendReason,QueueStatus,QueueAttribute,HostStatus,HostAttribute,LoadSched,RLimit,SubmitOption,Submit2Option
 from datetime import timedelta
 from datetime import datetime
 cdef int lserrno
@@ -414,15 +414,15 @@ cdef class Submit:
 		self._sub=sub
 	def to_dict(self):
 		items={}
-		for i in ['options','options2','job_name','queue_name','num_asked_hosts','asked_hosts','requested_resources','resource_limits','host_specification','num_processors','dependency_condition','begin_time','termination_time','signal_value','input_file','output_file','error_file','command','checkpoint_period','checkpoint_dir','num_transfer_files','transfer_files','pre_execution_command','email_user','delete_options','delete_options2','project_name','max_num_processors','login_shell','user_priority']:
+		for i in ['options','job_name','queue_name','num_asked_hosts','asked_hosts','requested_resources','resource_limits','host_specification','num_processors','dependency_condition','begin_time','termination_time','signal_value','input_file','output_file','error_file','command','checkpoint_period','checkpoint_dir','num_transfer_files','transfer_files','pre_execution_command','email_user','delete_options','project_name','max_num_processors','login_shell','user_priority']:
 			items[i]=getattr(self,i)
 		return items
 	property options:
 		def __get__(self):
-			return self._sub.options
-	property options2:
-		def __get__(self):
-			return self._sub.options2
+			options=[]
+			options.extend(SubmitOption.get_status_list(self._sub.options))
+			options.extend(Submit2Option.get_status_list(self._sub.options2))
+			return options
 	property job_name:
 		def __get__(self):
 			return u"%s" % self._sub.jobName
@@ -517,10 +517,10 @@ cdef class Submit:
 			return  u"%s" % self._sub.mailUser
 	property delete_options:
 		def __get__(self):
-			return self._sub.delOptions
-	property delete_options2:
-		def __get__(self):
-			return self._sub.delOptions2
+			options=[]
+			options.extend(SubmitOption.get_status_list(self._sub.delOptions))
+			options.extend(Submit2Option.get_status_list(self._sub.delOptions2))
+			return options
 	property project_name:
 		def __get__(self):
 			return  u"%s" % self._sub.projectName
