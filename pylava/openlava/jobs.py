@@ -30,5 +30,4 @@ class JobList():
 			raise StopIteration
 		self._counter+=1
 		self.job=self._lava.read_job_info()
-		print self.job.job_id
 		return self

@@ -244,7 +244,7 @@ cdef class QueueInfo:
 
 	property status:
 		def __get__(self):
-			return QueueStatus(self._q.qStatus)
+			return QueueStatus.get_status_list(self._q.qStatus)
 	
 	property max_jobs:
 		def __get__(self):

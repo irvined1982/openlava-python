@@ -4,7 +4,6 @@ class OpenLavaConnection:
 	@staticmethod
 	def get_connection():
 		if not OpenLavaConnection.connection:
-			print "Getting Connection"
 			OpenLavaConnection.connection=OpenLava("openlava python")
 		return OpenLavaConnection.connection
 	def __init__(self):

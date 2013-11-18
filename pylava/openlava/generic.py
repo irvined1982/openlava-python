@@ -38,8 +38,10 @@ class StateNumeric:
 	def get_status_list(cls, mask):
 		statuses=[]
 		for key in cls.states.keys():
-			if (key ^ mask) == key:
+			if (key & mask) == key:
 				statuses.append(cls(key))
+			else:
+				print "Not Matched"
 		return statuses
 	def to_dict(self):
 		return {'name':self.name,'description':self.description,'status':self._status}
