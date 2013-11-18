@@ -36,6 +36,223 @@ class StateNumeric:
 	def to_dict(self):
 		return {'name':self.name,'description':self.description,'status':self._status}
 
+class Submit2Option(StateNumeric):
+	states={
+			0x01:{
+				'name':'SUB2_HOLD',
+				'description': "",
+				'friendly': "SUB2_HOLD",
+				},
+			0x02:{
+				'name':'SUB2_MODIFY_CMD',
+				'description': "",
+				'friendly': "SUB2_MODIFY_CMD",
+				},
+			0x04:{
+				'name':'SUB2_BSUB_BLOCK',
+				'description': "",
+				'friendly': "SUB2_BSUB_BLOCK",
+				},
+			0x08:{
+				'name':'SUB2_HOST_NT',
+				'description': "",
+				'friendly': "SUB2_HOST_NT",
+				},
+			0x10:{
+				'name':'SUB2_HOST_UX',
+				'description': "",
+				'friendly': "SUB2_HOST_UX",
+				},
+			0x20:{
+				'name':'SUB2_QUEUE_CHKPNT',
+				'description': "",
+				'friendly': "SUB2_QUEUE_CHKPNT",
+				},
+			0x40:{
+				'name':'SUB2_QUEUE_RERUNNABLE',
+				'description': "",
+				'friendly': "SUB2_QUEUE_RERUNNABLE",
+				},
+			0x80:{
+				'name':'SUB2_IN_FILE_SPOOL',
+				'description': "",
+				'friendly': "SUB2_IN_FILE_SPOOL",
+				},
+			0x100:{
+				'name':'SUB2_JOB_CMD_SPOOL',
+				'description': "",
+				'friendly': "SUB2_JOB_CMD_SPOOL",
+				},
+			0x200:{
+				'name':'SUB2_JOB_PRIORITY',
+				'description': "",
+				'friendly': "SUB2_JOB_PRIORITY",
+				},
+			0x400:{
+				'name':'SUB2_USE_DEF_PROCLIMIT',
+				'description': "",
+				'friendly': "SUB2_USE_DEF_PROCLIMIT",
+				},
+			0x800:{
+				'name':'SUB2_MODIFY_RUN_JOB',
+				'description': "",
+				'friendly': "SUB2_MODIFY_RUN_JOB",
+				},
+			0x1000:{
+				'name':'SUB2_MODIFY_PEND_JOB',
+				'description': "",
+				'friendly': "SUB2_MODIFY_PEND_JOB",
+				},
+			}
+class SubmitOption(StateNumeric):
+	states={
+			0x01:{
+				'name':'SUB_JOB_NAME',
+				'description': "Submitted with a job name",
+				'friendly': "Job submitted with name",
+				},
+			0x02:{
+				'name':'SUB_QUEUE',
+				'description': "",
+				'friendly': "Job submitted with queue",
+				},
+			0x04:{
+				'name':'SUB_HOST',
+				'description': "",
+				'friendly': "SUB_HOST",
+				},
+			0x08:{
+				'name':'SUB_IN_FILE',
+				'description': "",
+				'friendly': "Job Submitted with input file",
+				},
+			0x10:{
+				'name':'SUB_OUT_FILE',
+				'description': "",
+				'friendly': "Job submitted with output file",
+				},
+			0x20:{
+				'name':'SUB_ERR_FILE',
+				'description': "",
+				'friendly': "Job submitted with error file",
+				},
+			0x40:{
+				'name':'SUB_EXCLUSIVE',
+				'description': "",
+				'friendly': "Job submitted to run exclusively",
+				},
+			0x80:{
+				'name':'SUB_NOTIFY_END',
+				'description': "",
+				'friendly': "SUB_NOTIFY_END",
+				},
+			0x100:{
+				'name':'SUB_NOTIFY_BEGIN',
+				'description': "",
+				'friendly': "SUB_NOTIFY_BEGIN",
+				},
+			0x200:{
+				'name':'SUB_USER_GROUP',
+				'description': "",
+				'friendly': "SUB_USER_GROUP",
+				},
+			0x400:{
+				'name':'SUB_CHKPNT_PERIOD',
+				'description': "",
+				'friendly': "Job submitted with checkpoint period",
+				},
+			0x800:{
+				'name':'SUB_CHKPNT_DIR',
+				'description': "",
+				'friendly': "Job submitted with checkpoint directory",
+				},
+			0x1000:{
+				'name':'SUB_RESTART_FORCE',
+				'description': "",
+				'friendly': "SUB_RESTART_FORCE",
+				},
+			0x2000:{
+				'name':'SUB_RESTART',
+				'description': "",
+				'friendly': "SUB_RESTART",
+				},
+			0x4000:{
+				'name':'SUB_RERUNNABLE',
+				'description': "",
+				'friendly': "Job submitted as rerunnable",
+				},
+			0x8000:{
+				'name':'SUB_WINDOW_SIG',
+				'description': "",
+				'friendly': "SUB_WINDOW_SIG",
+				},
+			0x10000:{
+				'name':'SUB_HOST_SPEC',
+				'description': "",
+				'friendly': "Job submitted with host spec",
+				},
+			0x20000:{
+				'name':'SUB_DEPEND_COND',
+				'description': "",
+				'friendly': "Job submitted with depend conditions",
+				},
+			0x40000:{
+				'name':'SUB_RES_REQ',
+				'description': "",
+				'friendly': "Job submitted with resource request",
+				},
+			0x80000:{
+				'name':'SUB_OTHER_FILES',
+				'description': "",
+				'friendly': "SUB_OTHER_FILES",
+				},
+			0x100000:{
+				'name':'SUB_PRE_EXEC',
+				'description': "",
+				'friendly': "Job submitted with pre exec script",
+				},
+			0x200000:{
+				'name':'SUB_LOGIN_SHELL',
+				'description': "",
+				'friendly': "Job submitted with login shell",
+				},
+			0x400000:{
+				'name':'SUB_MAIL_USER',
+				'description': "",
+				'friendly': "Job submitted to email user",
+				},
+			0x800000:{
+				'name':'SUB_MODIFY',
+				'description': "",
+				'friendly': "SUB_MODIFY",
+				},
+			0x1000000:{
+				'name':'SUB_MODIFY_ONCE',
+				'description': "",
+				'friendly': "SUB_MODIFY_ONCE",
+				},
+			0x2000000:{
+				'name':'SUB_PROJECT_NAME',
+				'description': "",
+				'friendly': "Job submitted to project",
+				},
+			0x4000000:{
+				'name':'SUB_INTERACTIVE',
+				'description': "",
+				'friendly': "Job submitted as interactive",
+				},
+			0x8000000:{
+				'name':'SUB_PTY',
+				'description': "",
+				'friendly': "SUB_PTY",
+				},
+			0x10000000:{
+				'name':'SUB_PTY_SHELL',
+				'description': "",
+				'friendly': "SUB_PTY_SHELL",
+				},
+			}
+
 class HostAttribute(StateNumeric):
 	states={
 			0x1:{
