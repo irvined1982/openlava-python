@@ -192,7 +192,7 @@ class HighLevel(unittest.TestCase):
 		jobs=OpenLava.get_job_list()
 		for job in jobs:
 			self.check_job(job)
-		self.assertRaises(ValueError, Job, 1)
+		self.assertRaises(ValueError, Job, job_id=1,array_id=0)
 
 	def check_job(self,job):
 		for reason in job.reasons:
@@ -211,8 +211,7 @@ class HighLevel(unittest.TestCase):
 		for attr in ['cpu_time','cpu_factor']:
 			self.assertIsInstance(getattr(job, attr), float)
 
-		for attr in ['pid','job_id','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time']:
-			print attr, getattr(job, attr)
+		for attr in ['pid','array_id', 'job_id','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time']:
 			self.assertIsInstance(getattr(job, attr), int)
 	
 	def check_resource_usage(self, r):
@@ -246,21 +245,19 @@ class HighLevel(unittest.TestCase):
 		self.assertIsInstance(f.execution_file_name, unicode)
 		self.assertIsInstance(f.options, int)
 
-
-
-
 	def check_queue(self, queue):
 		for i in queue.allowed_users:
-			self.assertIsInstance(i,str)
+			self.assertIsInstance(i,unicode)
 		for i in queue.host_list:
-			self.assertIsInstance(i,str)
+			self.assertIsInstance(i,unicode)
 		for i in queue.run_windows:
-			self.assertIsInstance(i,str)
+			self.assertIsInstance(i,unicode)
 		for i in queue.queue_admins:
-			self.assertIsInstance(i,str)
+			self.assertIsInstance(i,unicode)
 		for attr in queue.queue_attributes:
 			self.check_status(attr)
-		self.check_status(queue.status)
+		for s in queue.status:
+			self.check_status(s)
 		self.check_load(queue.stop_job_load)
 		self.check_load(queue.stop_scheduling_load)
 
@@ -270,7 +267,7 @@ class HighLevel(unittest.TestCase):
 		for attr in ['name','description','host_specification','dispatch_window','default_host_specification','pre_execution_command','post_execution_command','pre_post_username','requeue_exit_values','resource_request','resume_condition','stop_condition','job_starter','suspend_command','resume_command','terminate_command','checkpoint_directory']:
 			self.assertIsInstance(getattr(queue,attr),unicode)
 		self.assertIsInstance(queue.processor_job_limit,float)
-		for attr in ['priority','nice','user_job_limit','max_jobs','num_jobs','num_pending_jobs','num_running_jobs','num_system_suspended_jobs','num_user_suspended_jobs','migration_threshold','scheduling_delay','accept_interval','dispatch_window','process_limit','host_job_limit','reserved_slots','slot_hold_time','checkpoint_period','min_processor_limit','default_processor_limit']:
+		for attr in ['priority','nice','user_job_limit','max_jobs','num_jobs','num_pending_jobs','num_running_jobs','num_system_suspended_jobs','num_user_suspended_jobs','migration_threshold','scheduling_delay','accept_interval','process_limit','host_job_limit','reserved_slots','slot_hold_time','checkpoint_period','min_processor_limit','default_processor_limit']:
 			self.assertIsInstance(getattr(queue,attr),int)
 
 	def check_rlim(self,r):

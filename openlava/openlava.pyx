@@ -53,7 +53,7 @@ class NumericState:
 		for key in cls.states.keys():
 			if (key & mask) == key: 
 				statuses.append(cls(key))
-			return statuses
+		return statuses
 
 	def to_dict(self):
 		return {'name':self.name,'description':self.description,'status':self._status}
@@ -768,9 +768,9 @@ class TransferFile:
 # Jobs are a little different as OpenLava uses the same memory for each job info, which means once readjobinfo has been called, the data
 # changes.  As such data is copied locally at initialization time.
 class Job:
-	def __init__(self, j):
+	def __init__(self, j=None, job_id=None, array_id=0):
 		if not isinstance(j, __jobInfoEnt):
-			j=int(j)
+			j=OpenLava.create_job_id(job_id, array_id)
 			if not OpenLava.initialized:
 				OpenLava.__initialize()
 			num_jobs=OpenLavaCAPI.lsb_openjobinfo(job_id=j)
@@ -2041,10 +2041,21 @@ cdef class OpenLavaCAPI:
 		if numQueues==1:
 			num_queues=1
 
+		cdef char * chosts
+		cdef char * cusers
+		chosts=NULL
+		cusers=NULL
+		if len(users)>0:
+			cusers=users
+		if len(hosts)>0:
+			chosts=hosts
+
 		cdef queueInfoEnt *queue_info
 		cdef queueInfoEnt *q
 
-		queue_info=openlava.lsb_queueinfo(queues, &num_queues, hosts, users, options)
+		queue_info=openlava.lsb_queueinfo(queues, &num_queues, chosts, cusers, options)
+		if num_queues<1:
+			raise ValueError("No Queues")
 		lsberrno=openlava.lsberrno
 
 		ql=[]
@@ -2421,7 +2432,7 @@ class Queue:
 
 	@property
 	def hard_resource_limits(self):
-		return RLimit(self._q.rLimits)
+		return RLimit(*self._q.rLimits)
 
 	@property
 	def host_specification(self):
@@ -2574,7 +2585,7 @@ class Queue:
 
 	@property
 	def soft_resource_limits(self):
-		return RLimit(self._q.defLimits)
+		return RLimit(*self._q.defLimits)
 
 	@property
 	def min_processor_limit(self):
@@ -2881,3 +2892,11 @@ class OpenLava:
 		id=id << 32
 		id=id | job_id
 		return id
+
+	@classmethod
+	def get_array_index(cls, LS_LONG_INT job_id):
+		if job_id == -1:
+			array_index=0
+		else:
+			array_index=( job_id >> 32 ) & 0x0FFFF
+		return array_index
