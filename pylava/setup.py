@@ -1,19 +1,41 @@
+import os
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
+# Find lsbatch
+try:
+	lsfdir=os.environ['LSF_ENVDIR']
+	lsfdir=os.path.join(libdir,"..")
+
+except:
+	lsfdir='/opt/openlava'
+
+lsf=os.path.join(lsfdir, "lib", "liblsf.a")
+lsbatch=os.path.join(lsfdir, "lib", "liblsbatch.a")
+
+inc_dir=os.path.join(lsfdir,"include")
+lib_dir=os.path.join(lsfdir,"lib")
+
+if not os.path.exists(lsf):
+	raise ValueError("Cannot find liblsf.a")
+if not os.path.exists(lsbatch):
+	raise ValueError("Cannot find lsbatch.a")
+
+
 setup(
-	name="python-lava",
+	name="openlava",
 	version="0.1",
 	description="Bindings for OpenLava",
 	author="David Irvine",
 	author_email="irvined@gmail.com",
     cmdclass = {'build_ext': build_ext},
-	packages=['openlava'],
     ext_modules = [
-		Extension("pylava", ["pylava.pyx"],
-			extra_objects=['/opt/openlava/lib/liblsf.a','/opt/openlava/lib/liblsbatch.a'],
-			libraries=['lsf','lsbatch','nsl']
+		Extension("openlava", ["openlava.pyx"],
+			extra_objects=[lsf, lsbatch],
+			libraries=['lsf','lsbatch','nsl'],
+			include_dirs=[inc_dir],
+			library_dirs=[lib_dir],
 			)
 		]
 )
