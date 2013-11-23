@@ -1,4 +1,4 @@
-from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava
+from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava, Job
 
 
 import unittest
@@ -187,6 +187,65 @@ class HighLevel(unittest.TestCase):
 		for queue in queues:
 			self.check_queue(queue)
 		self.assertRaises(ValueError,Queue, '-123kjwld2o323f')
+
+	def test_jobs(self):
+		jobs=OpenLava.get_job_list()
+		for job in jobs:
+			self.check_job(job)
+		self.assertRaises(ValueError, Job, 1)
+
+	def check_job(self,job):
+		for reason in job.reasons:
+			self.check_status(reason)
+		self.check_status(job.status)
+
+		self.check_submit(job.submit)
+		self.check_resource_usage(job.resource_usage)
+
+		for host in job.execution_hosts:
+			self.assertIsInstance(host, unicode)
+
+		for attr in ['user','parent_group', 'cwd','submit_home_dir','submission_host','execution_home_dir','execution_cwd','execution_user_name','name']:
+			self.assertIsInstance(getattr(job, attr), unicode)
+	
+		for attr in ['cpu_time','cpu_factor']:
+			self.assertIsInstance(getattr(job, attr), float)
+
+		for attr in ['pid','job_id','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time']:
+			print attr, getattr(job, attr)
+			self.assertIsInstance(getattr(job, attr), int)
+	
+	def check_resource_usage(self, r):
+		for attr in  ['resident_memory_usage','virtual_memory_usage','user_time','system_time','num_active_processes','num_active_process_groups',]:
+			self.assertIsInstance(getattr(r, attr), int)
+		for p in r.active_processes:
+			for attr in ['process_id','parent_process_id','group_id','cray_job_id']:
+				self.assertIsInstance(getattr(p,attr), int)
+		for pg in r.active_process_groups:
+			self.assertIsInstance(pg,int)
+
+	
+	def check_submit(self, s):
+		for i in s.options:
+			self.check_status(i)
+		for i in s.delete_options:
+			self.check_status(i)
+		for i in s.asked_hosts:
+			self.assertIsInstance(i, unicode)
+		self.check_rlim(s.resource_limits)
+		for f in s.transfer_files:
+			self.check_transfer(f)
+
+		for attr in ['job_name','queue_name','requested_resources','host_specification','dependency_condition','input_file','output_file','error_file','command','checkpoint_dir','pre_execution_command','email_user','project_name','login_shell']:
+			self.assertIsInstance(getattr(s,attr), unicode)
+		for attr in ['num_asked_hosts','num_processors','begin_time','termination_time','signal_value','checkpoint_period','num_transfer_files','max_num_processors']:
+			self.assertIsInstance(getattr(s, attr), int)
+
+	def check_transfer(self, f):
+		self.assertIsInstance(f.submission_file_name, unicode)
+		self.assertIsInstance(f.execution_file_name, unicode)
+		self.assertIsInstance(f.options, int)
+
 
 
 

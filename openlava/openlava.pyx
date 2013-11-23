@@ -596,9 +596,10 @@ class SubmitOption(NumericState):
 
 class Submit:
 	def __init__(self, s):
-		for i in ['options','options2','jobName','queue','numAskedHosts','askedHosts','resReq','rLimits','hostSpec','numProcessors','dependCond','beginTime','termTiem','sigValue','inFile','outFile','errFile','command','chkpntPeriod','chkpntDir','nxf','preExecCmd','mailUser','delOptions','delOptions2','projectName','maxNumProcessors','loginShell','userPriority']:
-			setattr(self,i,getattr(s,i))
+		for i in ['options','options2','jobName','queue','numAskedHosts','askedHosts','resReq','hostSpec','numProcessors','dependCond','beginTime','termTime','sigValue','inFile','outFile','errFile','command','chkpntPeriod','chkpntDir','nxf','preExecCmd','mailUser','delOptions','delOptions2','projectName','maxNumProcessors','loginShell','userPriority']:
+			setattr(self,"_%s" % i,getattr(s,i))
 		self._xf= [ TransferFile(i) for i in s.xf]
+		self._rLimits=RLimit(*s.rLimits)
 
 	def to_dict(self):
 		items={}
@@ -619,11 +620,11 @@ class Submit:
 
 	@property
 	def queue_name(self):
-		return self.queue
+		return self._queue
 
 	@property
 	def num_asked_hosts(self):
-		return self.numAskedHosts
+		return self._numAskedHosts
 
 	@property
 	def asked_hosts(self):
@@ -635,7 +636,7 @@ class Submit:
 
 	@property
 	def resource_limits(self):
-		return RLimit(*self.rLimits)
+		return self._rLimits
 
 	@property
 	def host_specification(self):
@@ -643,7 +644,7 @@ class Submit:
 
 	@property
 	def num_processors(self):
-		return self._sub.numProcessors
+		return self._numProcessors
 
 	@property
 	def dependency_condition(self):
@@ -772,15 +773,17 @@ class Job:
 			j=int(j)
 			if not OpenLava.initialized:
 				OpenLava.__initialize()
-			num_jobs=OpenLavaCAPI.lsb_openinfo(job_id=j)
+			num_jobs=OpenLavaCAPI.lsb_openjobinfo(job_id=j)
 			if num_jobs<1:
 				OpenLavaCAPI.lsb_closejobinfo()
 				raise ValueError("Cannot Load Job by id")
 			j=OpenLavaCAPI.lsb_readjobinfo()
+			OpenLavaCAPI.lsb_closejobinfo()
+
 		if not isinstance(j, __jobInfoEnt):
 			raise ValueError("Job not __jobInfoEnt instance")
 
-		for attr in ['user','status','reasonTb','numReasons','reasons','subreasons','jobPid','submitTime','startTime','predictedStartTime','endTime','cpuTime','umask','cwd','subHomeDir','fromHost','exHosts','cpuFactor','nIdx','loadSched','loadStop','exitStatus','execUid','execHome','execCwd','execUsername','jRusageUpdateTime','jType','parentGroup','jName','counter','port','jobPriority']:
+		for attr in ['user','status','reserveTime', 'reasonTb','numReasons','reasons','subreasons','jobId', 'jobPid','submitTime','startTime','predictedStartTime','endTime','cpuTime','umask','cwd','subHomeDir','fromHost','exHosts','cpuFactor','nIdx','loadSched','loadStop','exitStatus','execUid','execHome','execCwd','execUsername','jRusageUpdateTime','jType','parentGroup','jName','counter','port','jobPriority']:
 			setattr(self, "_%s" % attr, getattr(j,attr))
 		self._runRusage=RUsage(j.runRusage)
 		self._submit=Submit(j.submit)
@@ -799,7 +802,7 @@ class Job:
 
 	def to_dict(self):
 		items={}
-		for i in ['pend_reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
+		for i in ['reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
 			items[i]=getattr(self,i)
 		return items
 
@@ -807,7 +810,7 @@ class Job:
 	def reasons(self):
 			v={
 			}
-			for reason in range(self._reasonTb):
+			for reason in self._reasonTb:
 				reason=reason & 0x00000000000ffff
 				if self._job.status==0x01: # pend
 					r=PendReason(reason)
@@ -826,11 +829,11 @@ class Job:
 
 	@property
 	def resource_usage(self):
-		return self._rUsage
+		return self._runRusage
 
 	@property
 	def user(self):
-		return self.user
+		return self._user
 
 	@property
 	def status(self):
@@ -862,7 +865,7 @@ class Job:
 
 	@property
 	def execution_hosts(self):
-		return self._job.exHosts
+		return self._exHosts
 
 	@property
 	def cpu_factor(self):
@@ -1146,7 +1149,8 @@ cdef class __submit:
 
 	property rLimits:
 		def __get__(self):
-			return [self._data.rLimits[i] for i in range(10)]
+			rlims=[self._data.rLimits[i] for i in range(11)]
+			return rlims
 
 	property hostSpec:
 		def __get__(self):
@@ -1296,7 +1300,7 @@ cdef class __queueInfoEnt:
 
 	property rLimits:
 		def __get__(self):
-			return [self._data.rLimits[i] for i in range(10)]
+			return [self._data.rLimits[i] for i in range(11)]
 
 	property hostSpec:
 		def __get__(self):
@@ -1420,7 +1424,7 @@ cdef class __queueInfoEnt:
 
 	property sigMap:
 		def __get__(self):
-			return [self._data.rLimits[i] for i in range(22)]
+			return [self._data.sigMap[i] for i in range(22)]
 
 	property chkpntDir:
 		def __get__(self):
@@ -1432,7 +1436,7 @@ cdef class __queueInfoEnt:
 
 	property defLimits:
 		def __get__(self):
-			return [self._data.rLimits[i] for i in range(10)]
+			return [self._data.rLimits[i] for i in range(11)]
 
 	property minProcLimit:
 		def __get__(self):
@@ -2836,16 +2840,44 @@ class OpenLava:
 
 	@classmethod
 	def get_user_list(cls, users=[]):
-		if not OpenLava.initialized:
+		if not cls.initialized:
 			cls.__initialize()
 		users=OpenLavaCAPI.lsb_userinfo(users)
 		return [User(u) for u in users]
 
 	@classmethod
 	def get_queue_list(cls, queues=[], hosts=[], users=[]):
-		if not OpenLava.initialized:
+		if not cls.initialized:
 			cls.__initialize()
 		hosts=" ".join(hosts)
 		users=" ".join(users)
 		queues=OpenLavaCAPI.lsb_queueinfo(queues, 0, hosts, users)
 		return [Queue(q) for q in queues]
+
+	@classmethod
+	def get_job_list(cls, job_id=0, job_name="", user="all", queue="", host="", options=0):
+		if not cls.initialized:
+			cls.__initialize()
+		num_jobs=OpenLavaCAPI.lsb_openjobinfo(job_id=job_id, job_name=job_name, user=user, queue=queue, host=host, options=options)
+
+		jobs=[]
+		for i in range(num_jobs):
+			jobs.append(Job(OpenLavaCAPI.lsb_readjobinfo()))
+		OpenLavaCAPI.lsb_closejobinfo()
+		return jobs
+
+	@classmethod
+	def get_job_id(cls, job_id):
+		if job_id==-1:
+			id=-1
+		else:
+			id=job_id & 0x0FFFFFFFF
+			return id
+
+
+	@classmethod
+	def  create_job_id(cls, job_id, array_index):
+		id=array_index
+		id=id << 32
+		id=id | job_id
+		return id
