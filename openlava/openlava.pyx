@@ -1210,7 +1210,12 @@ cdef class __submit:
 
 	property xf:
 		def __get__(self):
-			return [self._data.xf[i] for i in range(self.nxf)]
+			xfs=[]
+			for i in range(self.nxf):
+				x=__xFile()
+				x._set_struct(&self._data.xf[i])
+				xfs.append(x)
+			return xfs
 
 	property preExecCmd:
 		def __get__(self):
@@ -1709,7 +1714,9 @@ cdef char ** to_cstring_array(list_str):
 	return ret
 
 cdef class OpenLavaCAPI:
-	lsberrno=0
+	@classmethod 
+	def get_lsberrno(cls):
+		return openlava.lsberrno
 
 	NUM_JGRP_COUNTERS=8
 
@@ -1965,7 +1972,38 @@ cdef class OpenLavaCAPI:
 	SUB2_MODIFY_RUN_JOB = 0x800
 	SUB2_MODIFY_PEND_JOB = 0x1000
 
-
+	EVENT_JOB_NEW = 1
+	EVENT_JOB_START = 2
+	EVENT_JOB_STATUS = 3
+	EVENT_JOB_SWITCH = 4
+	EVENT_JOB_MOVE = 5
+	EVENT_QUEUE_CTRL = 6
+	EVENT_HOST_CTRL = 7
+	EVENT_MBD_DIE = 8
+	EVENT_MBD_UNFULFILL = 9
+	EVENT_JOB_FINISH = 10
+	EVENT_LOAD_INDEX = 11
+	EVENT_CHKPNT = 12
+	EVENT_MIG = 13
+	EVENT_PRE_EXEC_START = 14
+	EVENT_MBD_START = 15
+	EVENT_JOB_MODIFY = 16
+	EVENT_JOB_SIGNAL = 17
+	EVENT_JOB_EXECUTE = 18
+	EVENT_JOB_MSG = 19
+	EVENT_JOB_MSG_ACK = 20
+	EVENT_JOB_REQUEUE = 21
+	EVENT_JOB_SIGACT = 22
+	EVENT_SBD_JOB_STATUS = 23
+	EVENT_JOB_START_ACCEPT = 24
+	EVENT_JOB_CLEAN = 25
+	EVENT_JOB_FORCE = 26
+	EVENT_LOG_SWITCH = 27
+	EVENT_JOB_MODIFY2 = 28
+	EVENT_JOB_ATTR_SET = 29
+	EVENT_UNUSED_30 = 30
+	EVENT_UNUSED_31 = 31
+	EVENT_UNUSED_32 = 32
 
 	@classmethod
 	def lsb_init(cls, app_name):
@@ -1983,7 +2021,6 @@ cdef class OpenLavaCAPI:
 	def lsb_openjobinfo(cls, job_id=0, job_name="", user="all", queue="", host="", options=0):
 		cdef int numJobs
 		numJobs=openlava.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
-		lsberrno=openlava.lsberrno
 		return numJobs
 
 	@classmethod
@@ -1992,7 +2029,6 @@ cdef class OpenLavaCAPI:
 		cdef int * more
 		more=NULL
 		j=openlava.lsb_readjobinfo(more)
-		lsberrno=openlava.lsberrno
 		a=__jobInfoEnt()
 		a._set_struct(j)
 		return a
@@ -2000,7 +2036,6 @@ cdef class OpenLavaCAPI:
 	@classmethod
 	def lsb_closejobinfo(cls):
 		openlava.lsb_closejobinfo()
-		lsberrno=openlava.lsberrno
 
 	@classmethod
 	def lsb_userinfo(cls, user_list=[]):
@@ -2018,7 +2053,6 @@ cdef class OpenLavaCAPI:
 		cdef userInfoEnt *u
 
 		user_info=openlava.lsb_userinfo(users,&num_users)
-		lsberrno=openlava.lsberrno
 
 		usrs=[]
 		for i in range(num_users):
@@ -2056,7 +2090,6 @@ cdef class OpenLavaCAPI:
 		queue_info=openlava.lsb_queueinfo(queues, &num_queues, chosts, cusers, options)
 		if num_queues<1:
 			raise ValueError("No Queues")
-		lsberrno=openlava.lsberrno
 
 		ql=[]
 		for i in range (num_queues):
@@ -2083,7 +2116,6 @@ cdef class OpenLavaCAPI:
 		cdef hostInfoEnt *h
 
 		host_info=openlava.lsb_hostinfo(hosts, &num_hosts)
-		lsberrno=openlava.lsberrno
 
 		hl=[]
 		for i in range (num_hosts):
@@ -2093,34 +2125,1608 @@ cdef class OpenLavaCAPI:
 			hl.append(host)
 		return hl
 
+	@classmethod
+	def lsb_geteventrec(cls, file_handle, line_num):
+		cdef FILE * fh
+		cdef int line
+		cdef eventRec * record
+		line=line_num
+		fh=PyFile_AsFile(file_handle)
+		record=openlava.lsb_geteventrec(fh, &line)
+		if record==NULL:
+			return (None, line_num)
+		Record=__eventRec()
+		Record._set_struct(record)
+		line_num=line
+		return (Record, line_num)
 
 
 
 
+cdef class __eventRec:
+	cdef eventRec * _data
+
+	cdef _set_struct(self, eventRec * data ):
+		self._data=data
+
+	property version:
+		def __get__(self):
+			return u'%s' % self._data.version
+
+	property type:
+		def __get__(self):
+			return self._data.type
+
+	property eventTime:
+		def __get__(self):
+			return self._data.eventTime
+
+	property eventLog:
+		def __get__(self):
+			log=__eventLog()
+			log._set_struct(&self._data.eventLog)
+			return log
+
+cdef class __jobNewLog:
+	cdef jobNewLog * _data
+	
+	cdef _set_struct(self, jobNewLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property userName:
+		def __get__(self):
+			return u'%s' % self._data.userName[60]
+
+	property options:
+		def __get__(self):
+			return self._data.options
+
+	property options2:
+		def __get__(self):
+			return self._data.options2
+
+	property numProcessors:
+		def __get__(self):
+			return self._data.numProcessors
+
+	property submitTime:
+		def __get__(self):
+			return self._data.submitTime
+
+	property beginTime:
+		def __get__(self):
+			return self._data.beginTime
+
+	property termTime:
+		def __get__(self):
+			return self._data.termTime
+
+	property sigValue:
+		def __get__(self):
+			return self._data.sigValue
+
+	property chkpntPeriod:
+		def __get__(self):
+			return self._data.chkpntPeriod
+
+	property restartPid:
+		def __get__(self):
+			return self._data.restartPid
+
+	property rLimits:
+		def __get__(self):
+			return [ self._data.rLimits[i] for i in range(11) ]
+
+	property hostSpec:
+		def __get__(self):
+			return u'%s' % self._data.hostSpec
+
+	property hostFactor:
+		def __get__(self):
+			return self._data.hostFactor
+
+	property umask:
+		def __get__(self):
+			return self._data.umask
+
+	property queue:
+		def __get__(self):
+			return "%s" % self._data.queue
+
+	property resReq:
+		def __get__(self):
+			return u'%s' % self._data.resReq
+
+	property fromHost:
+		def __get__(self):
+			return u"%s" % self._data.fromHost
+
+	property cwd:
+		def __get__(self):
+			return u"%s" % self._data.cwd
+
+	property chkpntDir:
+		def __get__(self):
+			return u"%s" % self._data.chkpntDir
+
+	property inFile:
+		def __get__(self):
+			return u"%s" % self._data.inFile
+
+	property outFile:
+		def __get__(self):
+			return u"%s" % self._data.outFile
+
+	property errFile:
+		def __get__(self):
+			return u"%s" % self._data.errFile
+
+	property inFileSpool:
+		def __get__(self):
+			return u"%s" % self._data.inFileSpool
+
+	property commandSpool:
+		def __get__(self):
+			return u"%s" % self._data.commandSpool
+
+	property jobSpoolDir:
+		def __get__(self):
+			return u"%s" % self._data.jobSpoolDir
+
+	property subHomeDir:
+		def __get__(self):
+			return u"%s" % self._data.subHomeDir
+
+	property jobFile:
+		def __get__(self):
+			return u"%s" % self._data.jobFile
+
+	property numAskedHosts:
+		def __get__(self):
+			return self._data.numAskedHosts
+
+	property askedHosts:
+		def __get__(self):
+			return [u'%s' % self._data.askedHosts[i] for i in range(self.numAskedHosts)]
+
+	property dependCond:
+		def __get__(self):
+			return u'%s' % self._data.dependCond
+
+	property jobName:
+		def __get__(self):
+			return u"%s" % self._data.jobName
+
+	property command:
+		def __get__(self):
+			return u"%s" % self._data.command
+
+	property nxf:
+		def __get__(self):
+			return self._data.nxf
+
+	property xf:
+		def __get__(self):
+			xfs=[]
+			for i in range(self.nxf):
+				x=__xFile()
+				x._set_struct(&self._data.xf[i])
+				xfs.append(x)
+			return xfs
+
+	property preExecCmd:
+		def __get__(self):
+			return u'%s' % self._data.preExecCmd
+
+	property mailUser:
+		def __get__(self):
+			return u'%s' % self._data.mailUser
+
+	property projectName:
+		def __get__(self):
+			return u'%s' % self._data.projectName
+
+	property niosPort:
+		def __get__(self):
+			return self._data.niosPort
+
+	property maxNumProcessors:
+		def __get__(self):
+			return self._data.maxNumProcessors
+
+	property schedHostType:
+		def __get__(self):
+			return u'%s' % self._data.schedHostType
+
+	property loginShell:
+		def __get__(self):
+			return u'%s' % self._data.loginShell
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property userPriority:
+		def __get__(self):
+			return self._data.userPriority
+
+cdef class __jobStartLog:
+	cdef jobStartLog * _data
+
+	cdef _set_struct(self, jobStartLog * data ):
+		self._data=data
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property jStatus:
+		def __get__(self):
+			return self._data.jStatus
+
+	property jobPid:
+		def __get__(self):
+			return self._data.jobPid
+
+	property jobPGid:
+		def __get__(self):
+			return self._data.jobPGid
+
+	property hostFactor:
+		def __get__(self):
+			return self._data.hostFactor
+
+	property numExHosts:
+		def __get__(self):
+			return self._data.numExHosts
+
+	property execHosts:
+		def __get__(self):
+			return [u'%s' % self._data.execHosts[i] for i in range(self.numExHosts)]
+
+	property queuePreCmd:
+		def __get__(self):
+			return u'%s' % self._data.queuePreCmd
+
+	property queuePostCmd:
+		def __get__(self):
+			return u'%s' % self._data.queuePostCmd
+
+	property jFlags:
+		def __get__(self):
+			return self._data.jFlags
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobStatusLog:
+	cdef jobStatusLog * _data
+
+	cdef _set_struct(self, jobStatusLog * data ):
+		self._data=data
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property jStatus:
+		def __get__(self):
+			return self._data.jStatus
+
+	property reason:
+		def __get__(self):
+			return self._data.reason
+
+	property subreasons:
+		def __get__(self):
+			return self._data.subreasons
+
+	property cpuTime:
+		def __get__(self):
+			return self._data.cpuTime
+
+	property endTime:
+		def __get__(self):
+			return self._data.endTime
+
+	property ru:
+		def __get__(self):
+			return self._data.ru
+
+	property lsfRusage:
+		def __get__(self):
+			ru=__lsfRusage()
+			ru._set_struct(&self._data.lsfRusage)
+			return ru
+
+	property jFlags:
+		def __get__(self):
+			return self._data.jFlags
+
+	property exitStatus:
+		def __get__(self):
+			return self._data.exitStatus
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __lsfRusage:
+	cdef lsfRusage * _data
+
+	cdef _set_struct(self, lsfRusage * data ):
+		self._data=data
+
+	property ru_utime:
+		def __get__(self):
+			return self._data.ru_utime
+
+	property ru_stime:
+		def __get__(self):
+			return self._data.ru_stime
+
+	property ru_maxrss:
+		def __get__(self):
+			return self._data.ru_maxrss
+
+	property ru_ixrss:
+		def __get__(self):
+			return self._data.ru_ixrss
+
+	property ru_ismrss:
+		def __get__(self):
+			return self._data.ru_ismrss
+
+	property ru_idrss:
+		def __get__(self):
+			return self._data.ru_idrss
+
+	property ru_isrss:
+		def __get__(self):
+			return self._data.ru_isrss
+
+	property ru_minflt:
+		def __get__(self):
+			return self._data.ru_minflt
+
+	property ru_majflt:
+		def __get__(self):
+			return self._data.ru_majflt
+
+	property ru_nswap:
+		def __get__(self):
+			return self._data.ru_nswap
+
+	property ru_inblock:
+		def __get__(self):
+			return self._data.ru_inblock
+
+	property ru_oublock:
+		def __get__(self):
+			return self._data.ru_oublock
+
+	property ru_ioch:
+		def __get__(self):
+			return self._data.ru_ioch
+
+	property ru_msgsnd:
+		def __get__(self):
+			return self._data.ru_msgsnd
+
+	property ru_msgrcv:
+		def __get__(self):
+			return self._data.ru_msgrcv
+
+	property ru_nsignals:
+		def __get__(self):
+			return self._data.ru_nsignals
+
+	property ru_nvcsw:
+		def __get__(self):
+			return self._data.ru_nvcsw
+
+	property ru_nivcsw:
+		def __get__(self):
+			return self._data.ru_nivcsw
+
+	property ru_exutime:
+		def __get__(self):
+			return self._data.ru_exutime
+
+cdef class __sbdJobStatusLog:
+	cdef sbdJobStatusLog * _data
+
+	cdef _set_struct(self, sbdJobStatusLog * data ):
+		self._data=data
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property jStatus:
+		def __get__(self):
+			return self._data.jStatus
+
+	property reasons:
+		def __get__(self):
+			return self._data.reasons
+
+	property subreasons:
+		def __get__(self):
+			return self._data.subreasons
+
+	property actPid:
+		def __get__(self):
+			return self._data.actPid
+
+	property actValue:
+		def __get__(self):
+			return self._data.actValue
+
+	property actPeriod:
+		def __get__(self):
+			return self._data.actPeriod
+
+	property actFlags:
+		def __get__(self):
+			return self._data.actFlags
+
+	property actStatus:
+		def __get__(self):
+			return self._data.actStatus
+
+	property actReasons:
+		def __get__(self):
+			return self._data.actReasons
+
+	property actSubReasons:
+		def __get__(self):
+			return self._data.actSubReasons
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobMoveLog:
+	cdef jobMoveLog * _data
+
+	cdef _set_struct(self, jobMoveLog * data ):
+		self._data=data
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property position:
+		def __get__(self):
+			return self._data.position
+
+	property base:
+		def __get__(self):
+			return self._data.base
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property userName:
+		def __get__(self):
+			return "%s" % self._data.userName
+
+cdef class __queueCtrlLog:
+	cdef queueCtrlLog * _data
+	
+	cdef _set_struct(self, queueCtrlLog * data ):
+		self._data=data
+		
+
+	property opCode:
+		def __get__(self):
+			return self._data.opCode
+
+	property queue:
+		def __get__(self):
+			return u"%s" % self._data.queue
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+cdef class __newDebugLog:
+	cdef newDebugLog * _data
+
+	cdef _set_struct(self, newDebugLog * data ):
+		self._data=data
+
+	property opCode:
+		def __get__(self):
+			return self._data.opCode
+
+	property level:
+		def __get__(self):
+			return self._data.level
+
+	property logclass:
+		def __get__(self):
+			return self._data.logclass
+
+	property turnOff:
+		def __get__(self):
+			return self._data.turnOff
+
+	property logFileName:
+		def __get__(self):
+			return u"%s" % self._data.logFileName
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+cdef class __hostCtrlLog:
+	cdef hostCtrlLog * _data
+
+	cdef _set_struct(self, hostCtrlLog * data ):
+		self._data=data
+
+	property opCode:
+		def __get__(self):
+			return self._data.opCode
+
+	property host:
+		def __get__(self):
+			return u"%s" %  self._data.host
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+cdef class __mbdStartLog:
+	cdef mbdStartLog * _data
+
+	cdef _set_struct(self, mbdStartLog * data ):
+		self._data=data
+
+	property master:
+		def __get__(self):
+			return u"%s" % self._data.master
+
+	property cluster:
+		def __get__(self):
+			return u"%s" % self._data.cluster
+
+	property numHosts:
+		def __get__(self):
+			return self._data.numHosts
+
+	property numQueues:
+		def __get__(self):
+			return self._data.numQueues
+
+cdef class __mbdDieLog:
+	cdef mbdDieLog * _data
+	cdef _set_struct(self, mbdDieLog * data ):
+		self._data=data
+
+	property master:
+		def __get__(self):
+			return u"%s" %  self._data.master
+
+	property numRemoveJobs:
+		def __get__(self):
+			return self._data.numRemoveJobs
+
+	property exitCode:
+		def __get__(self):
+			return self._data.exitCode
+
+cdef class __unfulfillLog:
+	cdef unfulfillLog * _data
+
+	cdef _set_struct(self, unfulfillLog * data ):
+		self._data=data
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property notSwitched:
+		def __get__(self):
+			return self._data.notSwitched
+
+	property sig:
+		def __get__(self):
+			return self._data.sig
+
+	property sig1:
+		def __get__(self):
+			return self._data.sig1
+
+	property sig1Flags:
+		def __get__(self):
+			return self._data.sig1Flags
+
+	property chkPeriod:
+		def __get__(self):
+			return self._data.chkPeriod
+
+	property notModified:
+		def __get__(self):
+			return self._data.notModified
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobFinishLog:
+	cdef jobFinishLog * _data
+	
+	cdef _set_struct(self, jobFinishLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+	property options:
+		def __get__(self):
+			return self._data.options
+
+	property numProcessors:
+		def __get__(self):
+			return self._data.numProcessors
+
+	property jStatus:
+		def __get__(self):
+			return self._data.jStatus
+
+	property submitTime:
+		def __get__(self):
+			return self._data.submitTime
+
+	property beginTime:
+		def __get__(self):
+			return self._data.beginTime
+
+	property termTime:
+		def __get__(self):
+			return self._data.termTime
+
+	property startTime:
+		def __get__(self):
+			return self._data.startTime
+
+	property endTime:
+		def __get__(self):
+			return self._data.endTime
+
+	property queue:
+		def __get__(self):
+			return u"%s" % self._data.queue
+
+	property resReq:
+		def __get__(self):
+			return u'%s' % self._data.resReq
+
+	property fromHost:
+		def __get__(self):
+			return u"%s" % self._data.fromHost
+
+	property cwd:
+		def __get__(self):
+			return u"%s" % self._data.cwd
+
+	property inFile:
+		def __get__(self):
+			return u"%s" % self._data.inFile
+
+	property outFile:
+		def __get__(self):
+			return u"%s" % self._data.outFile
+
+	property errFile:
+		def __get__(self):
+			return u"%s" % self._data.errFile
+
+	property inFileSpool:
+		def __get__(self):
+			return u"%s" % self._data.inFileSpool
+
+	property commandSpool:
+		def __get__(self):
+			return u"%s" % self._data.commandSpool
+
+	property jobFile:
+		def __get__(self):
+			return u"%s" % self._data.jobFile
+
+	property numAskedHosts:
+		def __get__(self):
+			return self._data.numAskedHosts
+
+	property askedHosts:
+		def __get__(self):
+			return [u'%s' % self._data.askedHosts[i] for i in range(self.numAskedHosts)]
+
+	property hostFactor:
+		def __get__(self):
+			return self._data.hostFactor
+
+	property numExHosts:
+		def __get__(self):
+			return self._data.numExHosts
+
+	property execHosts:
+		def __get__(self):
+			return [u'%s' % self._data.execHosts[i] for i in range(self.numExHosts)]
+
+	property cpuTime:
+		def __get__(self):
+			return self._data.cpuTime
+
+	property jobName:
+		def __get__(self):
+			return u"%s" % self._data.jobName
+
+	property command:
+		def __get__(self):
+			return u"%s" % self._data.command
+
+	property lsfRusage:
+		def __get__(self):
+			ru=__lsfRusage()
+			ru._set_struct(&self._data.lsfRusage)
+			return ru
+
+	property dependCond:
+		def __get__(self):
+			return u'%s' % self._data.dependCond
+
+	property preExecCmd:
+		def __get__(self):
+			return u'%s' % self._data.preExecCmd
+
+	property mailUser:
+		def __get__(self):
+			return u'%s' % self._data.mailUser
+
+	property projectName:
+		def __get__(self):
+			return u'%s' % self._data.projectName
+
+	property exitStatus:
+		def __get__(self):
+			return self._data.exitStatus
+
+	property maxNumProcessors:
+		def __get__(self):
+			return self._data.maxNumProcessors
+
+	property loginShell:
+		def __get__(self):
+			return u'%s' % self._data.loginShell
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property maxRMem:
+		def __get__(self):
+			return self._data.maxRMem
+
+	property maxRSwap:
+		def __get__(self):
+			return self._data.maxRSwap
+
+cdef class __loadIndexLog:
+	cdef loadIndexLog * _data
+	cdef _set_struct(self, loadIndexLog * data ):
+		self._data=data
+
+	property nIdx:
+		def __get__(self):
+			return self._data.nIdx
+
+	property name:
+		def __get__(self):
+			return [ u'%s' % self._data.name[i] for i in range(self.nIdx)]
+
+cdef class __migLog:
+	cdef migLog * _data
+	
+	cdef _set_struct(self, migLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property numAskedHosts:
+		def __get__(self):
+			return self._data.numAskedHosts
+
+	property askedHosts:
+		def __get__(self):
+			return [u'%s' % self._data.askedHosts[i] for i in range(self.numAskedHosts)]
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
 
 
+cdef class __signalLog:
+	cdef signalLog * _data
+	
+	cdef _set_struct(self, signalLog * data ):
+		self._data=data
+		
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property signalSymbol:
+		def __get__(self):
+			return u'%s' % self._data.signalSymbol
+
+	property runCount:
+		def __get__(self):
+			return self._data.runCount
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+cdef class __jobExecuteLog:
+	cdef jobExecuteLog * _data
+	
+	cdef _set_struct(self, jobExecuteLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property execUid:
+		def __get__(self):
+			return self._data.execUid
+
+	property execHome:
+		def __get__(self):
+			return u'%s' % self._data.execHome
+
+	property execCwd:
+		def __get__(self):
+			return u'%s' % self._data.execCwd
+
+	property jobPGid:
+		def __get__(self):
+			return self._data.jobPGid
+
+	property execUsername:
+		def __get__(self):
+			return u'%s' % self._data.execUsername
+
+	property jobPid:
+		def __get__(self):
+			return self._data.jobPid
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobMsgLog:
+	cdef jobMsgLog * _data
+	
+	cdef _set_struct(self, jobMsgLog * data ):
+		self._data=data
+		
+
+	property usrId:
+		def __get__(self):
+			return self._data.usrId
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property msgId:
+		def __get__(self):
+			return self._data.msgId
+
+	property type:
+		def __get__(self):
+			return self._data.type
+
+	property src:
+		def __get__(self):
+			return u'%s' % self._data.src
+
+	property dest:
+		def __get__(self):
+			return u'%s' % self._data.dest
+
+	property msg:
+		def __get__(self):
+			return u'%s' % self._data.msg
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobMsgAckLog:
+	cdef jobMsgAckLog * _data
+	
+	cdef _set_struct(self, jobMsgAckLog * data ):
+		self._data=data
+		
+
+	property usrId:
+		def __get__(self):
+			return self._data.usrId
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property msgId:
+		def __get__(self):
+			return self._data.msgId
+
+	property type:
+		def __get__(self):
+			return self._data.type
+
+	property src:
+		def __get__(self):
+			return u'%s' % self._data.src
+
+	property dest:
+		def __get__(self):
+			return u'%s' % self._data.dest
+
+	property msg:
+		def __get__(self):
+			return u'%s' % self._data.msg
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobRequeueLog:
+	cdef jobRequeueLog * _data
+	
+	cdef _set_struct(self, jobRequeueLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __chkpntLog:
+	cdef chkpntLog * _data
+	cdef _set_struct(self, chkpntLog * data ):
+		self._data=data
 
 
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property period:
+		def __get__(self):
+			return self._data.period
+
+	property pid:
+		def __get__(self):
+			return self._data.pid
+
+	property ok:
+		def __get__(self):
+			return self._data.ok
+
+	property flags:
+		def __get__(self):
+			return self._data.flags
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __sigactLog:
+	cdef sigactLog * _data
+	
+	cdef _set_struct(self, sigactLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property period:
+		def __get__(self):
+			return self._data.period
+
+	property pid:
+		def __get__(self):
+			return self._data.pid
+
+	property jStatus:
+		def __get__(self):
+			return self._data.jStatus
+
+	property reasons:
+		def __get__(self):
+			return self._data.reasons
+
+	property flags:
+		def __get__(self):
+			return self._data.flags
+
+	property signalSymbol:
+		def __get__(self):
+			return u'%s' % self._data.signalSymbol
+
+	property actStatus:
+		def __get__(self):
+			return self._data.actStatus
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+cdef class __jobStartAcceptLog:
+	cdef jobStartAcceptLog * _data
+	
+	cdef _set_struct(self, jobStartAcceptLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property jobPid:
+		def __get__(self):
+			return self._data.jobPid
+
+	property jobPGid:
+		def __get__(self):
+			return self._data.jobPGid
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
 
 
+cdef class __jobCleanLog:
+	cdef jobCleanLog * _data
+	
+	cdef _set_struct(self, jobCleanLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+cdef class __jobForceRequestLog:
+	cdef jobForceRequestLog * _data
+	cdef _set_struct(self, jobForceRequestLog * data ):
+		self._data=data
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property numExecHosts:
+		def __get__(self):
+			return self._data.numExecHosts
+
+	property execHosts:
+		def __get__(self):
+			return [u"%s" % self._data.execHosts[i] for i in range(self.numExecHosts)]
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property options:
+		def __get__(self):
+			return self._data.options
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+cdef class __jobSwitchLog:
+	cdef jobSwitchLog * _data
+
+	cdef _set_struct(self, jobSwitchLog * data ):
+		self._data=data
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property queue:
+		def __get__(self):
+			return u"%s" % self._data.queue
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property userName:
+		def __get__(self):
+			return u"%s" % self._data.userName
+
+cdef class __jobModLog:
+	cdef jobModLog * _data
+	
+	cdef _set_struct(self, jobModLog * data ):
+		self._data=data
+		
+
+	property jobIdStr:
+		def __get__(self):
+			return u'%s' % self._data.jobIdStr
+
+	property options:
+		def __get__(self):
+			return self._data.options
+
+	property options2:
+		def __get__(self):
+			return self._data.options2
+
+	property delOptions:
+		def __get__(self):
+			return self._data.delOptions
+
+	property delOptions2:
+		def __get__(self):
+			return self._data.delOptions2
+
+	property userId:
+		def __get__(self):
+			return self._data.userId
+
+	property userName:
+		def __get__(self):
+			return u'%s' % self._data.userName
+
+	property submitTime:
+		def __get__(self):
+			return self._data.submitTime
+
+	property umask:
+		def __get__(self):
+			return self._data.umask
+
+	property numProcessors:
+		def __get__(self):
+			return self._data.numProcessors
+
+	property beginTime:
+		def __get__(self):
+			return self._data.beginTime
+
+	property termTime:
+		def __get__(self):
+			return self._data.termTime
+
+	property sigValue:
+		def __get__(self):
+			return self._data.sigValue
+
+	property restartPid:
+		def __get__(self):
+			return self._data.restartPid
+
+	property jobName:
+		def __get__(self):
+			return u'%s' % self._data.jobName
+
+	property queue:
+		def __get__(self):
+			return u'%s' % self._data.queue
+
+	property numAskedHosts:
+		def __get__(self):
+			return self._data.numAskedHosts
+
+	property askedHosts:
+		def __get__(self):
+			return [ u'%s' % self._data.askedHosts[i] for i in range(self.numAskedHosts)] 
+
+	property resReq:
+		def __get__(self):
+			return u'%s' % self._data.resReq
+
+	property rLimits:
+		def __get__(self):
+			return [ self._data.rLimits[i] for i in range(11)]
+
+	property hostSpec:
+		def __get__(self):
+			return u'%s' % self._data.hostSpec
+
+	property dependCond:
+		def __get__(self):
+			return u'%s' % self._data.dependCond
+
+	property subHomeDir:
+		def __get__(self):
+			return u'%s' % self._data.subHomeDir
+
+	property inFile:
+		def __get__(self):
+			return u'%s' % self._data.inFile
+
+	property outFile:
+		def __get__(self):
+			return u'%s' % self._data.outFile
+
+	property errFile:
+		def __get__(self):
+			return u'%s' % self._data.errFile
+
+	property command:
+		def __get__(self):
+			return u'%s' % self._data.command
+
+	property inFileSpool:
+		def __get__(self):
+			return u'%s' % self._data.inFileSpool
+
+	property commandSpool:
+		def __get__(self):
+			return u'%s' % self._data.commandSpool
+
+	property chkpntPeriod:
+		def __get__(self):
+			return self._data.chkpntPeriod
+
+	property chkpntDir:
+		def __get__(self):
+			return u'%s' % self._data.chkpntDir
+
+	property nxf:
+		def __get__(self):
+			return self._data.nxf
+
+	property xf:
+		def __get__(self):
+			xfs=[]
+			for i in range(self.nxf):
+				x=__xFile()
+				x._set_struct(&self._data.xf[i])
+				xfs.append(x)
+			return xfs
+
+	property jobFile:
+		def __get__(self):
+			return u'%s' % self._data.jobFile
+
+	property fromHost:
+		def __get__(self):
+			return u'%s' % self._data.fromHost
+
+	property cwd:
+		def __get__(self):
+			return u'%s' % self._data.cwd
+
+	property preExecCmd:
+		def __get__(self):
+			return u'%s' % self._data.preExecCmd
+
+	property mailUser:
+		def __get__(self):
+			return u'%s' % self._data.mailUser
+
+	property projectName:
+		def __get__(self):
+			return u'%s' % self._data.projectName
+
+	property niosPort:
+		def __get__(self):
+			return self._data.niosPort
+
+	property maxNumProcessors:
+		def __get__(self):
+			return self._data.maxNumProcessors
+
+	property loginShell:
+		def __get__(self):
+			return u'%s' % self._data.loginShell
+
+	property schedHostType:
+		def __get__(self):
+			return u'%s' % self._data.schedHostType
+
+	property userPriority:
+		def __get__(self):
+			return self._data.userPriority
+
+cdef class __jobAttrSetLog:
+	cdef jobAttrSetLog * _data
+	
+	cdef _set_struct(self, jobAttrSetLog * data ):
+		self._data=data
+		
+
+	property jobId:
+		def __get__(self):
+			return self._data.jobId
+
+	property idx:
+		def __get__(self):
+			return self._data.idx
+
+	property uid:
+		def __get__(self):
+			return self._data.uid
+
+	property port:
+		def __get__(self):
+			return self._data.port
+
+	property hostname:
+		def __get__(self):
+			return u'%s' % self._data.hostname
 
 
+cdef class __logSwitchLog:
+	cdef logSwitchLog * _data
+	
+	cdef _set_struct(self, logSwitchLog * data ):
+		self._data=data
+		
+
+	property lastJobId:
+		def __get__(self):
+			return self._data.lastJobId
 
 
+cdef class __eventLog:
+	cdef eventLog * _data
 
+	cdef _set_struct(self, eventLog * data ):
+		self._data=data
 
+	property jobNewLog:
+		def __get__(self):
+			log=__jobNewLog()
+			log._set_struct(&self._data.jobNewLog)
+			return log
 
+	property jobStartLog:
+		def __get__(self):
+			log=__jobStartLog()
+			log._set_struct(&self._data.jobStartLog)
+			return log
 
+	property jobStatusLog:
+		def __get__(self):
+			log=__jobStatusLog()
+			log._set_struct(&self._data.jobStatusLog)
+			return log
 
+	property sbdJobStatusLog:
+		def __get__(self):
+			log=__sbdJobStatusLog()
+			log._set_struct(&self._data.sbdJobStatusLog)
+			return log
 
+	property jobSwitchLog:
+		def __get__(self):
+			log=__jobSwitchLog()
+			log._set_struct(&self._data.jobSwitchLog)
+			return log
 
+	property jobMoveLog:
+		def __get__(self):
+			log=__jobMoveLog()
+			log._set_struct(&self._data.jobMoveLog)
+			return log
 
+	property queueCtrlLog:
+		def __get__(self):
+			log=__queueCtrlLog()
+			log._set_struct( &self._data.queueCtrlLog)
+			return log
 
+	property newDebugLog:
+		def __get__(self):
+			log=__newDebugLog()
+			log._set_struct(&self._data.newDebugLog)
+			return log
 
+	property hostCtrlLog:
+		def __get__(self):
+			log=__hostCtrlLog()
+			log._set_struct(&self._data.hostCtrlLog)
+			return log
 
+	property mbdStartLog:
+		def __get__(self):
+			log=__mbdStartLog()
+			log._set_struct(&self._data.mbdStartLog)
+			return log
 
+	property mbdDieLog:
+		def __get__(self):
+			log=__mbdDieLog()
+			log._set_struct( &self._data.mbdDieLog)
+			return log
 
+	property unfulfillLog:
+		def __get__(self):
+			log=__unfulfillLog()
+			log._set_struct(&self._data.unfulfillLog)
+			return log
 
+	property jobFinishLog:
+		def __get__(self):
+			log=__jobFinishLog()
+			log._set_struct( &self._data.jobFinishLog)
+			return log
+
+	property loadIndexLog:
+		def __get__(self):
+			log=__loadIndexLog()
+			log._set_struct(&self._data.loadIndexLog)
+			return log
+
+	property migLog:
+		def __get__(self):
+			log=__migLog()
+			log._set_struct(&self._data.migLog)
+			return log
+
+	property signalLog:
+		def __get__(self):
+			log=__signalLog()
+			log._set_struct(&self._data.signalLog)
+			return log
+
+	property jobExecuteLog:
+		def __get__(self):
+			log=__jobExecuteLog()
+			log._set_struct(&self._data.jobExecuteLog)
+			return log
+
+	property jobMsgLog:
+		def __get__(self):
+			log=__jobMsgLog()
+			log._set_struct(&self._data.jobMsgLog)
+			return log
+
+	property jobMsgAckLog:
+		def __get__(self):
+			log=__jobMsgAckLog()
+			log._set_struct(&self._data.jobMsgAckLog)
+			return log
+
+	property jobRequeueLog:
+		def __get__(self):
+			log=__jobRequeueLog()
+			log._set_struct(&self._data.jobRequeueLog)
+			return log
+
+	property chkpntLog:
+		def __get__(self):
+			log=__chkpntLog()
+			log._set_struct(&self._data.chkpntLog)
+			return log
+
+	property sigactLog:
+		def __get__(self):
+			log=__sigactLog()
+			log._set_struct(&self._data.sigactLog)
+			return log
+
+	property jobStartAcceptLog:
+		def __get__(self):
+			log=__jobStartAcceptLog()
+			log._set_struct( &self._data.jobStartAcceptLog)
+			return log
+
+	property jobCleanLog:
+		def __get__(self):
+			log=__jobCleanLog()
+			log._set_struct( &self._data.jobCleanLog)
+			return log
+
+	property jobForceRequestLog:
+		def __get__(self):
+			log=__jobForceRequestLog()
+			log._set_struct(&self._data.jobForceRequestLog)
+			return log
+
+	property logSwitchLog:
+		def __get__(self):
+			log=__logSwitchLog()
+			log._set_struct(&self._data.logSwitchLog)
+			return log
+
+	property jobModLog:
+		def __get__(self):
+			log=__jobModLog()
+			log._set_struct(&self._data.jobModLog)
+			return log
+
+	property jobAttrSetLog:
+		def __get__(self):
+			log=__jobAttrSetLog()
+			log._set_struct(&self._data.jobAttrSetLog)
+			return log
 
 
 

@@ -1,5 +1,15 @@
 from libc.stdio cimport *
 
+cdef extern from "Python.h":
+	ctypedef struct FILE
+	FILE* PyFile_AsFile(object)
+	void  fprintf(FILE* f, char* s, char* s)
+
+cdef extern from "fileobject.h":
+	ctypedef class __builtin__.file [object PyFileObject]:
+		pass
+
+
 cdef extern from "lsbatch.h":
 	ctypedef unsigned short u_short
 	ctypedef long time_t
@@ -7,7 +17,7 @@ cdef extern from "lsbatch.h":
 	ctypedef unsigned long long LS_UNS_LONG_INT
 	extern int lsberrno
 
-	struct  lsfRusage:
+	extern struct  lsfRusage:
 		double ru_utime
 		double ru_stime
 		double  ru_maxrss
@@ -78,7 +88,7 @@ cdef extern from "lsbatch.h":
 		int    idx
 		int    userPriority
 
-	struct jobModLog:
+	extern struct jobModLog:
 		char    *jobIdStr
 		int     options
 		int     options2

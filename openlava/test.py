@@ -1,17 +1,42 @@
-from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava, Job
-
-
+import os
 import unittest
+from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava, Job
 
 
 class LSBTests(unittest.TestCase):
 	def setUp(self):
 		self.assertEqual( OpenLavaCAPI.lsb_init("My App"), 0)
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
-	
+		#self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
+
+	def test_lsbaccts(self):
+		# Find lsbatch
+		try:
+			lsfdir=os.environ['LSF_ENVDIR']
+			lsfdir=os.path.join(libdir,"..")
+
+		except:
+			lsfdir='/opt/openlava'
+
+		for fname in ['lsb.acct','lsb.events']:
+			acct_file=os.path.join(lsfdir,"work","logdir",fname)
+			f=open(acct_file)
+			row_num=0
+			while(True):
+				(rec, row_num)=OpenLavaCAPI.lsb_geteventrec(f,row_num)
+				if rec==None:
+					if OpenLavaCAPI.get_lsberrno()==OpenLavaCAPI.LSBE_EOF:
+						break
+				if OpenLavaCAPI.get_lsberrno()==OpenLavaCAPI.LSBE_EVENT_FORMAT:
+					print "Bad Row: %s in %s" % (row_num, fname)
+					continue
+				self.assertGreaterEqual(row_num,0)
+				self.assertIsInstance(row_num,int)
+				self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
+
+
 	def test_users(self):
 		users=OpenLavaCAPI.lsb_userinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 		self.assertIsInstance(users,list)
 		for u in users:
 			self.assertEqual(str(type(u)),"<type 'openlava.__userInfoEnt'>")
@@ -31,25 +56,25 @@ class LSBTests(unittest.TestCase):
 				self.assertGreaterEqual(getattr(u,i),0)
 	def test_user(self):
 		users=OpenLavaCAPI.lsb_userinfo(["default"])
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 		self.assertEqual( len(users), 1 )
+
 	def test_job(self):
 		num_jobs=OpenLavaCAPI.lsb_openjobinfo(job_id=1)
 		self.assertEqual( num_jobs, -1)
 		OpenLavaCAPI.lsb_closejobinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
 
 	def test_jobs(self):
 		num_jobs=OpenLavaCAPI.lsb_openjobinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 		for i in range(num_jobs):
 			job=OpenLavaCAPI.lsb_readjobinfo()
 			self.check_job(job)
 		OpenLavaCAPI.lsb_closejobinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 
 	def check_job(self,job):
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 		self.assertEqual(str(type(job)), "<type 'openlava.__jobInfoEnt'>")
 		ints=[
 			'jobId',
@@ -156,10 +181,10 @@ class LSBTests(unittest.TestCase):
 
 	def test_queues(self):
 		queues=OpenLavaCAPI.lsb_queueinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 	def test_hosts(self):
 		hosts=OpenLavaCAPI.lsb_hostinfo()
-		self.assertEqual( OpenLavaCAPI.lsberrno, OpenLavaCAPI.LSBE_NO_ERROR)
+		self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 
 
 class HighLevel(unittest.TestCase):
