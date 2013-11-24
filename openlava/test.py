@@ -1,6 +1,43 @@
+# Copyright 2013 David Irvine
+#
+# This file is part of openlava-python
+#
+# openlava-python is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or (at
+# your option) any later version.
+#
+# openlava-python is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import os
+import json
 import unittest
-from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava, Job
+from openlava import OpenLavaCAPI,Host, Queue, User, OpenLava, Job, EventLog,OpenLava
+
+# Find lsbatch
+try:
+	lsfdir=os.environ['LSF_ENVDIR']
+	lsfdir=os.path.join(libdir,"..")
+except:
+	lsfdir='/opt/openlava'
+
+class LogFile(unittest.TestCase):
+	def test_acct(self):
+		acct_file=os.path.join(lsfdir,"work","logdir","lsb.acct")
+		for log in EventLog(file_name=acct_file):
+			self.assertIsInstance(log.to_dict(), dict)
+			self.assertIsInstance(OpenLava.dumps(log.to_dict()),str)
+	def test_events(self):
+		evnt_file=os.path.join(lsfdir,"work","logdir","lsb.events")
+		fh=open(evnt_file)
+		for log in EventLog(file_handle=fh):
+			self.assertIsInstance(log.to_dict(), dict)
+			self.assertIsInstance(OpenLava.dumps(log.to_dict()),str)
 
 
 class LSBTests(unittest.TestCase):
@@ -9,13 +46,6 @@ class LSBTests(unittest.TestCase):
 		#self.assertEqual( OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
 
 	def test_lsbaccts(self):
-		# Find lsbatch
-		try:
-			lsfdir=os.environ['LSF_ENVDIR']
-			lsfdir=os.path.join(libdir,"..")
-
-		except:
-			lsfdir='/opt/openlava'
 
 		for fname in ['lsb.acct','lsb.events']:
 			acct_file=os.path.join(lsfdir,"work","logdir",fname)

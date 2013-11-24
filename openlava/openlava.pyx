@@ -1,9 +1,27 @@
+# Copyright 2013 David Irvine
+#
+# This file is part of openlava-python
+#
+# openlava-python is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or (at
+# your option) any later version.
+#
+# openlava-python is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
+
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcmp
 from cpython.string cimport PyString_AsString
 cimport openlava
 from datetime import timedelta
 from datetime import datetime
+import json
 
 class NumericState:
 	def __init__(self,status):
@@ -2167,6 +2185,85 @@ cdef class __eventRec:
 			log._set_struct(&self._data.eventLog)
 			return log
 
+class EventLog:
+	def __init__(self, file_name=None,file_handle=None):
+		if file_name:
+			self._fh=open(file_name)
+		elif file_handle:
+			self._fh=file_handle
+		self._row_num=0
+
+	def __iter__(self):
+		return self
+
+	def next(self):
+		while(True):
+			# iterate until we run out, or we get a row we can do something with
+			(self._event, self._row_num)=OpenLavaCAPI.lsb_geteventrec(self._fh, self._row_num)
+			if OpenLavaCAPI.get_lsberrno()==OpenLavaCAPI.LSBE_EOF:
+				raise StopIteration
+			if self._event:
+				if self.event_type==OpenLavaCAPI.EVENT_JOB_NEW:
+					self._log=JobNewLog(self._event.eventLog.jobNewLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_FINISH:
+					self._log=JobFinishLog(self._event.eventLog.jobFinishLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_START:
+					self._log=JobStartLog(self._event.eventLog.jobStartLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_EXECUTE:
+					self._log=JobExecuteLog(self._event.eventLog.jobExecuteLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_START_ACCEPT:
+					self._log=JobStartAcceptLog(self._event.eventLog.jobStartAcceptLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_CLEAN:
+					self._log=JobCleanLog(self._event.eventLog.jobCleanLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_STATUS:
+					self._log=JobStatusLog(self._event.eventLog.jobStatusLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_LOAD_INDEX:
+					self._log=LoadIndexLog(self._event.eventLog.loadIndexLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_LOG_SWITCH:
+					self._log=LogSwitchLog(self._event.eventLog.logSwitchLog)
+					break
+				elif self.event_type==OpenLavaCAPI.EVENT_JOB_SIGNAL:
+					self._log=SignalLog(self._event.eventLog.signalLog)
+					break
+				else:
+					print "Unable to do anything with log type: %s" % self.event_type
+		return self
+
+	def to_dict(self):
+		items={}
+		items['time']=self.time
+		items['event_type']=self.event_type
+		items['version']=self.version
+		items.update(self.log.to_dict())
+		return items
+
+	@property
+	def	log(self):
+		return self._log
+
+	@property
+	def version(self):
+		return self._event.version
+
+	@property
+	def event_type(self):
+		return self._event.type
+
+	@property
+	def time(self):
+		return self._event.eventTime
+
+		
+
+
 cdef class __jobNewLog:
 	cdef jobNewLog * _data
 	
@@ -2359,6 +2456,200 @@ cdef class __jobNewLog:
 		def __get__(self):
 			return self._data.userPriority
 
+
+class JobNewLog:
+	def __init__(self, data):
+		if isinstance(data, __jobNewLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	@property
+	def options(self):
+		opt=[]
+		opt.extend(SubmitOption.get_status_list(self._data.options))
+		opt.extend(Submit2Option.get_status_list(self._data.options2))
+		return opt
+
+	@property
+	def num_processors(self):
+		return self._data.numProcessors
+
+	@property
+	def submit_time(self):
+		return self._data.submitTime
+
+	@property
+	def begin_time(self):
+		return self._data.beginTime
+
+	@property
+	def termination_time(self):
+		return self._data.termTime
+
+	@property
+	def signal_value(self):
+		return self._data.sigValue
+
+	@property
+	def checkpoint_period(self):
+		return self._data.chkpntPeriod
+
+	@property
+	def restart_pid(self):
+		return self._data.restartPid
+
+	@property
+	def resource_limits(self):
+		return RLimit(*self._data.rLimits)
+
+	@property
+	def host_specification(self):
+		return self._data.hostSpec
+
+	@property
+	def host_factor(self):
+		return self._data.hostFactor
+
+	@property
+	def umask(self):
+		return self._data.umask
+
+	@property
+	def queue(self):
+		return self._data.queue
+
+	@property
+	def resource_request(self):
+		return self._data.resReq
+
+	@property
+	def submit_host(self):
+		return self._data.fromHost
+
+	@property
+	def cwd(self):
+		return self._data.cwd
+
+	@property
+	def checkpoint_dir(self):
+		return self._data.chkpntDir
+
+	@property
+	def input_file(self):
+		return self._data.inFile
+
+	@property
+	def output_file(self):
+		return self._data.outFile
+
+	@property
+	def error_file(self):
+		return self._data.errFile
+
+	@property
+	def input_file_spool(self):
+		return self._data.inFileSpool
+
+	@property
+	def command_spool(self):
+		return self._data.commandSpool
+
+	@property
+	def job_spool_dir(self):
+		return self._data.jobSpoolDir
+
+	@property
+	def submit_home_dir(self):
+		return self._data.subHomeDir
+
+	@property
+	def job_file(self):
+		return self._data.jobFile
+
+	@property
+	def num_asked_hosts(self):
+		return self._data.numAskedHosts
+
+	@property
+	def asked_hosts(self):
+		return self._data.askedHosts
+
+	@property
+	def dependency_condition(self):
+		return self._data.dependCond
+
+	@property
+	def job_name(self):
+		return self._data.jobName
+
+	@property
+	def command(self):
+		return self._data.command
+
+	@property
+	def num_transfer_files(self):
+		return self._data.nxf
+
+	@property
+	def transfer_files(self):
+		return self._data.xf
+
+	@property
+	def pre_execution_cmd(self):
+		return self._data.preExecCmd
+
+	@property
+	def email_user(self):
+		return self._data.mailUser
+
+	@property
+	def project_name(self):
+		return self._data.projectName
+
+	@property
+	def nios_port(self):
+		return self._data.niosPort
+
+	@property
+	def max_num_processors(self):
+		return self._data.maxNumProcessors
+
+	@property
+	def schedule_host_type(self):
+		return self._data.schedHostType
+
+	@property
+	def login_shell(self):
+		return self._data.loginShell
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def user_priority(self):
+		return self._data.userPriority
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","user_id","user_name","options","num_processors","submit_time","begin_time","termination_time","signal_value","checkpoint_period","restart_pid","resource_limits","host_specification","host_factor","umask","queue","resource_request","submit_host","cwd","checkpoint_dir","input_file","output_file","error_file","input_file_spool","command_spool","job_spool_dir","submit_home_dir","job_file","num_asked_hosts","asked_hosts","dependency_condition","job_name","command","num_transfer_files","transfer_files","pre_execution_cmd","email_user","project_name","nios_port","max_num_processors","schedule_host_type","login_shell","array_index","user_priority"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __jobStartLog:
 	cdef jobStartLog * _data
 
@@ -2408,6 +2699,63 @@ cdef class __jobStartLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class JobStartLog:
+	def __init__(self, data):
+		if isinstance(data, __jobStartLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def job_status(self):
+		return JobStatus(self._data.jStatus)
+
+	@property
+	def job_pid(self):
+		return self._data.jobPid
+
+	@property
+	def job_process_group_id(self):
+		return self._data.jobPGid
+
+	@property
+	def host_factor(self):
+		return self._data.hostFactor
+
+	@property
+	def num_execution_hosts(self):
+		return self._data.numExHosts
+
+	@property
+	def execution_hosts(self):
+		return self._data.execHosts
+
+	@property
+	def queue_pre_execution_cmd(self):
+		return self._data.queuePreCmd
+
+	@property
+	def queue_post_execution_cmd(self):
+		return self._data.queuePostCmd
+
+	@property
+	def job_flags(self):
+		return JobFlag.get_status_list( self._data.jFlags )
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","job_status","job_pid","job_process_group_id","host_factor","num_execution_hosts","execution_hosts","queue_pre_execution_cmd","queue_post_execution_cmd","job_flags","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
 
 cdef class __jobStatusLog:
 	cdef jobStatusLog * _data
@@ -2460,6 +2808,134 @@ cdef class __jobStatusLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class JobFlag(NumericState):
+	states={
+			0x02:{
+				'name':"JFLAG_LASTRUN_SUCC",
+				'description':'',
+			},
+			0x004:{
+				'name':'JFLAG_DEPCOND_INVALID',
+				'description':'',
+				},
+			0x008:{
+				'name':'JFLAG_READY',
+				'description':'',
+				},
+			0x200:{
+				'name':'FLAG_EXACT',
+				'description':'',
+				},
+			0x400:{
+				'name':'JFLAG_UPTO',
+				'description':'',
+				},
+			0x8000:{
+				'name':'JFLAG_DEPCOND_REJECT',
+				'description':'',
+				},
+			0x10000:{
+				'name':'JFLAG_SEND_SIG',
+				'description':'',
+				},
+			0x20000:{
+				'name':'JFLAG_BTOP',
+				'description':'',
+				},
+			0x40000:{
+				'name':'JFLAG_ADM_BTOP',
+				'description':'',
+				},
+			0x100000:{
+				'name':'JFLAG_READY1',
+				'description':'',
+				},
+			0x200000:{
+				'name':'JFLAG_READY2',
+				'description':'',
+				},
+			0x400000:{
+				'name':'JFLAG_URGENT',
+				'description':'',
+				},
+			0x800000:{
+				'name':'JFLAG_URGENT_NOSTOP',
+				'description':'',
+				},
+			0x1000000:{
+				'name':'JFLAG_REQUEUE',
+				'description':'',
+				},
+			0x2000000:{
+				'name':'JFLAG_HAS_BEEN_REQUEUED',
+				'description':'',
+				},
+			}
+class JobStatusLog:
+	def __init__(self, data):
+		if isinstance(data, __jobStatusLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def job_status(self):
+		return JobStatus( self._data.jStatus )
+
+	@property
+	def reasons(self):
+		if self.job_status.name=="JOB_STAT_PEND":
+			return PendReason.get_status_list(self._data.reasons)
+		if self.job_status.name=="JOB_STAT_SUSP":
+			return SuspReason.get_status_list(self._data_reasons)
+
+	@property
+	def sub_reasons(self):
+		return self._data.subreasons
+
+	@property
+	def cpu_time(self):
+		return self._data.cpuTime
+
+	@property
+	def end_time(self):
+		return self._data.endTime
+
+	@property
+	def resource_usage_available(self):
+		return self._data.ru
+
+	@property
+	def resource_usage(self):
+		if self.resource_usage_available:
+			return LsfRusage(self._data.lsfRusage)
+		else:
+			return None
+
+	@property
+	def job_flags(self):
+		return JobFlag.get_status_list(self._data.jFlags)
+
+	@property
+	def exit_status(self):
+		return self._data.exitStatus
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","job_status","reasons","sub_reasons","cpu_time","end_time","resource_usage_available","resource_usage","job_flags","exit_status","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 
 cdef class __lsfRusage:
 	cdef lsfRusage * _data
@@ -2543,6 +3019,98 @@ cdef class __lsfRusage:
 		def __get__(self):
 			return self._data.ru_exutime
 
+
+class LsfRusage:
+	def __init__(self, data):
+		if isinstance(data, __lsfRusage):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_time(self):
+		return self._data.ru_utime
+
+	@property
+	def system_time(self):
+		return self._data.ru_stime
+
+	@property
+	def max_rss(self):
+		return self._data.ru_maxrss
+
+	@property
+	def integral_shared_text(self):
+		return self._data.ru_ixrss
+
+	@property
+	def integral_shared_memory(self):
+		return self._data.ru_ismrss
+
+	@property
+	def integral_unshared_data(self):
+		return self._data.ru_idrss
+
+	@property
+	def integral_unshared_stack(self):
+		return self._data.ru_isrss
+
+	@property
+	def page_reclaims(self):
+		return self._data.ru_minflt
+
+	@property
+	def page_faults(self):
+		return self._data.ru_majflt
+
+	@property
+	def swaps(self):
+		return self._data.ru_nswap
+
+	@property
+	def input_block_ops(self):
+		return self._data.ru_inblock
+
+	@property
+	def output_block_ops(self):
+		return self._data.ru_oublock
+
+	@property
+	def charecter_io_ops(self):
+		return self._data.ru_ioch
+
+	@property
+	def messages_sent(self):
+		return self._data.ru_msgsnd
+
+	@property
+	def messages_received(self):
+		return self._data.ru_msgrcv
+
+	@property
+	def num_signals(self):
+		return self._data.ru_nsignals
+
+	@property
+	def voluntary_context_switches(self):
+		return self._data.ru_nvcsw
+
+	@property
+	def involuntary_context_switches(self):
+		return self._data.ru_nivcsw
+
+	@property
+	def exact_user_time(self):
+		return self._data.ru_exutime
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_time","system_time","max_rss","integral_shared_text","integral_shared_memory","integral_unshared_data","integral_unshared_stack","page_reclaims","page_faults","swaps","input_block_ops","output_block_ops","charecter_io_ops","messages_sent","messages_received","num_signals","voluntary_context_switches","involuntary_context_switches","exact_user_time"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+	
+
+
 cdef class __sbdJobStatusLog:
 	cdef sbdJobStatusLog * _data
 
@@ -2597,6 +3165,69 @@ cdef class __sbdJobStatusLog:
 		def __get__(self):
 			return self._data.idx
 
+class SbdJobStatusLog:
+	def __init__(self, data):
+		if isinstance(data, __sbdJobStatusLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def job_status(self):
+		return JobStatus(self._data.jStatus)
+
+	@property
+	def reasons(self):
+		return self._data.reasons
+
+	@property
+	def subreasons(self):
+		return self._data.subreasons
+
+	@property
+	def action_pid(self):
+		return self._data.actPid
+
+	@property
+	def action_value(self):
+		return self._data.actValue
+
+	@property
+	def action_period(self):
+		return self._data.actPeriod
+
+	@property
+	def action_flags(self):
+		return self._data.actFlags
+
+	@property
+	def action_status(self):
+		return self._data.actStatus
+
+	@property
+	def action_reasons(self):
+		return self._data.actReasons
+
+	@property
+	def action_sub_reasons(self):
+		return self._data.actSubReasons
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","job_status","reasons","subreasons","action_pid","action_value","action_period","action_flags","action_status","action_reasons","action_sub_reasons","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 cdef class __jobMoveLog:
 	cdef jobMoveLog * _data
 
@@ -2627,12 +3258,52 @@ cdef class __jobMoveLog:
 		def __get__(self):
 			return "%s" % self._data.userName
 
+
+class JobMoveLog:
+	def __init__(self, data):
+		if isinstance(data, __jobMoveLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def position(self):
+		return self._data.position
+
+	@property
+	def base(self):
+		return self._data.base
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","job_id","position","base","array_index","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 cdef class __queueCtrlLog:
 	cdef queueCtrlLog * _data
-	
+
 	cdef _set_struct(self, queueCtrlLog * data ):
 		self._data=data
-		
+
 
 	property opCode:
 		def __get__(self):
@@ -2649,6 +3320,37 @@ cdef class __queueCtrlLog:
 	property userName:
 		def __get__(self):
 			return u"%s" % self._data.userName
+
+
+class QueueCtrlLog:
+	def __init__(self, data):
+		if isinstance(data, __queueCtrlLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def op_code(self):
+		return self._data.opCode
+
+	@property
+	def queue(self):
+		return self._data.queue
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["op_code","queue","user_id","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
 
 cdef class __newDebugLog:
 	cdef newDebugLog * _data
@@ -2680,6 +3382,45 @@ cdef class __newDebugLog:
 		def __get__(self):
 			return self._data.userId
 
+class NewDebugLog:
+	def __init__(self, data):
+		if isinstance(data, __newDebugLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def op_code(self):
+		return self._data.opCode
+
+	@property
+	def level(self):
+		return self._data.level
+
+	@property
+	def logclass(self):
+		return self._data.logclass
+
+	@property
+	def turn_off(self):
+		return self._data.turnOff
+
+	@property
+	def log_file_name(self):
+		return self._data.logFileName
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	def to_dict(self):
+		keys={}
+		for attr in ["op_code","level","logclass","turn_off","log_file_name","user_id"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 cdef class __hostCtrlLog:
 	cdef hostCtrlLog * _data
 
@@ -2701,6 +3442,37 @@ cdef class __hostCtrlLog:
 	property userName:
 		def __get__(self):
 			return u"%s" % self._data.userName
+
+class HostCtrlLog:
+	def __init__(self, data):
+		if isinstance(data, __hostCtrlLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def op_code(self):
+		return self._data.opCode
+
+	@property
+	def host(self):
+		return self._data.host
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["op_code","host","user_id","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 
 cdef class __mbdStartLog:
 	cdef mbdStartLog * _data
@@ -2724,6 +3496,36 @@ cdef class __mbdStartLog:
 		def __get__(self):
 			return self._data.numQueues
 
+class MbdStartLog:
+	def __init__(self, data):
+		if isinstance(data, __mbdStartLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def master(self):
+		return self._data.master
+
+	@property
+	def cluster(self):
+		return self._data.cluster
+
+	@property
+	def num_hosts(self):
+		return self._data.numHosts
+
+	@property
+	def num_queues(self):
+		return self._data.numQueues
+
+	def to_dict(self):
+		keys={}
+		for attr in ["master","cluster","num_hosts","num_queues"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __mbdDieLog:
 	cdef mbdDieLog * _data
 	cdef _set_struct(self, mbdDieLog * data ):
@@ -2740,6 +3542,32 @@ cdef class __mbdDieLog:
 	property exitCode:
 		def __get__(self):
 			return self._data.exitCode
+
+class MbdDieLog:
+	def __init__(self, data):
+		if isinstance(data, __mbdDieLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def master(self):
+		return self._data.master
+
+	@property
+	def num_remove_jobs(self):
+		return self._data.numRemoveJobs
+
+	@property
+	def exit_code(self):
+		return self._data.exitCode
+
+	def to_dict(self):
+		keys={}
+		for attr in ["master","num_remove_jobs","exit_code"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
 
 cdef class __unfulfillLog:
 	cdef unfulfillLog * _data
@@ -2778,6 +3606,54 @@ cdef class __unfulfillLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+
+class UnfulfillLog:
+	def __init__(self, data):
+		if isinstance(data, __unfulfillLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def not_switched(self):
+		return self._data.notSwitched
+
+	@property
+	def signale(self):
+		return self._data.sig
+
+	@property
+	def signal1(self):
+		return self._data.sig1
+
+	@property
+	def signal1_flags(self):
+		return self._data.sig1Flags
+
+	@property
+	def checkpoint_period(self):
+		return self._data.chkPeriod
+
+	@property
+	def not_modified(self):
+		return self._data.notModified
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","not_switched","signale","signal1","signal1_flags","checkpoint_period","not_modified","array_dx"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 
 cdef class __jobFinishLog:
 	cdef jobFinishLog * _data
@@ -2948,6 +3824,182 @@ cdef class __jobFinishLog:
 		def __get__(self):
 			return self._data.maxRSwap
 
+class JobFinishLog:
+	def __init__(self, data):
+		if isinstance(data, __jobFinishLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	@property
+	def options(self):
+		return SubmitOption.get_status_list( self._data.options )
+
+	@property
+	def num_processors(self):
+		return self._data.numProcessors
+
+	@property
+	def job_status(self):
+		return JobStatus(self._data.jStatus)
+
+	@property
+	def submit_time(self):
+		return self._data.submitTime
+
+	@property
+	def begin_time(self):
+		return self._data.beginTime
+
+	@property
+	def termination_time(self):
+		return self._data.termTime
+
+	@property
+	def start_time(self):
+		return self._data.startTime
+
+	@property
+	def end_time(self):
+		return self._data.endTime
+
+	@property
+	def queue(self):
+		return self._data.queue
+
+	@property
+	def resource_request(self):
+		return self._data.resReq
+
+	@property
+	def submit_host(self):
+		return self._data.fromHost
+
+	@property
+	def cwd(self):
+		return self._data.cwd
+
+	@property
+	def input_file(self):
+		return self._data.inFile
+
+	@property
+	def output_file(self):
+		return self._data.outFile
+
+	@property
+	def error_file(self):
+		return self._data.errFile
+
+	@property
+	def input_file_spool(self):
+		return self._data.inFileSpool
+
+	@property
+	def command_spool(self):
+		return self._data.commandSpool
+
+	@property
+	def job_file(self):
+		return self._data.jobFile
+
+	@property
+	def num_asked_hosts(self):
+		return self._data.numAskedHosts
+
+	@property
+	def asked_hosts(self):
+		return self._data.askedHosts
+
+	@property
+	def host_factor(self):
+		return self._data.hostFactor
+
+	@property
+	def num_execution_hosts(self):
+		return self._data.numExHosts
+
+	@property
+	def execution_hosts(self):
+		return self._data.execHosts
+
+	@property
+	def cpu_time(self):
+		return self._data.cpuTime
+
+	@property
+	def job_name(self):
+		return self._data.jobName
+
+	@property
+	def command(self):
+		return self._data.command
+
+	@property
+	def resource_usage(self):
+		return LsfRusage( self._data.lsfRusage )
+
+	@property
+	def dependency_condition(self):
+		return self._data.dependCond
+
+	@property
+	def pre_execution_cmd(self):
+		return self._data.preExecCmd
+
+	@property
+	def email_user(self):
+		return self._data.mailUser
+
+	@property
+	def project_name(self):
+		return self._data.projectName
+
+	@property
+	def exit_status(self):
+		return self._data.exitStatus
+
+	@property
+	def max_num_processors(self):
+		return self._data.maxNumProcessors
+
+	@property
+	def login_shell(self):
+		return self._data.loginShell
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def max_residual_mem(self):
+		return self._data.maxRMem
+
+	@property
+	def max_swap(self):
+		return self._data.maxRSwap
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","user_id","user_name","options","num_processors","job_status","submit_time","begin_time","termination_time","start_time","end_time","queue","resource_request","submit_host","cwd","input_file","output_file","error_file","input_file_spool","command_spool","job_file","num_asked_hosts","asked_hosts","host_factor","num_execution_hosts","execution_hosts","cpu_time","job_name","command","resource_usage","dependency_condition","pre_execution_cmd","email_user","project_name","exit_status","max_num_processors","login_shell","array_index","max_residual_mem","max_swap"]:
+
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 cdef class __loadIndexLog:
 	cdef loadIndexLog * _data
 	cdef _set_struct(self, loadIndexLog * data ):
@@ -2961,12 +4013,34 @@ cdef class __loadIndexLog:
 		def __get__(self):
 			return [ u'%s' % self._data.name[i] for i in range(self.nIdx)]
 
+class LoadIndexLog:
+	def __init__(self, data):
+		if isinstance(data, __loadIndexLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def num_load_indexes(self):
+		return self._data.nIdx
+
+	@property
+	def name(self):
+		return self._data.name
+
+	def to_dict(self):
+		keys={}
+		for attr in ["num_load_indexes","name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __migLog:
 	cdef migLog * _data
-	
+
 	cdef _set_struct(self, migLog * data ):
 		self._data=data
-		
+
 
 	property jobId:
 		def __get__(self):
@@ -2991,6 +4065,43 @@ cdef class __migLog:
 	property userName:
 		def __get__(self):
 			return u"%s" % self._data.userName
+
+class MigLog:
+	def __init__(self, data):
+		if isinstance(data, __migLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def num_asked_hosts(self):
+		return self._data.numAskedHosts
+
+	@property
+	def asked_hosts(self):
+		return self._data.askedHosts
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","num_asked_hosts","asked_hosts","user_id","array_index","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
 
 
 cdef class __signalLog:
@@ -3023,6 +4134,44 @@ cdef class __signalLog:
 	property userName:
 		def __get__(self):
 			return u"%s" % self._data.userName
+
+class SignalLog:
+	def __init__(self, data):
+		if isinstance(data, __signalLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def signal_symbol(self):
+		return self._data.signalSymbol
+
+	@property
+	def run_count(self):
+		return self._data.runCount
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","job_id","signal_symbol","run_count","array_index","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
 
 cdef class __jobExecuteLog:
 	cdef jobExecuteLog * _data
@@ -3063,6 +4212,52 @@ cdef class __jobExecuteLog:
 		def __get__(self):
 			return self._data.idx
 
+class JobExecuteLog:
+	def __init__(self, data):
+		if isinstance(data, __jobExecuteLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def execution_uid(self):
+		return self._data.execUid
+
+	@property
+	def execution_home_dir(self):
+		return self._data.execHome
+
+	@property
+	def execution_cwd(self):
+		return self._data.execCwd
+
+	@property
+	def job_process_group_id(self):
+		return self._data.jobPGid
+
+	@property
+	def execution_username(self):
+		return self._data.execUsername
+
+	@property
+	def job_pid(self):
+		return self._data.jobPid
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","execution_uid","execution_home_dir","execution_cwd","job_process_group_id","execution_username","job_pid","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __jobMsgLog:
 	cdef jobMsgLog * _data
 	
@@ -3101,6 +4296,52 @@ cdef class __jobMsgLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class JobMsgLog:
+	def __init__(self, data):
+		if isinstance(data, __jobMsgLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.usrId
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def message_id(self):
+		return self._data.msgId
+
+	@property
+	def type(self):
+		return self._data.type
+
+	@property
+	def source(self):
+		return self._data.src
+
+	@property
+	def destination(self):
+		return self._data.dest
+
+	@property
+	def message(self):
+		return self._data.msg
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","job_id","message_id","type","source","destination","message","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
 
 cdef class __jobMsgAckLog:
 	cdef jobMsgAckLog * _data
@@ -3141,12 +4382,58 @@ cdef class __jobMsgAckLog:
 		def __get__(self):
 			return self._data.idx
 
+class JobMsgAckLog:
+	def __init__(self, data):
+		if isinstance(data, __jobMsgAckLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.usrId
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def message_id(self):
+		return self._data.msgId
+
+	@property
+	def type(self):
+		return self._data.type
+
+	@property
+	def source(self):
+		return self._data.src
+
+	@property
+	def destination(self):
+		return self._data.dest
+
+	@property
+	def emssage(self):
+		return self._data.msg
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","job_id","message_id","type","source","destination","message","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __jobRequeueLog:
 	cdef jobRequeueLog * _data
-	
+
 	cdef _set_struct(self, jobRequeueLog * data ):
 		self._data=data
-		
+
 
 	property jobId:
 		def __get__(self):
@@ -3155,6 +4442,29 @@ cdef class __jobRequeueLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class JobRequeueLog:
+	def __init__(self, data):
+		if isinstance(data, __jobRequeueLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 
 cdef class __chkpntLog:
 	cdef chkpntLog * _data
@@ -3185,6 +4495,52 @@ cdef class __chkpntLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+class CheckPointFlag(NumericState):
+	states={}
+class ActionFlag(NumericState):
+	states={}
+class ActionStatus(NumericState):
+	states={}
+
+class ChkpntLog:
+	def __init__(self, data):
+		if isinstance(data, __chkpntLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def period(self):
+		return self._data.period
+
+	@property
+	def process_id(self):
+		return self._data.pid
+
+	@property
+	def ok(self):
+		return self._data.ok
+
+	@property
+	def flags(self):
+		return CheckPointFlag(self._data.flags)
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","period","process_id","ok","flags","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 
 cdef class __sigactLog:
 	cdef sigactLog * _data
@@ -3228,6 +4584,58 @@ cdef class __sigactLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class SigactLog:
+	def __init__(self, data):
+		if isinstance(data, __sigactLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def period(self):
+		return self._data.period
+
+	@property
+	def process_id(self):
+		return self._data.pid
+
+	@property
+	def j_status(self):
+		return JobStatus(self._data.jStatus)
+
+	@property
+	def reasons(self):
+		return PendReason.get_status_list(self._data.reasons)
+
+	@property
+	def action_flags(self):
+		return ActionFlag.get_status_list(self._data.flags)
+
+	@property
+	def signal_symbol(self):
+		return self._data.signalSymbol
+
+	@property
+	def action_status(self):
+		return ActionStatus(self._data.actStatus)
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","period","process_id","job_status","pending_reasons","action_flags","action_symbol","action_status","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
 cdef class __jobStartAcceptLog:
 	cdef jobStartAcceptLog * _data
 	
@@ -3251,6 +4659,38 @@ cdef class __jobStartAcceptLog:
 		def __get__(self):
 			return self._data.idx
 
+class JobStartAcceptLog:
+	def __init__(self, data):
+		if isinstance(data, __jobStartAcceptLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def job_pid(self):
+		return self._data.jobPid
+
+	@property
+	def job_process_group_id(self):
+		return self._data.jobPGid
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","job_pid","job_process_group_id","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
+
 
 cdef class __jobCleanLog:
 	cdef jobCleanLog * _data
@@ -3266,6 +4706,31 @@ cdef class __jobCleanLog:
 	property idx:
 		def __get__(self):
 			return self._data.idx
+
+class JobCleanLog:
+	def __init__(self, data):
+		if isinstance(data, __jobCleanLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","array_index"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
+
+
 
 cdef class __jobForceRequestLog:
 	cdef jobForceRequestLog * _data
@@ -3300,6 +4765,52 @@ cdef class __jobForceRequestLog:
 		def __get__(self):
 			return u"%s" % self._data.userName
 
+
+class ForceRequestOption(NumericState):
+	states={}
+
+class JobForceRequestLog:
+	def __init__(self, data):
+		if isinstance(data, __jobForceRequestLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def num_execution_hosts(self):
+		return self._data.numExecHosts
+
+	@property
+	def execution_hosts(self):
+		return self._data.execHosts
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def array_index(self):
+		return self._data.idx
+
+	@property
+	def options(self):
+		return ForceRequestOption(self._data.options)
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","num_execution_hosts","execution_hosts","job_id","array_index","options","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __jobSwitchLog:
 	cdef jobSwitchLog * _data
 
@@ -3325,6 +4836,40 @@ cdef class __jobSwitchLog:
 	property userName:
 		def __get__(self):
 			return u"%s" % self._data.userName
+
+class JobSwitchLog:
+	def __init__(self, data):
+		if isinstance(data, __jobSwitchLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def queue(self):
+		return self._data.queue
+
+	@property
+	def idx(self):
+		return self._data.idx
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	def to_dict(self):
+		keys={}
+		for attr in ["user_id","job_id","queue","array_index","user_name"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
 
 cdef class __jobModLog:
 	cdef jobModLog * _data
@@ -3514,12 +5059,199 @@ cdef class __jobModLog:
 		def __get__(self):
 			return self._data.userPriority
 
+class JobModLog:
+	def __init__(self, data):
+		if isinstance(data, __jobModLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id_string(self):
+		return self._data.jobIdStr
+
+	@property
+	def options(self):
+		options=[]
+		options.extend(SubmitOption.get_status_list(self._data.options))
+		options.extend(Submit2Option.get_status_list(self._data.options2))
+		return options
+
+	@property
+	def delete_options(self):
+		options=[]
+		options.extend(SubmitOption.get_status_list(self._data.del_options))
+		options.extend(Submit2Option.get_status_list(self._data.del_options2))
+		return options
+
+	@property
+	def user_id(self):
+		return self._data.userId
+
+	@property
+	def user_name(self):
+		return self._data.userName
+
+	@property
+	def submit_time(self):
+		return self._data.submitTime
+
+	@property
+	def umask(self):
+		return self._data.umask
+
+	@property
+	def num_processors(self):
+		return self._data.numProcessors
+
+	@property
+	def begin_time(self):
+		return self._data.beginTime
+
+	@property
+	def termination_time(self):
+		return self._data.termTime
+
+	@property
+	def signal_value(self):
+		return self._data.sigValue
+
+	@property
+	def restart_pid(self):
+		return self._data.restartPid
+
+	@property
+	def job_name(self):
+		return self._data.jobName
+
+	@property
+	def queue(self):
+		return self._data.queue
+
+	@property
+	def num_asked_hosts(self):
+		return self._data.numAskedHosts
+
+	@property
+	def asked_hosts(self):
+		return self._data.askedHosts
+
+	@property
+	def resource_request(self):
+		return self._data.resReq
+
+	@property
+	def resource_limits(self):
+		return RLimit(*self._data.rLimits)
+
+	@property
+	def host_specification(self):
+		return self._data.hostSpec
+
+	@property
+	def dependency_condition(self):
+		return self._data.dependCond
+
+	@property
+	def submit_home_dir(self):
+		return self._data.subHomeDir
+
+	@property
+	def input_file(self):
+		return self._data.inFile
+
+	@property
+	def output_file(self):
+		return self._data.outFile
+
+	@property
+	def error_file(self):
+		return self._data.errFile
+
+	@property
+	def command(self):
+		return self._data.command
+
+	@property
+	def input_file_spool(self):
+		return self._data.inFileSpool
+
+	@property
+	def command_spool(self):
+		return self._data.commandSpool
+
+	@property
+	def checkpoint_period(self):
+		return self._data.chkpntPeriod
+
+	@property
+	def checkpoint_dir(self):
+		return self._data.chkpntDir
+
+	@property
+	def num_transfer_files(self):
+		return self._data.nxf
+
+	@property
+	def transfer_files(self):
+		return [ TransferFile(i) for i in self._data.xf]
+
+	@property
+	def job_file(self):
+		return self._data.jobFile
+
+	@property
+	def from_host(self):
+		return self._data.fromHost
+
+	@property
+	def cwd(self):
+		return self._data.cwd
+
+	@property
+	def pre_execution_cmd(self):
+		return self._data.preExecCmd
+
+	@property
+	def email_user(self):
+		return self._data.mailUser
+
+	@property
+	def project_name(self):
+		return self._data.projectName
+
+	@property
+	def nios_port(self):
+		return self._data.niosPort
+
+	@property
+	def max_num_processors(self):
+		return self._data.maxNumProcessors
+
+	@property
+	def login_shell(self):
+		return self._data.loginShell
+
+	@property
+	def schedule_host_type(self):
+		return self._data.schedHostType
+
+	@property
+	def user_priority(self):
+		return self._data.userPriority
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id_string","options","delete_options","user_id","user_name","submit_time","umask","num_processors","begin_time","term_time","sig_value","restart_pid","job_name","queue","num_asked_hosts","asked_hosts","resource_request","resource_limits","host_specification","dependency_condition","submit_home_dir","input_file","output_file","error_file","command","input_file_spool","command_spool","checkpoint_period","checkkpoint_dir","num_transfer_files","transfer_files","job_file","subit_host","cwd","pre_execution_cmd","email_user","project_name","nios_port","max_num_processors","login_shell","schedule_host_type","user_priority"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 cdef class __jobAttrSetLog:
 	cdef jobAttrSetLog * _data
-	
+
 	cdef _set_struct(self, jobAttrSetLog * data ):
 		self._data=data
-		
 
 	property jobId:
 		def __get__(self):
@@ -3541,17 +5273,67 @@ cdef class __jobAttrSetLog:
 		def __get__(self):
 			return u'%s' % self._data.hostname
 
+class JobAttrSetLog:
+	def __init__(self, data):
+		if isinstance(data, __jobAttrSetLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def job_id(self):
+		return self._data.jobId
+
+	@property
+	def array_dx(self):
+		return self._data.idx
+
+	@property
+	def user_id(self):
+		return self._data.uid
+
+	@property
+	def port(self):
+		return self._data.port
+
+	@property
+	def hostname(self):
+		return self._data.hostname
+
+	def to_dict(self):
+		keys={}
+		for attr in ["job_id","array_index","user_id","port","hostname"]:
+			keys[attr]=getattr(self,attr)
+		return keys
+
+
 
 cdef class __logSwitchLog:
 	cdef logSwitchLog * _data
-	
+
 	cdef _set_struct(self, logSwitchLog * data ):
 		self._data=data
-		
 
 	property lastJobId:
 		def __get__(self):
 			return self._data.lastJobId
+
+class LogSwitchLog:
+	def __init__(self, data):
+		if isinstance(data, __logSwitchLog):
+			self._data=data
+		else:
+			raise ValueError("Incorrect class passed")
+
+	@property
+	def last_job_id(self):
+		return self._data.lastJobId
+
+	def to_dict(self):
+		keys={}
+		for attr in ["last_job_id"]:
+			keys[attr]=getattr(self,attr)
+		return keys
 
 
 cdef class __eventLog:
@@ -3745,11 +5527,11 @@ class RLimit:
 		self._swap=swap
 		self._run=run
 		self._process=process
-		def to_dict(self):
-			items={}
-			for i in ['cpu','file_size','data','stack','core','rss','run','process','swap','nofile','open_files']:
-				items[i]=getattr(self,i)
-				return items
+	def to_dict(self):
+		items={}
+		for i in ['cpu','file_size','data','stack','core','rss','run','process','swap','nofile','open_files']:
+			items[i]=getattr(self,i)
+		return items
 	@property
 	def cpu(self):
 		return self._cpu
@@ -4440,8 +6222,19 @@ class Host():
 
 
 
+class OpenLavaEncoder(json.JSONEncoder):
+	def default(self,obj):
+		try:
+			return obj.to_dict()
+		except:
+			return json.JSONEncoder.default(self, obj)
+
 class OpenLava:
 	initialized=False
+
+	@classmethod
+	def dumps(cls, obj):
+		return json.dumps(obj,cls=OpenLavaEncoder)
 
 	@classmethod
 	def __initialize(cls):
@@ -4506,3 +6299,14 @@ class OpenLava:
 		else:
 			array_index=( job_id >> 32 ) & 0x0FFFF
 		return array_index
+
+	@classmethod
+	def get_cluster_name(cls):
+		if not cls.initialized:
+			cls.__initialize()
+		return OpenLavaCAPI.ls_getclustername()
+
+	def get_master_name(cls):
+		if not cls.initialized:
+			cls.__initialize()
+		return OpenLavaCAPI.ls_getmastername()
