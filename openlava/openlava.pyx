@@ -1756,6 +1756,8 @@ cdef class OpenLavaCAPI:
 		return openlava.lsberrno
 
 	SIGKILL=9
+	SIGSTOP=23
+	SIGCONT=25
 	NUM_JGRP_COUNTERS=8
 
 	LSBE_NO_ERROR = 00
