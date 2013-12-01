@@ -995,18 +995,35 @@ class Job:
 			return datetime.utcfromtimestamp(self.resource_usage_last_update_time)
 	
 	def get_full_job_id(self):
-		return 
+		return OpenLava.create_job_id(self.job_id, self.array_id)
 
 	def kill(self):
-		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
+		full_job_id=self.get_full_job_id()
 		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGKILL)
 
-	def stop(self):
-		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
-		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGSTOP)
+	def suspend(self):
+		full_job_id=self.get_full_job_id()
+		code=OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGSTOP)
+		return code
+
+	def requeue(self, hold=False):
+		new_state=OpenLavaCAPI.JOB_STAT_PEND
+		if hold:
+			new_state=OpenLavaCAPI.JOB_STAT_PSUSP
+
+		if self.status.name==u"JOB_STAT_DONE":
+			option=OpenLavaCAPI.REQUEUE_DONE
+		elif self.status.name==u"JOB_STAT_RUN":
+			option=OpenLavaCAPI.REQUEUE_RUN
+		elif self.status.name==u"JOB_STAT_EXIT":
+			option=OpenLavaCAPI.REQUEUE_EXIT
+		else:
+			raise ValueError(self.status)
+
+		return OpenLavaCAPI.lsb_requeuejob(self.job_id, self.array_id, new_state, option)
 
 	def resume(self):
-		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
+		full_job_id=self.get_full_job_id()
 		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGCONT)
 
 	def has_admin(self, user):
@@ -1755,9 +1772,14 @@ cdef class OpenLavaCAPI:
 	def get_lsberrno(cls):
 		return openlava.lsberrno
 
+	REQUEUE_DONE=  0x1
+	REQUEUE_EXIT=  0x2
+	REQUEUE_RUN =  0x4
+
 	SIGKILL=9
-	SIGSTOP=23
-	SIGCONT=25
+	SIGSTOP=19
+	SIGCONT=18
+
 	NUM_JGRP_COUNTERS=8
 
 	LSBE_NO_ERROR = 00
@@ -2190,6 +2212,53 @@ cdef class OpenLavaCAPI:
 	def lsb_signaljob (cls, jobId, sigValue):
 		return openlava.lsb_signaljob(jobId, sigValue)
 
+	@classmethod
+	def lsb_requeuejob(cls, job_id, array_id, status, options):
+		cdef jobrequeue rq
+		job_id=OpenLava.create_job_id(job_id, array_id)
+		if status!=OpenLavaCAPI.JOB_STAT_PEND and status!=OpenLavaCAPI.JOB_STAT_PSUSP:
+			raise ValueError("Invalid Status")
+		if options != OpenLavaCAPI.REQUEUE_DONE and options != OpenLavaCAPI.REQUEUE_EXIT and options != OpenLavaCAPI.REQUEUE_RUN:
+			raise ValueError("Invalid Option")
+		rq.jobId=job_id
+		rq.status=status
+		rq.options=options
+		return openlava.lsb_requeuejob(&rq)
+
+
+#cdef class JobRequeue:
+#	cdef jobrequeue * _rq
+#	property jobId:
+#		def __get__(self):
+#			return self._rq.jobId
+#
+#		def __set__(self, value):
+#			self._rq.jobId=value
+#
+#
+#	property status:
+#		def __get__(self):
+#			return self._rq.status
+#
+#		def __set__(self, value):
+#			if value==OpenLavaCAPI.JOB_STAT_PEND or value==OpenLavaCAPI.JOB_STATE_PSUSP:
+#				self._rq.status=value
+#			else:
+#				raise ValueError
+#
+#
+#	property options:
+#		def __get__(self):
+#			return self._rq.options
+#
+#		def __set__(self, value):
+#			if value == OpenLavaCAPI.REQUEUE_DONE or value==OpenLavaCAPI.REQUEUE_EXIT or value==OpenLavaCAPI.REQUEUE_RUN:
+#				self._rq.options=value
+#			else:
+#				raise ValueError
+#
+#	cdef jobrequeue * get_struct(self):
+#		return self._rq
 
 
 cdef class __eventRec:
@@ -6317,7 +6386,7 @@ class OpenLava:
 
 
 	@classmethod
-	def  create_job_id(cls, job_id, array_index):
+	def create_job_id(cls, job_id, array_index):
 		id=array_index
 		id=id << 32
 		id=id | job_id

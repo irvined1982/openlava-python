@@ -607,6 +607,11 @@ cdef extern from "lsbatch.h":
 		int    minProcLimit
 		int    defProcLimit
 
+	extern struct jobrequeue:
+		LS_LONG_INT      jobId
+		int              status
+		int              options
+
 	extern int lsb_init (char *appName)
 	extern char *ls_getclustername()
 	extern char *ls_getmastername()
@@ -619,4 +624,5 @@ cdef extern from "lsbatch.h":
 	extern eventRec *lsb_geteventrec(FILE* log_fp,int * lineNum)
 	extern int lsb_deletejob (LS_LONG_INT jobId, int times, int options)
 	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
+	extern int lsb_requeuejob(jobrequeue * reqPtr)
 
