@@ -993,8 +993,27 @@ class Job:
 	@property
 	def resource_usage_last_update_time_datetime_utc(self):
 			return datetime.utcfromtimestamp(self.resource_usage_last_update_time)
+	
+	def get_full_job_id(self):
+		return 
 
+	def kill(self):
+		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
+		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGKILL)
 
+	def stop(self):
+		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
+		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGSTOP)
+
+	def resume(self):
+		full_job_id=OpenLava.create_job_id(self.job_id, self.array_id)
+		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGCONT)
+
+	def has_admin(self, user):
+		if user == self.user or user in self.queue.admins:
+			return True
+		else:
+			return False
 
 ##############################
 ###########
@@ -1736,6 +1755,7 @@ cdef class OpenLavaCAPI:
 	def get_lsberrno(cls):
 		return openlava.lsberrno
 
+	SIGKILL=9
 	NUM_JGRP_COUNTERS=8
 
 	LSBE_NO_ERROR = 00
@@ -2023,6 +2043,8 @@ cdef class OpenLavaCAPI:
 	EVENT_UNUSED_31 = 31
 	EVENT_UNUSED_32 = 32
 
+	LSB_KILL_REQUEUE=0x10
+
 	@classmethod
 	def lsb_init(cls, app_name):
 		return openlava.lsb_init(app_name)
@@ -2158,6 +2180,13 @@ cdef class OpenLavaCAPI:
 		line_num=line
 		return (Record, line_num)
 
+	@classmethod
+	def lsb_deletejob(cls, job_id, submit_time, options=0):
+		return openlava.lsb_deletejob(job_id, submit_time, options)
+
+	@classmethod
+	def lsb_signaljob (cls, jobId, sigValue):
+		return openlava.lsb_signaljob(jobId, sigValue)
 
 
 

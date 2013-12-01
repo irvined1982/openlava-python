@@ -617,4 +617,6 @@ cdef extern from "lsbatch.h":
 	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
 	extern userInfoEnt *lsb_userinfo(char **users, int *numUsers)
 	extern eventRec *lsb_geteventrec(FILE* log_fp,int * lineNum)
+	extern int lsb_deletejob (LS_LONG_INT jobId, int times, int options)
+	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
 

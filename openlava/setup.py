@@ -45,6 +45,8 @@ setup(
 	description="Bindings for OpenLava",
 	author="David Irvine",
 	author_email="irvined@gmail.com",
+	url="https://github.com/irvined1982/openlava-python",
+	license="GPL 3",
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
 		Extension("openlava", ["openlava.pyx"],
@@ -53,7 +55,14 @@ setup(
 			include_dirs=[inc_dir],
 			library_dirs=[lib_dir],
 			)
-		]
+		],
+	classifiers=[
+			'Programming Language :: Python',
+			'Programming Language :: Python :: 2',
+			'Programming Language :: Python :: 2.7',
+			'Intended Audience :: Science/Research',
+			'Intended Audience :: System Administrators',
+			'Topic :: Scientific/Engineering',
+			],
 )
-
 
