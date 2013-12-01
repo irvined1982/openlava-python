@@ -40,7 +40,7 @@ if not os.path.exists(lsbatch):
 
 
 setup(
-	name="openlava",
+	name="openlava-bindings",
 	version="1.0",
 	description="Bindings for OpenLava",
 	author="David Irvine",

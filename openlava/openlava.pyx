@@ -76,109 +76,374 @@ class NumericState:
 	def to_dict(self):
 		return {'name':self.name,'description':self.description,'status':self._status}
 
+
 class PendReason(NumericState):
 	states={
-			0:{
-				'name':'PEND_JOB_REASON',
-				'description': 'Virtual code; not a reason.  ',
-				},
-			1:{
-				'name':'PEND_JOB_NEW',
-				'description': 'A new job is waiting to be scheduled.  ',
-				},
-			2:{
-				'name':'PEND_JOB_START_TIME',
-				'description': 'The job is held until its specified start time.  ',
-				},
-			3:{
-				'name':'PEND_JOB_DEPEND',
-				'description': 'The job is waiting for its dependency condition(s) to be satisfied.  ',
-				},
-			4:{
-				'name':'PEND_JOB_DEP_INVALID',
-				'description': 'The dependency condition is invalid or never satisfied.  ',
-				},
-			5:{
-				'name':'PEND_JOB_MIG',
-				'description': 'The migrating job is waiting to be rescheduled.  ',
-				},
-			6:{
-				'name':'PEND_JOB_PRE_EXEC',
-				'description': 'The jobs pre-exec command exited with non-zero status.  ',
-				},
-			7:{
-				'name':'PEND_JOB_NO_FILE',
-				'description': 'Unable to access jobfile.  ',
-				},
-			8:{
-				'name':'PEND_JOB_ENV',
-				'description': 'Unable to set jobs environment variables.  ',
-				},
-			9:{
-				'name':'PEND_JOB_PATHS',
-				'description': 'Unable to determine the jobs home or working directories.  ',
-				},
-			10:{
-				'name':'PEND_JOB_OPEN_FILES',
-				'description': 'Unable to open the jobs input and output files.  ',
-				},
-			11:{
-				'name':'PEND_JOB_EXEC_INIT',
-				'description': 'Job execution initialization failed.  ',
-				},
-			12:{
-				'name':'PEND_JOB_RESTART_FILE',
-				'description': 'Unable to copy restarting jobs checkpoint files.  ',
-				},
-			13:{
-				'name':'PEND_JOB_DELAY_SCHED',
-				'description': 'Scheduling of the job is delayed.  ',
-				},
-			14:{
-				'name':'PEND_JOB_SWITCH',
-				'description': 'Waiting for the re-scheduling of the job after switching queues.  ',
-				},
-			15:{
-				'name':'PEND_JOB_DEP_REJECT',
-				'description': 'An event is rejected by eeventd due to a syntax error.  ',
-				},
-			16:{
-				'name':'PEND_JOB_JS_DISABLED',
-				'description': 'A JobScheduler feature is not enabled.  ',
-				},
-			17:{
-				'name':'PEND_JOB_NO_PASSWD',
-				'description': 'Failed to get user password.  ',
-				},
-			19:{
-				'name':'PEND_JOB_MODIFY',
-				'description': 'The job is waiting to be re-scheduled after its parameters have been changed.  ',
-				},
-			23:{
-				'name':'PEND_JOB_REQUEUED',
-				'description': 'The job has been requeued.  ',
-				},
-			38:{
-				'name':'PEND_JOB_ARRAY_JLIMIT',
-				'description': 'The job has reached its running element limit.  ',
-				},
-			312:{
-				'name':'PEND_JOB_SPREAD_TASK',
-				'description': 'Not enough hosts to meet the jobs spanning requirement.  ',
-				},
-			1320:{
-				'name':'PEND_JOB_NO_SPAN',
-				'description': 'There are not enough processors to meet the jobs spanning requirement.  The job level locality is unsatisfied.  ',
-				},
-			1603:{
-				'name':'PEND_JOB_START_FAIL',
-				'description': 'The job failed in talking to the server to start the job.  ',
-				},
-			1604:{
-				'name':'PEND_JOB_START_UNKNWN',
-				'description': 'Failed in receiving the reply from the server when starting the job.  ',
-				},
-			}
+                        0:{
+                                'name':'PEND_JOB_REASON',
+                                'description': 'Virtual code; not a reason.  ',
+                                },
+                        1:{
+                                'name':'PEND_JOB_NEW',
+                                'description': 'A new job is waiting to be scheduled.  ',
+                                },
+                        2:{
+                                'name':'PEND_JOB_START_TIME',
+                                'description': 'The job is held until its specified start time.  ',
+                                },
+                        3:{
+                                'name':'PEND_JOB_DEPEND',
+                                'description': 'The job is waiting for its dependency condition(s) to be satisfied.  ',
+                                },
+                        4:{
+                                'name':'PEND_JOB_DEP_INVALID',
+                                'description': 'The dependency condition is invalid or never satisfied.  ',
+                                },
+                        5:{
+                                'name':'PEND_JOB_MIG',
+                                'description': 'The migrating job is waiting to be rescheduled.  ',
+                                },
+                        6:{
+                                'name':'PEND_JOB_PRE_EXEC',
+                                'description': 'The jobs pre-exec command exited with non-zero status.  ',
+                                },
+                        7:{
+                                'name':'PEND_JOB_NO_FILE',
+                                'description': 'Unable to access jobfile.  ',
+                                },
+                        8:{
+                                'name':'PEND_JOB_ENV',
+                                'description': 'Unable to set jobs environment variables.  ',
+                                },
+                        9:{
+                                'name':'PEND_JOB_PATHS',
+                                'description': 'Unable to determine the jobs home or working directories.  ',
+                                },
+                        10:{
+                                'name':'PEND_JOB_OPEN_FILES',
+                                'description': 'Unable to open the jobs input and output files.  ',
+                                },
+                        11:{
+                                'name':'PEND_JOB_EXEC_INIT',
+                                'description': 'Job execution initialization failed.  ',
+                                },
+                        12:{
+                                'name':'PEND_JOB_RESTART_FILE',
+                                'description': 'Unable to copy restarting jobs checkpoint files.  ',
+                                },
+                        13:{
+                                'name':'PEND_JOB_DELAY_SCHED',
+                                'description': 'Scheduling of the job is delayed.  ',
+                                },
+                        14:{
+                                'name':'PEND_JOB_SWITCH',
+                                'description': 'Waiting for the re-scheduling of the job after switching queues.  ',
+                                },
+                        15:{
+                                'name':'PEND_JOB_DEP_REJECT',
+                                'description': 'An event is rejected by eeventd due to a syntax error.  ',
+                                },
+                        17:{
+                                'name':'PEND_JOB_NO_PASSWD',
+                                'description': 'Failed to get user password.  ',
+                                },
+                        19:{
+                                'name':'PEND_JOB_MODIFY',
+                                'description': 'The job is waiting to be re-scheduled after its parameters have been changed.  ',
+                                },
+                        23:{
+                                'name':'PEND_JOB_REQUEUED',
+                                'description': 'The job has been requeued.  ',
+                                },
+                        35:{
+                                'name':'PEND_SYS_UNABLE',
+                                'description': 'The system is unable to schedule the job.  ',
+                                },
+                        38:{
+                                'name':'PEND_JOB_ARRAY_JLIMIT',
+                                'description': 'The job has reached its running element limit.  ',
+                                },
+                        39:{
+                                'name':'PEND_CHKPNT_DIR',
+                                'description': 'Checkpoint directory is invalid.  ',
+                                },
+                        301:{
+                                'name':'PEND_QUE_INACT',
+                                'description': 'The queue is inactivated by the administrator.  ',
+                                },
+                        302:{
+                                'name':'PEND_QUE_WINDOW',
+                                'description': 'The queue is inactivated by its time windows.  ',
+                                },
+                        303:{
+                                'name':'PEND_QUE_JOB_LIMIT',
+                                'description': 'The queue has reached its job slot limit.  ',
+                                },
+                        304:{
+                                'name':'PEND_QUE_USR_JLIMIT',
+                                'description': 'The user has reached the per-user job slot limit of the queue.  ',
+                                },
+                        305:{
+                                'name':'PEND_QUE_USR_PJLIMIT',
+                                'description': 'Not enough per-user job slots of the queue for the parallel job.  ',
+                                },
+                        306:{
+                                'name':'PEND_QUE_PRE_FAIL',
+                                'description': 'The queues pre-exec command exited with non-zero status.  ',
+                                },
+                        310:{
+                                'name':'PEND_SYS_NOT_READY',
+                                'description': 'The system is not ready for scheduling after reconfiguration.  ',
+                                },
+                        311:{
+                                'name':'PEND_SBD_JOB_REQUEUE',
+                                'description': 'The requeued job is waiting for rescheduling.  ',
+                                },
+                        312:{
+                                'name':'PEND_JOB_SPREAD_TASK',
+                                'description': 'Not enough hosts to meet the jobs spanning requirement.  ',
+                                },
+                        313:{
+                                'name':'PEND_QUE_SPREAD_TASK',
+                                'description': 'Not enough hosts to meet the queues spanning requirement.  ',
+                                },
+                        314:{
+                                'name':'PEND_QUE_PJOB_LIMIT',
+                                'description': 'The queue has not enough job slots for the parallel job.  ',
+                                },
+                        315:{
+                                'name':'PEND_QUE_WINDOW_WILL_CLOSE',
+                                'description': 'The job will not finish before queues run window is closed.  ',
+                                },
+                        316:{
+                                'name':'PEND_QUE_PROCLIMIT',
+                                'description': 'Job no longer satisfies queue PROCLIMIT configuration.  ',
+                                },
+                        601:{
+                                'name':'PEND_USER_JOB_LIMIT',
+                                'description': 'The job slot limit is reached.  ',
+                                },
+                        602:{
+                                'name':'PEND_UGRP_JOB_LIMIT',
+                                'description': 'A user group has reached its job slot limit.  ',
+                                },
+                        603:{
+                                'name':'PEND_USER_PJOB_LIMIT',
+                                'description': 'The job slot limit for the parallel job is reached.  ',
+                                },
+                        604:{
+                                'name':'PEND_UGRP_PJOB_LIMIT',
+                                'description': 'A user group has reached its job slot limit for the parallel job.  ',
+                                },
+                        605:{
+                                'name':'PEND_USER_RESUME',
+                                'description': 'Waiting for scheduling after resumed by user.  ',
+                                },
+                        607:{
+                                'name':'PEND_USER_STOP',
+                                'description': 'The job was suspended by the user while pending.  ',
+                                },
+                        608:{
+                                'name':'PEND_NO_MAPPING',
+                                'description': 'Unable to determine user account for execution.  ',
+                                },
+                        609:{
+                                'name':'PEND_RMT_PERMISSION',
+                                'description': 'The user has no permission to run the job on remote host/cluster.  ',
+                                },
+                        610:{
+                                'name':'PEND_ADMIN_STOP',
+                                'description': 'The job was suspended by LSF admin or root while pending.  ',
+                                },
+                        1001:{
+                                'name':'PEND_HOST_RES_REQ',
+                                'description': 'The jobs resource requirements not satisfied.  ',
+                                },
+                        1002:{
+                                'name':'PEND_HOST_NONEXCLUSIVE',
+                                'description': 'The jobs requirement for exclusive execution not satisfied.  ',
+                                },
+                        1003:{
+                                'name':'PEND_HOST_JOB_SSUSP',
+                                'description': 'Higher or equal priority jobs already suspended by system.  ',
+                                },
+                        1005:{
+                                'name':'PEND_SBD_GETPID',
+                                'description': 'Unable to get the PID of the restarting job.  ',
+                                },
+                        1006:{
+                                'name':'PEND_SBD_LOCK',
+                                'description': 'Unable to lock the host for exclusively executing the job.  ',
+                                },
+                        1007:{
+                                'name':'PEND_SBD_ZOMBIE',
+                                'description': 'Cleaning up zombie job.  ',
+                                },
+                        1008:{
+                                'name':'PEND_SBD_ROOT',
+                                'description': 'Cant run jobs submitted by root.  The job is rejected by the sbatchd  ',
+                                },
+                        1009:{
+                                'name':'PEND_HOST_WIN_WILL_CLOSE',
+                                'description': 'Job cant finish on the host before queues run window is closed.  ',
+                                },
+                        1010:{
+                                'name':'PEND_HOST_MISS_DEADLINE',
+                                'description': 'Job cant finish on the host before jobs termination deadline.  ',
+                                },
+                        1011:{
+                                'name':'PEND_FIRST_HOST_INELIGIBLE',
+                                'description': 'The specified first execution host is not eligible for this job at this time.  ',
+                                },
+                        1301:{
+                                'name':'PEND_HOST_DISABLED',
+                                'description': 'The host is closed by the LSF administrator.  ',
+                                },
+                        1302:{
+                                'name':'PEND_HOST_LOCKED',
+                                'description': 'The host is locked by the LSF administrator.  ',
+                                },
+                        1303:{
+                                'name':'PEND_HOST_LESS_SLOTS',
+                                'description': 'Not enough job slots for the parallel job.  ',
+                                },
+                        1304:{
+                                'name':'PEND_HOST_WINDOW',
+                                'description': 'Dispatch windows are closed.  ',
+                                },
+                        1305:{
+                                'name':'PEND_HOST_JOB_LIMIT',
+                                'description': 'The job slot limit reached.  ',
+                                },
+                        1306:{
+                                'name':'PEND_QUE_PROC_JLIMIT',
+                                'description': 'The queues per-CPU job slot limit is reached.  ',
+                                },
+                        1307:{
+                                'name':'PEND_QUE_HOST_JLIMIT',
+                                'description': 'The queues per-host job slot limit is reached.  ',
+                                },
+                        1308:{
+                                'name':'PEND_USER_PROC_JLIMIT',
+                                'description': 'The users per-CPU job slot limit is reached.  ',
+                                },
+                        1309:{
+                                'name':'PEND_HOST_USR_JLIMIT',
+                                'description': 'The hosts per-user job slot limit is reached.  ',
+                                },
+                        1310:{
+                                'name':'PEND_HOST_QUE_MEMB',
+                                'description': 'Not a member of the queue.  ',
+                                },
+                        1311:{
+                                'name':'PEND_HOST_USR_SPEC',
+                                'description': 'Not a user-specified host.  ',
+                                },
+                        1312:{
+                                'name':'PEND_HOST_PART_USER',
+                                'description': 'The user has no access to the host partition.  ',
+                                },
+                        1313:{
+                                'name':'PEND_HOST_NO_USER',
+                                'description': 'There is no such user account.  ',
+                                },
+                        1314:{
+                                'name':'PEND_HOST_ACCPT_ONE',
+                                'description': 'Just started a job recently.  ',
+                                },
+                        1315:{
+                                'name':'PEND_LOAD_UNAVAIL',
+                                'description': 'Load info unavailable.  ',
+                                },
+                        1316:{
+                                'name':'PEND_HOST_NO_LIM',
+                                'description': 'The LIM is unreachable by the sbatchd.  ',
+                                },
+                        1318:{
+                                'name':'PEND_HOST_QUE_RESREQ',
+                                'description': 'The queues resource requirements are not satisfied.  ',
+                                },
+                        1319:{
+                                'name':'PEND_HOST_SCHED_TYPE',
+                                'description': 'The submission host type is not the same.  ',
+                                },
+                        1320:{
+                                'name':'PEND_JOB_NO_SPAN',
+                                'description': 'There are not enough processors to meet the jobs spanning requirement.  The job level locality is unsatisfied.  ',
+                                },
+                        1321:{
+                                'name':'PEND_QUE_NO_SPAN',
+                                'description': 'There are not enough processors to meet the queues spanning requirement.  The queue level locality is unsatisfied.  ',
+                                },
+                        1322:{
+                                'name':'PEND_HOST_EXCLUSIVE',
+                                'description': 'An exclusive job is running.  ',
+                                },
+                        1324:{
+                                'name':'PEND_UGRP_PROC_JLIMIT',
+                                'description': 'The user groups per-CPU job slot limit is reached.  ',
+                                },
+                        1325:{
+                                'name':'PEND_BAD_HOST',
+                                'description': 'Incorrect host, group or cluster name.  ',
+                                },
+                        1326:{
+                                'name':'PEND_QUEUE_HOST',
+                                'description': 'Host is not used by the queue.  ',
+                                },
+                        1327:{
+                                'name':'PEND_HOST_LOCKED_MASTER',
+                                'description': 'Host is locked by master LIM.  ',
+                                },
+                        1601:{
+                                'name':'PEND_SBD_UNREACH',
+                                'description': 'Cannot reach sbatchd.  ',
+                                },
+                        1602:{
+                                'name':'PEND_SBD_JOB_QUOTA',
+                                'description': 'Number of jobs exceed quota.  ',
+                                },
+                        1603:{
+                                'name':'PEND_JOB_START_FAIL',
+                                'description': 'The job failed in talking to the server to start the job.  ',
+                                },
+                        1604:{
+                                'name':'PEND_JOB_START_UNKNWN',
+                                'description': 'Failed in receiving the reply from the server when starting the job.  ',
+                                },
+                        1605:{
+                                'name':'PEND_SBD_NO_MEM',
+                                'description': 'Unable to allocate memory to run job.  There is no memory on the sbatchd.  ',
+                                },
+                        1606:{
+                                'name':'PEND_SBD_NO_PROCESS',
+                                'description': 'Unable to fork process to run the job.  There are no more processes on the sbatchd.  ',
+                                },
+                        1607:{
+                                'name':'PEND_SBD_SOCKETPAIR',
+                                'description': 'Unable to communicate with the job process.  ',
+                                },
+                        1608:{
+                                'name':'PEND_SBD_JOB_ACCEPT',
+                                'description': 'The slave batch server failed to accept the job.  ',
+                                },
+                        2001:{
+                                'name':'PEND_HOST_LOAD',
+                                'description': 'The load threshold is reached.  ',
+                                },
+                        2301:{
+                                'name':'PEND_HOST_QUE_RUSAGE',
+                                'description': 'The queues requirements for resource reservation are not satisfied.  ',
+                                },
+                        2601:{
+                                'name':'PEND_HOST_JOB_RUSAGE',
+                                'description': 'The jobs requirements for resource reservation are not satisfied.  ',
+                                },
+                        2900:{
+                                'name':'PEND_MAX_REASONS',
+                                'description': 'The maximum number of reasons.  ',
+                                },
+                        }
 
 class JobStatus(NumericState):
 	states={
@@ -319,6 +584,8 @@ class RUsage:
 		items={}
 		for i in ['resident_memory_usage','virtual_memory_usage','user_time','system_time','num_active_processes','active_processes','num_active_process_groups','active_process_groups']:
 			items[i]=getattr(self,i)
+		items['user_time_timedelta']="%s" % self.user_time_timedelta
+		items['system_time_timedelta']="%s" % self.system_time_timedelta
 		return items
 
 
@@ -822,24 +1089,33 @@ class Job:
 		items={}
 		for i in ['reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
 			items[i]=getattr(self,i)
+		items['predicted_start_time_datetime']="%s" % self.predicted_start_time_datetime_local
+		items['start_time_datetime']="%s" % self.start_time_datetime_local
+		items['end_time_datetime']="%s" % self.end_time_datetime_local
 		return items
 
 	@property
 	def reasons(self):
-			v={
-			}
-			for reason in self._reasonTb:
-				reason=reason & 0x00000000000ffff
-				if self._job.status==0x01: # pend
-					r=PendReason(reason)
-				if self._job.status==0x02: # psusp
-					r=SuspReason(reason)
-				try:
-					v[r.name].count+=1
-				except:
-					v[r.name]=r
-					v[r.name].count=1
-			return v.values()
+		v={
+		}
+		for reason in self._reasonTb:
+			reason=reason & 0x00000000000ffff
+			if self.status.name=="JOB_STAT_PEND": # pend
+				r=PendReason(reason)
+			if self.status.name=="JOB_STAT_PSUSP": # psusp
+				r=SuspReason(reason)
+			try:
+				v[r.name]['count']+=1
+			except:
+				v[r.name]={
+						'count':1,
+						'name':r.name,
+						'description':r.description,
+						'status':r.status,
+						'friendly_name':r.friendly,
+						}
+		print v.values()
+		return v.values()
 
 	@property
 	def submit(self):
@@ -1935,30 +2211,101 @@ cdef class OpenLavaCAPI:
 	QUEUE_STAT_DISC = 0x10
 	QUEUE_STAT_RUNWIN_CLOSE = 0x20
 
-	PEND_JOB_REASON = 0
-	PEND_JOB_NEW = 1
-	PEND_JOB_START_TIME = 2
-	PEND_JOB_DEPEND = 3
-	PEND_JOB_DEP_INVALID = 4
-	PEND_JOB_MIG = 5
-	PEND_JOB_PRE_EXEC = 6
-	PEND_JOB_NO_FILE = 7
-	PEND_JOB_ENV = 8
-	PEND_JOB_PATHS = 9
-	PEND_JOB_OPEN_FILES = 10
-	PEND_JOB_EXEC_INIT = 11
+	PEND_JOB_REASON        =0
+	PEND_JOB_NEW           =1
+	PEND_JOB_START_TIME    =2
+	PEND_JOB_DEPEND        =3
+	PEND_JOB_DEP_INVALID   =4
+	PEND_JOB_MIG           =5
+	PEND_JOB_PRE_EXEC     = 6
+	PEND_JOB_NO_FILE      = 7
+	PEND_JOB_ENV          = 8
+	PEND_JOB_PATHS        = 9
+	PEND_JOB_OPEN_FILES   = 10
+	PEND_JOB_EXEC_INIT    = 11
 	PEND_JOB_RESTART_FILE = 12
-	PEND_JOB_DELAY_SCHED = 13
-	PEND_JOB_SWITCH = 14
-	PEND_JOB_DEP_REJECT = 15
-	PEND_JOB_NO_PASSWD = 17
-	PEND_JOB_MODIFY = 19
-	PEND_JOB_REQUEUED = 23
+	PEND_JOB_DELAY_SCHED  = 13
+	PEND_JOB_SWITCH       = 14
+	PEND_JOB_DEP_REJECT   = 15
+	PEND_JOB_NO_PASSWD    = 17
+	PEND_JOB_MODIFY       = 19
+	PEND_JOB_REQUEUED     = 23
+	PEND_SYS_UNABLE       = 35
 	PEND_JOB_ARRAY_JLIMIT = 38
-	PEND_JOB_SPREAD_TASK = 312
-	PEND_JOB_NO_SPAN = 1320
-	PEND_JOB_START_FAIL = 1603
-	PEND_JOB_START_UNKNWN = 1604
+	PEND_CHKPNT_DIR       = 39
+	PEND_QUE_INACT             =301
+	PEND_QUE_WINDOW            =302
+	PEND_QUE_JOB_LIMIT         =303
+	PEND_QUE_USR_JLIMIT        =304
+	PEND_QUE_USR_PJLIMIT       =305
+	PEND_QUE_PRE_FAIL          =306
+	PEND_SYS_NOT_READY         =310
+	PEND_SBD_JOB_REQUEUE       =311
+	PEND_JOB_SPREAD_TASK       =312
+	PEND_QUE_SPREAD_TASK       =313
+	PEND_QUE_PJOB_LIMIT        =314
+	PEND_QUE_WINDOW_WILL_CLOSE= 315
+	PEND_QUE_PROCLIMIT   =  316
+
+	PEND_USER_JOB_LIMIT    =601
+	PEND_UGRP_JOB_LIMIT    =602
+	PEND_USER_PJOB_LIMIT   =603
+	PEND_UGRP_PJOB_LIMIT   =604
+	PEND_USER_RESUME       =605
+	PEND_USER_STOP         =607
+	PEND_NO_MAPPING        =608
+	PEND_RMT_PERMISSION    =609
+	PEND_ADMIN_STOP        =610
+	PEND_HOST_RES_REQ      =1001
+	PEND_HOST_NONEXCLUSIVE =1002
+	PEND_HOST_JOB_SSUSP    =1003
+	PEND_SBD_GETPID        =1005
+	PEND_SBD_LOCK          =1006
+	PEND_SBD_ZOMBIE        =1007
+	PEND_SBD_ROOT          =1008
+	PEND_HOST_WIN_WILL_CLOSE =1009
+	PEND_HOST_MISS_DEADLINE  =1010
+	PEND_FIRST_HOST_INELIGIBLE= 1011
+	PEND_HOST_DISABLED    = 1301
+	PEND_HOST_LOCKED      = 1302
+	PEND_HOST_LESS_SLOTS  = 1303
+	PEND_HOST_WINDOW      = 1304
+	PEND_HOST_JOB_LIMIT   = 1305
+	PEND_QUE_PROC_JLIMIT  = 1306
+	PEND_QUE_HOST_JLIMIT  = 1307
+	PEND_USER_PROC_JLIMIT = 1308
+	PEND_HOST_USR_JLIMIT  = 1309
+	PEND_HOST_QUE_MEMB    = 1310
+	PEND_HOST_USR_SPEC    = 1311
+	PEND_HOST_PART_USER   = 1312
+	PEND_HOST_NO_USER     = 1313
+	PEND_HOST_ACCPT_ONE   = 1314
+	PEND_LOAD_UNAVAIL     = 1315
+	PEND_HOST_NO_LIM      = 1316
+	PEND_HOST_QUE_RESREQ  = 1318
+	PEND_HOST_SCHED_TYPE  = 1319
+	PEND_JOB_NO_SPAN      = 1320
+	PEND_QUE_NO_SPAN      = 1321
+	PEND_HOST_EXCLUSIVE   =1322
+	PEND_UGRP_PROC_JLIMIT = 1324
+	PEND_BAD_HOST         = 1325
+	PEND_QUEUE_HOST       = 1326
+	PEND_HOST_LOCKED_MASTER= 1327
+	PEND_SBD_UNREACH     =  1601
+	PEND_SBD_JOB_QUOTA  =   1602
+	PEND_JOB_START_FAIL =   1603
+	PEND_JOB_START_UNKNWN=  1604
+	PEND_SBD_NO_MEM     =   1605
+	PEND_SBD_NO_PROCESS =   1606
+	PEND_SBD_SOCKETPAIR =   1607
+	PEND_SBD_JOB_ACCEPT =   1608
+	PEND_HOST_LOAD      =   2001
+	PEND_HOST_QUE_RUSAGE=  2301
+	PEND_HOST_JOB_RUSAGE= 2601
+	PEND_MAX_REASONS = 2900
+
+
+
 
 	JOB_STAT_NULL = 0x00
 	JOB_STAT_PEND = 0x01
