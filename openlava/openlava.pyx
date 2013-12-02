@@ -1087,7 +1087,7 @@ class Job:
 
 	def to_dict(self):
 		items={}
-		for i in ['reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
+		for i in ['admins', 'reasons','submit','resource_usage','user','status','pid','cpu_time','cwd','submit_home_dir','submission_host','execution_hosts','cpu_factor','execution_user_id','execution_home_dir','execution_cwd','execution_user_name','parent_group','job_id','name','service_port','priority','submit_time','reservation_time','start_time','predicted_start_time','end_time','resource_usage_last_update_time']:
 			items[i]=getattr(self,i)
 		items['predicted_start_time_datetime']="%s" % self.predicted_start_time_datetime_local
 		items['start_time_datetime']="%s" % self.start_time_datetime_local
@@ -1269,7 +1269,14 @@ class Job:
 	@property
 	def resource_usage_last_update_time_datetime_utc(self):
 			return datetime.utcfromtimestamp(self.resource_usage_last_update_time)
-	
+
+	@property
+	def admins(self):
+		admins=[self.user]
+		q=Queue(self.submit.queue_name)
+		admins.extend(q.queue_admins)
+		return admins
+
 	def get_full_job_id(self):
 		return OpenLava.create_job_id(self.job_id, self.array_id)
 
@@ -1301,6 +1308,7 @@ class Job:
 	def resume(self):
 		full_job_id=self.get_full_job_id()
 		return OpenLavaCAPI.lsb_signaljob(full_job_id, OpenLavaCAPI.SIGCONT)
+
 
 	def has_admin(self, user):
 		if user == self.user or user in self.queue.admins:
@@ -3337,9 +3345,9 @@ class JobStatusLog:
 	@property
 	def reasons(self):
 		if self.job_status.name=="JOB_STAT_PEND":
-			return PendReason.get_status_list(self._data.reasons)
+			return PendReason.get_status_list(self._data.reason)
 		if self.job_status.name=="JOB_STAT_SUSP":
-			return SuspReason.get_status_list(self._data_reasons)
+			return SuspReason.get_status_list(self._data.reason)
 
 	@property
 	def sub_reasons(self):
