@@ -2736,7 +2736,7 @@ cdef class __jobNewLog:
 
 	property userName:
 		def __get__(self):
-			return u'%s' % self._data.userName[60]
+			return u'%s' % self._data.userName
 
 	property options:
 		def __get__(self):
