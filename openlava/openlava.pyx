@@ -16,12 +16,14 @@
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 
 from libc.stdlib cimport malloc, free
-from libc.string cimport strcmp
+from libc.string cimport strcmp, memset
 from cpython.string cimport PyString_AsString
 cimport openlava
 from datetime import timedelta
 from datetime import datetime
 import json
+
+import cython
 
 class NumericState:
 	def __init__(self,status):
@@ -1114,7 +1116,6 @@ class Job:
 						'status':r.status,
 						'friendly_name':r.friendly,
 						}
-		print v.values()
 		return v.values()
 
 	@property
@@ -1431,6 +1432,7 @@ cdef class __jRusage:
 			return [ self._data.pgid[i] for i in range(self.npgids)]
 
 
+
 cdef class __xFile:
 	cdef xFile * _data
 
@@ -1450,142 +1452,515 @@ cdef class __xFile:
 			return self._data.options
 
 
+class SubmitReply:
+	def __init__(self):
+		self.queue=""
+		self.badJobId=0
+		self.badJobName=""
+		self.badReqIndx=""
 
 cdef class __submit:
 	cdef submit * _data
-
 	cdef _set_struct(self, submit * data ):
 		self._data=data
+		self._options=data.options
+		self._options2=data.options2
+		self._jobName= u"%s" % data.jobName
+		self._queue=u"%s" % data.queue
+		self._askedHosts= [u'%s' % data.askedHosts[i] for i in range(data.numAskedHosts)]
+		self._resReq=data.resReq
+		self._rLimits=[data.rLimits[i] for i in range(OpenLavaCAPI.LSF_RLIM_NLIMITS)]
+		self._hostSpec=u"%s" % data.hostSpec
+		self._numProcessors=data.numProcessors
+		self._dependCond=u"%s" % data.dependCond
+		self._beginTime=data.beginTime
+		self._termTime=data.termTime
+		self._sigValue=data.sigValue
+		self._inFile=u"%s" % data.inFile
+		self._outFile=u"%s" % data.outFile
+		self._errFile=u"%s" % data.errFile
+		self._command="%s" % data.command
+		if data.options & OpenLavaCAPI.SUB_MODIFY:
+			self._newCommand=u"%s" % data.newCommand
+		else:
+			self._newCommand=u""
+		self._chkpntPeriod=data.chkpntPeriod
+		self._chkpntDir=u"%s" % data.chkpntDir
+		self._xf=[]
+		for i in range(data.nxf):
+			x=__xFile()
+			x._set_struct(&data.xf[i])
+			self._xf.append(x)
+		self._preExecCmd=u"%s" % data.preExecCmd
+		self._mailUser=u"%s" % data.mailUser
+		self._delOptions=data.delOptions
+		self._delOptions2=data.delOptions2
+		self._projectName=u"%s" % data.projectName
+		self._maxNumProcessors=data.maxNumProcessors
+		self._loginShell=u"%s" % data.loginShell
+		self._userPriority=data.userPriority
 
 	property options:
 		def __get__(self):
-			return self._data.options
+			return self._options
 
 	property options2:
 		def __get__(self):
-			return self._data.options2
+			return self._options2
 
 	property jobName:
 		def __get__(self):
-			return u'%s' % self._data.jobName
+			return self._jobName
 
 	property queue:
 		def __get__(self):
-			return u'%s' % self._data.queue
+			return self._queue
 
 	property numAskedHosts:
 		def __get__(self):
-			return self._data.numAskedHosts
+			return len(self._askedHosts)
 
 	property askedHosts:
 		def __get__(self):
-			return [u'%s' % self._data.askedHosts[i] for i in range(self.numAskedHosts)]
+			return self.AskedHosts
 
 	property resReq:
 		def __get__(self):
-			return u'%s' % self._data.resReq
+			return self._resReq
 
 	property rLimits:
 		def __get__(self):
-			rlims=[self._data.rLimits[i] for i in range(11)]
-			return rlims
+			return self._rLimits
 
 	property hostSpec:
 		def __get__(self):
-			return u'%s' % self._data.hostSpec
+			return self._hostSpec
 
 	property numProcessors:
 		def __get__(self):
-			return self._data.numProcessors
+			return self._numProcessors
 
 	property dependCond:
 		def __get__(self):
-			return u'%s' % self._data.dependCond
+			return self._dependCond
 
 	property beginTime:
 		def __get__(self):
-			return self._data.beginTime
+			return self._beginTime
 
 	property termTime:
 		def __get__(self):
-			return self._data.termTime
+			return self._termTime
 
 	property sigValue:
 		def __get__(self):
-			return self._data.sigValue
+			return self._sigValue
 
 	property inFile:
 		def __get__(self):
-			return u'%s' % self._data.inFile
+			return self._inFile
 
 	property outFile:
 		def __get__(self):
-			return u'%s' % self._data.outFile
+			return self._outFile
 
 	property errFile:
 		def __get__(self):
-			return u'%s' % self._data.errFile
+			return self._errFile
 
 	property command:
 		def __get__(self):
-			return u'%s' % self._data.command
+			return self._command
 
 	property newCommand:
 		def __get__(self):
-			return u'%s' % self._data.newCommand
+			return self._newCommand
 
 	property chkpntPeriod:
 		def __get__(self):
-			return self._data.chkpntPeriod
+			return self._chkpntPeriod
 
 	property chkpntDir:
 		def __get__(self):
-			return u'%s' % self._data.chkpntDir
+			return self._chkpntDir
 
 	property nxf:
 		def __get__(self):
-			return self._data.nxf
+			return len(self.xf)
 
 	property xf:
 		def __get__(self):
-			xfs=[]
-			for i in range(self.nxf):
-				x=__xFile()
-				x._set_struct(&self._data.xf[i])
-				xfs.append(x)
-			return xfs
+			return self._xf
 
 	property preExecCmd:
 		def __get__(self):
-			return u'%s' % self._data.preExecCmd
+			return self._preExecCmd
 
 	property mailUser:
 		def __get__(self):
-			return u'%s' % self._data.mailUser
+			return self._mailUser
 
 	property delOptions:
 		def __get__(self):
-			return self._data.delOptions
+			return self._delOptions
 
 	property delOptions2:
 		def __get__(self):
-			return self._data.delOptions2
+			return self._delOptions2
 
 	property projectName:
 		def __get__(self):
-			return u'%s' % self._data.projectName
+			return self._projectName
 
 	property maxNumProcessors:
 		def __get__(self):
-			return self._data.maxNumProcessors
+			return self._maxNumProcessors
 
 	property loginShell:
 		def __get__(self):
-			return u'%s' % self._data.loginShell
+			return self._loginShell
+
 
 	property userPriority:
 		def __get__(self):
-			return self._data.userPriority
+			return self._userPriority
+
+
+class SubmitRequest(object):
+	def __init__(self):
+		self._options=0
+		self._options2=0
+		self._jobName=""
+		self._queue=""
+		self._askedHosts=[]
+		self._resReq=""
+		self._rLimits=[OpenLavaCAPI.DEFAULT_RLIMIT for i in range(OpenLavaCAPI.LSF_RLIM_NLIMITS)]
+		self._hostSpec = ""
+		self._numProcessors=0
+		self._dependCond=""
+		self._beginTime=0
+		self._termTime=0
+		self._sigValue=0
+		self._inFile=""
+		self._outFile=""
+		self._errFile=""
+		self._command=""
+		self._newCommand=""
+		self._chkpntPeriod=0
+		self._chkpntDir=""
+		self._nxf=0
+		self._xf=[]
+		self._preExecCmd=""
+		self._mailUser=""
+		self._delOptions=0
+		self._delOptions2=0
+		self._projectName = ""
+		self._maxNumProcessors=0
+		self._loginShell=""
+		self._userPriority=-1
+
+	def addOption(self, option):
+		self._options=self._options | option
+
+	def delOption(self, option):
+		if self._options & option:
+			self._options = self._options - option
+
+	def options_getter(self):
+		return self._options
+
+	def options_setter(self,value):
+		self.options=value
+	options=property(options_getter, options_setter)
+
+	def options2_getter(self):
+		return self._options2
+
+	def options2_setter(self,value):
+		self._options2=value
+	options2=property(options2_getter, options2_setter)
+
+	def jobName_getter(self):
+		return self._jobName
+
+	def jobName_setter(self,value):
+		self._jobName=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_JOB_NAME)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_JOB_NAME)
+	jobName=property(jobName_getter, jobName_setter)
+
+	def queue_getter(self):
+		return self._queue
+
+	def queue_setter(self,value):
+		self._queue=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_QUEUE)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_QUEUE)
+	queue=property(queue_getter, queue_setter)
+
+
+	@property
+	def numAskedHosts(self):
+		return len(self._askedHosts)
+
+	def askedHosts_getter(self):
+		return self.AskedHosts
+
+	def askedHosts_setter(self,value):
+		self._askedHosts=value
+
+	askedHosts=property(askedHosts_getter, askedHosts_setter)
+
+
+	def resReq_getter(self):
+		return self._resReq
+
+	def resReq_setter(self,value):
+		self._resReq=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_RES_REQ)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_RES_REQ)
+	resReq=property(resReq_getter, resReq_setter)
+
+
+	def rLimits_getter(self):
+		return self._rLimits
+
+	def rLimits_setter(self,value):
+		if len(value) != OpenLavaCAPI.LSF_RLIM_NLIMITS:
+			raise ValueError("Incorrect length of rlimits")
+		self._rLimits=value
+	rLimits=property(rLimits_getter, rLimits_setter)
+
+
+	def hostSpec_getter(self):
+		return self._hostSpec
+
+	def hostSpec_setter(self,value):
+		self._hostSpec=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_HOST_SPEC)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_HOST_SPEC)
+	hostSpec=property(hostSpec_getter, hostSpec_setter)
+
+
+	def numProcessors_getter(self):
+		return self._numProcessors
+
+	def numProcessors_setter(self,value):
+		self._numProcessors=value
+	numProcessors=property(numProcessors_getter, numProcessors_setter)
+
+
+	def dependCond_getter(self):
+		return self._dependCond
+
+	def dependCond_setter(self,value):
+		self._dependCond=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_DEPEND_COND)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_DEPEND_COND)
+	dependCond=property(dependCond_getter, dependCond_setter)
+
+
+	def beginTime_getter(self):
+		return self._beginTime
+
+	def beginTime_setter(self,value):
+		self.termTime=value
+	beginTime=property(beginTime_getter, beginTime_setter)
+
+
+	def termTime_getter(self):
+		return self._termTime
+
+	def termTime_setter(self,value):
+		self._termTime=value
+	termTime=property(termTime_getter, termTime_setter)
+
+
+	def sigValue_getter(self):
+		return self._sigValue
+
+	def sigValue_setter(self,value):
+		self._sigValue=value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_WINDOW_SIG)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_WINDOW_SIG)
+	sigValue=property(sigValue_getter, sigValue_setter)
+
+
+	def inFile_getter(self):
+		return self._inFile
+
+	def inFile_setter(self,value):
+		self._inFile=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_IN_FILE )
+		else:
+			self.delOption(OpenLavaCAPI.SUB_IN_FILE )
+	inFile=property(inFile_getter, inFile_setter)
+
+
+	def outFile_getter(self):
+		return self._outFile
+
+	def outFile_setter(self,value):
+		self._outFile=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_OUT_FILE )
+		else:
+			self.delOption(OpenLavaCAPI.SUB_OUT_FILE )
+	outFile=property(outFile_getter, outFile_setter)
+
+	def errFile_getter(self):
+		return self._errFile
+
+	def errFile_setter(self,value):
+		self._errFile=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_ERR_FILE )
+		else:
+			self.delOption(OpenLavaCAPI.SUB_ERR_FILE )
+	errFile=property(errFile_getter, errFile_setter)
+
+
+	def command_getter(self):
+		return self._command
+
+	def command_setter(self,value):
+		self._command=u"%s" % value
+	command=property(command_getter, command_setter)
+
+
+	def newCommand_getter(self):
+		return self._newCommand
+	def newCommand_setter(self,value):
+		raise NotImplementedError
+	newCommand=property(newCommand_getter, newCommand_setter)
+
+
+	def chkpntPeriod_getter(self):
+		return self._chkpntPeriod
+
+	def chkpntPeriod_setter(self,value):
+		self._chkpntPeriod=value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_CHKPNT_PERIOD)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_CHKPNT_PERIOD)
+	chkpntPeriod=property(chkpntPeriod_getter, chkpntPeriod_setter)
+
+
+	def chkpntDir_getter(self):
+		return self._chkpntDir
+
+	def  chkpntDir_setter(self,value):
+		self._chkpntDir = u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_CHKPNT_DIR )
+		else:
+			self.delOption(OpenLavaCAPI.SUB_CHKPNT_DIR )
+	chkpntDir=property(chkpntDir_getter, chkpntDir_setter)
+
+	@property
+	def nxf(self):
+		return len(self._xf)
+
+	def xf_getter(self):
+		return self._xf
+	def xf_setter(self,value):
+		raise NotImplementedError
+	xf=property(xf_getter, xf_setter)
+
+	
+	def preExecCmd_getter(self):
+		return self._preExecCmd
+
+	def preExecCmd_setter(self,value):
+		self._preExecCmd=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_PRE_EXEC)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_PRE_EXEC)
+	preExecCmd=property(preExecCmd_getter, preExecCmd_setter)
+
+
+	def mailUser_getter(self):
+		return self._mailUser
+
+	def mailUser_setter(self,value):
+		self.mailUser=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_MAIL_USER)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_MAIL_USER)
+	mailUser=property(mailUser_getter, mailUser_setter)
+
+
+	def delOptions_getter(self):
+		return self._delOptions
+	def delOptions_setter(self,value):
+		self._delOptions=value
+	delOptions=property(delOptions_getter, delOptions_setter)
+
+
+	def delOptions2_getter(self):
+		return self._delOptions2
+
+	def delOptions2_setter(self,value):
+		self._delOptions2=value
+	delOptions2=property(delOptions2_getter, delOptions2_setter)
+
+
+	def projectName_getter(self):
+		return self._projectName
+
+	def projectName_setter(self,value):
+		self._projectName=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_PROJECT_NAME)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_PROJECT_NAME)
+
+	projectName=property(projectName_getter, projectName_setter)
+
+
+	def maxNumProcessors_getter(self):
+		return self._maxNumProcessors
+
+	def maxNumProcessors_setter(self,value):
+		self._maxNumProcessors=value
+	maxNumProcessors=property(maxNumProcessors_getter, maxNumProcessors_setter)
+
+
+	def loginShell_getter(self):
+		return self._loginShell
+
+	def loginShell_setter(self,value):
+		self._loginShell=u"%s" % value
+		if len(value)>0:
+			self.addOption(OpenLavaCAPI.SUB_LOGIN_SHELL)
+		else:
+			self.delOption(OpenLavaCAPI.SUB_LOGIN_SHELL)
+	loginShell=property(loginShell_getter, loginShell_setter)
+
+
+	def userPriority_getter(self):
+		return self._userPriority
+	def userPriority_setter(self,value):
+		self._userPriority=int(value)
+	userPriority=property(userPriority_getter, userPriority_setter)
+
+
 
 cdef class __queueInfoEnt:
 	cdef queueInfoEnt * _data
@@ -2051,8 +2426,10 @@ cdef char ** to_cstring_array(list_str):
 		ret[i] = PyString_AsString(list_str[i])
 	return ret
 
+
 cdef class OpenLavaCAPI:
-	@classmethod 
+
+	@classmethod
 	def get_lsberrno(cls):
 		return openlava.lsberrno
 
@@ -2423,6 +2800,9 @@ cdef class OpenLavaCAPI:
 	EVENT_UNUSED_32 = 32
 
 	LSB_KILL_REQUEUE=0x10
+	
+	LSF_RLIM_NLIMITS=11
+	DEFAULT_RLIMIT=-1
 
 	@classmethod
 	def lsb_init(cls, app_name):
@@ -2579,6 +2959,63 @@ cdef class OpenLavaCAPI:
 		rq.status=status
 		rq.options=options
 		return openlava.lsb_requeuejob(&rq)
+
+	@classmethod
+	def lsb_submit(cls, s, sr):
+		if not isinstance(s, SubmitRequest):
+			raise ValueError("Invalid SubmitRequest object")
+		if not isinstance(sr, SubmitReply):
+			raise ValueError("Invalid SubmitReply object")
+
+
+		cdef submit sub
+		for i in range(OpenLavaCAPI.LSF_RLIM_NLIMITS):
+			sub.rLimits[i]=s.rLimits[i]
+		sub.options=s.options
+		sub.options2=s.options2
+		sub.jobName=s.jobName
+		sub.queue=s.queue
+		sub.numAskedHosts=s.numAskedHosts
+		if s.numAskedHosts>0:
+			sub.askedHosts=to_cstring_array(s.askedHosts)
+		sub.resReq=s.resReq
+		sub.hostSpec=s.hostSpec
+		sub.dependCond=s.dependCond
+		sub.beginTime=s.beginTime
+		sub.termTime=s.termTime
+		sub.sigValue=s.sigValue
+		sub.inFile=s.inFile
+		sub.outFile=s.outFile
+		sub.errFile=s.errFile
+		sub.chkpntPeriod=s.chkpntPeriod
+		sub.chkpntDir=s.chkpntDir
+		sub.nxf=s.nxf
+		#if len(s.nxf)>0:
+			#sub.xf= <xFile *> malloc(s.nxf * cython.sizeof(xFile))
+			#for i in range(s.nxf):
+			#	sub.xf[i].subFn=s.xf[i].subFn
+			#	sub.xf[i].execFn=s.xf[i].execFn
+			#	sub.xf[i].options=s.xf[i].options
+
+		sub.preExecCmd=s.preExecCmd
+		sub.mailUser=s.mailUser
+		sub.projectName=s.projectName
+		sub.numProcessors=s.numProcessors
+		sub.maxNumProcessors=s.maxNumProcessors
+		sub.loginShell=s.loginShell
+		sub.userPriority=s.userPriority
+		sub.command=s.command
+
+
+		cdef submitReply subRep
+		cdef int code
+		job_id = openlava.lsb_submit(&sub, &subRep);
+		#free(sub.xf)
+		sr.queue=subRep.queue
+		sr.badJobId=subRep.badJobId
+		sr.badJobName=subRep.badJobName
+		sr.badReqIndx=subRep.badReqIndx
+		return job_id
 
 
 #cdef class JobRequeue:

@@ -16,6 +16,7 @@
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 
 from libc.stdio cimport *
+import cython
 
 cdef extern from "Python.h":
 	ctypedef struct FILE
@@ -612,6 +613,14 @@ cdef extern from "lsbatch.h":
 		int              status
 		int              options
 
+
+	extern struct submitReply:
+		char    *queue
+		LS_LONG_INT  badJobId
+		char    *badJobName
+		int     badReqIndx
+
+
 	extern int lsb_init (char *appName)
 	extern char *ls_getclustername()
 	extern char *ls_getmastername()
@@ -625,4 +634,6 @@ cdef extern from "lsbatch.h":
 	extern int lsb_deletejob (LS_LONG_INT jobId, int times, int options)
 	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
 	extern int lsb_requeuejob(jobrequeue * reqPtr)
+	extern LS_LONG_INT lsb_submit ( submit * subPtr, submitReply * repPtr)
+
 
