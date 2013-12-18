@@ -39,6 +39,32 @@ if not os.path.exists(lsbatch):
 	raise ValueError("Cannot find lsbatch.a")
 
 
+def scandir(dir, files=[]):
+	for file in os.listdir(dir):
+		path = os.path.join(dir, file)
+		if os.path.isfile(path) and path.endswith(".pyx"):
+			files.append(path.replace(os.path.sep, ".")[:-4])
+		elif os.path.isdir(path):
+			scandir(path, files)
+	return files
+
+def makeExtension(extName):
+	extPath = extName.replace(".", os.path.sep)+".pyx"
+	print extName
+	return Extension(
+			extName,
+			[extPath],
+			extra_compile_args = ["-O3", "-Wall"],
+			extra_link_args = ['-g'],
+			extra_objects=[lsf, lsbatch],
+			libraries=['lsf','lsbatch','nsl'],
+			include_dirs=[inc_dir,"."],
+			library_dirs=[lib_dir],
+			)
+
+
+
+
 setup(
 	name="openlava-bindings",
 	version="1.0",
@@ -48,14 +74,8 @@ setup(
 	url="https://github.com/irvined1982/openlava-python",
 	license="GPL 3",
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [
-		Extension("openlava", ["openlava.pyx"],
-			extra_objects=[lsf, lsbatch],
-			libraries=['lsf','lsbatch','nsl'],
-			include_dirs=[inc_dir],
-			library_dirs=[lib_dir],
-			)
-		],
+    ext_modules = [makeExtension(name) for name in scandir("openlava")],
+	packages=['openlava'],
 	classifiers=[
 			'Programming Language :: Python',
 			'Programming Language :: Python :: 2',
