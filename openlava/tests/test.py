@@ -16,10 +16,165 @@
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
-from openlava.lslib import ls_getclustername, ls_getmastername, ls_gethostinfo, HostInfo, ls_info, LsInfo, ResItem,ls_gethosttype,ls_gethostmodel#,ls_gethostfactor
-from openlava.lsblib import lsb_init,lsb_queueinfo
+from openlava.lslib import ls_getclustername, ls_getmastername, ls_gethostinfo, HostInfo, ls_info, LsInfo, ResItem,ls_gethosttype,ls_gethostmodel, get_lserrno, LSBE_NO_ERROR
+from openlava.lsblib import lsb_init,lsb_queueinfo,lsb_hostinfo,HostInfoEnt, lsb_openjobinfo, lsb_readjobinfo, lsb_closejobinfo, JobInfoEnt, Submit, lsb_userinfo, UserInfoEnt,lsb_submit, Submit, SubmitReply
 
 class LsBlib(unittest.TestCase):
+	def test_users(self):
+		self.assertGreaterEqual(lsb_init("Test Case"), 0)
+		users=lsb_userinfo()
+		self.assertIsNotNone(users)
+		for user in users:
+			self.check_user(user)
+
+	def test_submit(self):
+		s=Submit()
+		s.command="hostname"
+		s.maxNumProcessors=1
+		s.numProcessors=1
+		r=SubmitReply()
+		job_id=lsb_submit(s,r)
+		self.assertGreaterEqual(job_id,0)
+
+	def check_user(self, u):
+		self.assertIsInstance(u, UserInfoEnt)
+		self.assertIsInstance(u.user,unicode)
+		methods=[
+				'procJobLimit',
+				'maxJobs',
+				'numStartJobs',
+				'numJobs',
+				'numPEND',
+				'numRUN',
+				'numSSUSP',
+				'numUSUSP',
+				'numRESERVE',
+				]
+		for i in methods:
+			self.assertGreaterEqual(getattr(u,i),0)
+
+		
+	def test_job(self):
+		self.assertGreaterEqual(lsb_init("Test Case"), 0)
+		num_jobs=lsb_openjobinfo(job_id=1)
+		self.assertEqual( num_jobs, -1)
+		lsb_closejobinfo()
+
+	def test_jobs(self):
+		num_jobs=lsb_openjobinfo()
+		self.assertEqual( get_lserrno(), LSBE_NO_ERROR)
+		for i in range(num_jobs):
+			job=lsb_readjobinfo()
+			self.check_job(job)
+			lsb_closejobinfo()
+			self.assertEqual( get_lserrno(), LSBE_NO_ERROR )
+
+	def check_job(self,job):
+		self.assertIsInstance(job, JobInfoEnt)
+		ints=[
+			'jobId',
+			'status',
+			'numReasons',
+			'reasons',
+			'subreasons',
+			'jobPid',
+			'submitTime',
+			'reserveTime',
+			'startTime',
+			'predictedStartTime',
+			'endTime',
+			'umask',
+			'numExHosts','nIdx',
+			'exitStatus',
+			'execUid',
+			'jType',
+			'port',
+			'jobPriority',
+			'jRusageUpdateTime'
+			]
+		for attr in ints:
+			self.assertIsInstance(getattr(job,attr),int)
+		for a in range(7):
+			self.assertIsInstance(job.counter[a],int)
+
+		for attr in ['cwd','subHomeDir','fromHost','execHome','execCwd','execUsername','parentGroup','jName',]:
+			self.assertIsInstance(getattr(job,attr),unicode)
+		
+		self.assertIsInstance(job.exHosts,list)
+		for host in job.exHosts:
+			self.assertIsInstance(host, unicode)
+
+		self.assertIsInstance(job.loadSched,list)
+		self.assertIsInstance(job.loadStop,list)
+		self.assertEqual(len(job.loadSched), job.nIdx)
+		self.assertEqual(len(job.loadStop), job.nIdx)
+		for l in job.loadSched:
+			self.assertIsInstance(l,float)
+		for l in job.loadStop:
+			self.assertIsInstance(l,float)
+		for a in [job.cpuFactor, job.cpuTime]:
+			self.assertIsInstance(a,float)
+
+		s=job.submit
+		self.assertIsInstance(s,Submit)
+		for attr in [
+				'options',
+				'options2',
+				'numAskedHosts',
+				'numProcessors',
+				'sigValue',
+				'nxf',
+				'delOptions',
+				'delOptions2',
+				'maxNumProcessors',
+				'userPriority',
+				'beginTime',
+				'termTime',
+				'chkpntPeriod',
+				]:
+			self.assertIsInstance(getattr(s,attr),int)
+		for attr in [
+				'jobName',
+				'queue',
+				'resReq',
+				'hostSpec',
+				'dependCond',
+				'inFile',
+				'outFile',
+				'errFile',
+				'command',
+				'chkpntDir',
+				'preExecCmd',
+				'mailUser',
+				'projectName',
+				'loginShell',]:
+			self.assertIsInstance(getattr(s,attr),unicode)
+		self.assertEqual(len(s.askedHosts),s.numAskedHosts)
+		for h in s.askedHosts:
+			self.assertIsInstance(h,unicode)
+		for r in range(10):
+			self.assertIsInstance(s.rLimits[r],int)
+			self.assertGreaterEqual(s.rLimits[r],-1)
+		xf=s.xf
+		self.assertEqual(len(xf), s.nxf)
+		self.assertIsInstance(xf,list)
+		for a in xf:
+			self.assertIsInstance(a.subFn,unicode)
+			self.assertIsInstance(a.execFn,unicode)
+			self.assertIsInstance(a.options,int)
+		ru=job.runRusage
+		for a in ['mem','swap','utime','stime','npids','npgids']:
+			self.assertIsInstance(getattr(ru,a),int)
+			self.assertGreaterEqual(getattr(ru,a),-1)
+			inf=ru.pidInfo
+			self.assertEqual(len(inf),ru.npids)
+			for pi in inf:
+				for a in ['pid','ppid','pgid','jobid']:
+					self.assertGreaterEqual(getattr(pi,a),-1)
+			for g in range(ru.npgids):
+				self.assertGreaterEqual(ru.pgid[g],-1)
+
+
 	def test_init(self):
 		self.assertGreaterEqual(lsb_init("Test Case"), 0)
 	def test_queueinfo(self):
@@ -28,6 +183,13 @@ class LsBlib(unittest.TestCase):
 		self.assertIsInstance(queues,list)
 		for queue in queues:
 			self.check_queue(queue)
+
+	def test_hostinfo(self):
+		lsb_init("test hosts")
+		hosts=lsb_hostinfo()
+		self.assertIsInstance(hosts,list)
+		for host in hosts:
+			self.check_host(host)
 
 	def check_queue(self, queue):
 		self.assertIsInstance(queue.queue,unicode)
@@ -56,6 +218,23 @@ class LsBlib(unittest.TestCase):
 		for i in queue.rLimits:
 			self.assertIsInstance(i,int)
 			self.assertGreaterEqual(i,-1)
+		self.assertIsInstance(queue.hostSpec, unicode)
+		self.assertIsInstance(queue.qAttrib, int)
+		self.assertIsInstance(queue.qStatus, int)
+		self.assertIsInstance(queue.maxJobs, int)
+		self.assertIsInstance(queue.numJobs, int)
+		self.assertIsInstance(queue.numPEND, int)
+		self.assertIsInstance(queue.numRUN, int)
+		self.assertIsInstance(queue.numSSUSP, int)
+		self.assertIsInstance(queue.numUSUSP, int)
+		self.assertIsInstance(queue.mig, int)
+		self.assertIsInstance(queue.schedDelay, int)
+		self.assertIsInstance(queue.acceptIntvl, int)
+
+	def check_host(self,host):
+		self.assertIsInstance(host, HostInfoEnt)
+
+
 
 class LsLib(unittest.TestCase):
 	def test_clustername(self):
