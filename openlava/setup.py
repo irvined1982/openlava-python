@@ -50,7 +50,6 @@ def scandir(dir, files=[]):
 
 def makeExtension(extName):
 	extPath = extName.replace(".", os.path.sep)+".pyx"
-	print extName
 	return Extension(
 			extName,
 			[extPath],

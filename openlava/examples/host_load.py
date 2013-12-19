@@ -15,27 +15,27 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
-from openlava.lslib import ls_gethostinfo
+from openlava.lslib import ls_load,LS_ISUNAVAIL, LS_ISBUSY, LS_ISLOCKED, R1M, INFINIT_LOAD
 import sys
-hostinfo = ls_gethostinfo()
-if hostinfo == None:
-	print "Unable to get hostinfo"
+hosts = ls_load()
+if hosts == None:
+	print "Unable to get host load"
 	sys.exit(1)
+print "%-15.15s %6.6s %6.6s" % ("HOST_NAME", "status", "r1m")
 
-print "%-11.11s %8.8s %8.8s %6.6s %6.6s %9.9s" % (  "HOST_NAME", "type", "model",  "maxMem", "ncpus", "RESOURCES")
+for host in hosts:
 
-for host in hostinfo:
-	sys.stdout.write( "%-11.11s %8.8s %8.8s " % ( host.hostName, host.hostType, host.hostModel ) )
-	if (host.maxMem > 0):
-		sys.stdout.write("%6d " % host.maxMem)
+	sys.stdout.write( "%-11.11s " % host.hostName )
+	if (LS_ISUNAVAIL(host.status)):
+		sys.stdout.write("%6.6s " % "unavail")
+	elif LS_ISBUSY(host.status):
+		sys.stdout.write("%6.6s " % "busy")
+	elif LS_ISLOCKED(host.status):
+		sys.stdout.write("%6.6s " % "locked")
 	else:
-		sys.stdout.write("%6.6s " % "-")
+		sys.stdout.write("%6.6s " % "ok")
 
-
-	if (host.maxCpus > 0):
-		sys.stdout.write("%6d " % host.maxCpus)
+	if host.li[R1M] >= INFINIT_LOAD:
+		print "%6.6s " % "-"
 	else:
-		sys.stdout.write("%6.6s" % "-")
-	for res in host.resources:
-		sys.stdout.write(" %s" % res)
-	sys.stdout.write("\n")
+		print "%6.6s " % host.li[R1M]

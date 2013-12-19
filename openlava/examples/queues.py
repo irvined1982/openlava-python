@@ -15,27 +15,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
-from openlava.lslib import ls_gethostinfo
-import sys
-hostinfo = ls_gethostinfo()
-if hostinfo == None:
-	print "Unable to get hostinfo"
-	sys.exit(1)
+from openlava.lslib import ls_perror, INFINIT_INT
+from openlava.lsblib import lsb_init, lsb_queueinfo
 
-print "%-11.11s %8.8s %8.8s %6.6s %6.6s %9.9s" % (  "HOST_NAME", "type", "model",  "maxMem", "ncpus", "RESOURCES")
-
-for host in hostinfo:
-	sys.stdout.write( "%-11.11s %8.8s %8.8s " % ( host.hostName, host.hostType, host.hostModel ) )
-	if (host.maxMem > 0):
-		sys.stdout.write("%6d " % host.maxMem)
-	else:
-		sys.stdout.write("%6.6s " % "-")
+if lsb_init("queue info")<0:
+	lsb_perror("lsb_init() failed")
+	sys.exit(-1)
 
 
-	if (host.maxCpus > 0):
-		sys.stdout.write("%6d " % host.maxCpus)
-	else:
-		sys.stdout.write("%6.6s" % "-")
-	for res in host.resources:
-		sys.stdout.write(" %s" % res)
-	sys.stdout.write("\n")
+qlist=lsb_queueinfo()
+if qlist==None:
+	lsb_perror("lsb_queueinfo() failed")
+	sys.exit(-1)
+
+for q in qlist:
+	max_slots="unlimited"
+	if q.maxJobs<INFINIT_INT:
+		max_slots=q.maxJobs
+
+	print "Information about %s queue:" % q.queue
+	print " Description: %s" % q.description
+	print " Priority: %d         Nice: %d:" % (q.priority, q.nice)
+	print " Max Job Slots: %s" % max_slots
+	print " Job slot statistics: PEND(%d) RUN(%d) SUSP(%d) TOTAL(%d)." % ( q.numPEND, q.numRUN, q.numSSUSP+q.numUSUSP, q.numJobs)
