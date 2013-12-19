@@ -16,8 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
-from openlava.lslib import ls_getclustername, ls_getmastername, ls_gethostinfo, HostInfo, ls_info, LsInfo, ResItem,ls_gethosttype,ls_gethostmodel, get_lserrno, LSBE_NO_ERROR
-from openlava.lsblib import lsb_init,lsb_queueinfo,lsb_hostinfo,HostInfoEnt, lsb_openjobinfo, lsb_readjobinfo, lsb_closejobinfo, JobInfoEnt, Submit, lsb_userinfo, UserInfoEnt,lsb_submit, Submit, SubmitReply
+from openlava.lslib import ls_getclustername, ls_getmastername, ls_gethostinfo, HostInfo, ls_info, LsInfo, ResItem,ls_gethosttype,ls_gethostmodel, get_lserrno, LSBE_NO_ERROR, ls_perror
+from openlava.lsblib import lsb_init,lsb_queueinfo,lsb_hostinfo,HostInfoEnt, lsb_openjobinfo, lsb_readjobinfo, lsb_closejobinfo, JobInfoEnt, Submit, lsb_userinfo, UserInfoEnt,lsb_submit, Submit, SubmitReply, XFile
+import openlava.lsblib
 
 class LsBlib(unittest.TestCase):
 	def test_users(self):
@@ -35,6 +36,38 @@ class LsBlib(unittest.TestCase):
 		r=SubmitReply()
 		job_id=lsb_submit(s,r)
 		self.assertGreaterEqual(job_id,0)
+		
+	def test_queuecontrol(self):
+		lsb_init("test queues")
+		queues=lsb_queueinfo()
+		for q in queues:
+			queueName=q.queue
+			code=openlava.lsblib.lsb_queuecontrol(queueName, openlava.lsblib.QUEUE_INACTIVATE)
+			code=openlava.lsblib.lsb_queuecontrol(queueName, openlava.lsblib.QUEUE_ACTIVATE)
+			code=openlava.lsblib.lsb_queuecontrol(queueName, openlava.lsblib.QUEUE_CLOSED)
+			code=openlava.lsblib.lsb_queuecontrol(queueName, openlava.lsblib.QUEUE_OPEN)
+		
+			
+		
+	def test_hostcontrol(self):
+		hosts=lsb_hostinfo()
+		for h in hosts:
+			if h.hStatus & (openlava.lsblib.HOST_STAT_OK|openlava.lsblib.HOST_STAT_BUSY) != 0:
+				hostName=h.host
+				code=lsblib.lsb_hostcontrol(hostName, lsblib.HOST_CLOSE)
+				code=lsblib.lsb_hostcontrol(hostName, lsblib.HOST_CLOSE)
+
+		
+	
+		
+	def test_xFile(self):
+		x=XFile()
+		x.subFn="foo"
+		x.execFn="bar"
+		x.options=0
+		self.assertEqual(u"foo", x.subFn)
+		self.assertEqual(u"bar", x.execFn)
+		self.assertEqual(0,x.options)
 
 	def check_user(self, u):
 		self.assertIsInstance(u, UserInfoEnt)

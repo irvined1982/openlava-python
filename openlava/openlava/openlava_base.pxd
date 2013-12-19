@@ -17,25 +17,46 @@
 
 
 cdef extern from "lsbatch.h":
-	extern void lsb_closejobinfo()
-	extern int lsb_deletejob (LS_LONG_INT jobId, int times, int options)
-	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
-	extern int lsb_init (char *appName)
-	extern LS_LONG_INT lsb_modify (submit *, submitReply *, LS_LONG_INT)
-	extern int lsb_openjobinfo (long, char *, char *, char *, char *,int)
-	extern queueInfoEnt *lsb_queueinfo (char **queues, int *numQueues, char *host, char *userName, int options)
-	extern jobInfoEnt * lsb_readjobinfo( int * )
-	extern int lsb_requeuejob(jobrequeue * reqPtr)
-	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
-	extern LS_LONG_INT lsb_submit ( submit * subPtr, submitReply * repPtr)
-	extern userInfoEnt *lsb_userinfo(char **users, int *numUsers)
-	
+
 	ctypedef long long int LS_LONG_INT
 	ctypedef unsigned long long LS_UNS_LONG_INT
 
 	ctypedef long time_t
 	ctypedef unsigned short u_short
 
+	extern struct submit:
+		int     options
+		int     options2
+		char    *jobName
+		char    *queue
+		int     numAskedHosts
+		char    **askedHosts
+		char    *resReq
+		int     rLimits[11]
+		char    *hostSpec
+		int     numProcessors
+		char    *dependCond
+		time_t  beginTime
+		time_t  termTime
+		int     sigValue
+		char    *inFile
+		char    *outFile
+		char    *errFile
+		char    *command
+		char    *newCommand
+		time_t  chkpntPeriod
+		char    *chkpntDir
+		int     nxf
+		xFile *xf
+		char    *preExecCmd
+		char    *mailUser
+		int    delOptions
+		int    delOptions2
+		char   *projectName
+		int    maxNumProcessors
+		char   *loginShell
+		int    userPriority
+		
 	extern struct hostInfoEnt:
 		char   *host
 		int    hStatus
@@ -58,7 +79,17 @@ cdef extern from "lsbatch.h":
 		float *realLoad
 		int   numRESERVE
 		int   chkSig
-
+	
+	extern struct jRusage:
+		int mem
+		int swap
+		int utime
+		int stime
+		int npids
+		pidInfo *pidInfo
+		int npgids
+		int *pgid
+		
 	extern struct jobInfoEnt:
 		LS_LONG_INT jobId
 		char    *user
@@ -103,16 +134,6 @@ cdef extern from "lsbatch.h":
 		LS_LONG_INT      jobId
 		int              status
 		int              options
-
-	extern struct jRusage:
-		int mem
-		int swap
-		int utime
-		int stime
-		int npids
-		pidInfo *pidInfo
-		int npgids
-		int *pgid
 
 	extern struct pidInfo:
 		int pid
@@ -171,39 +192,6 @@ cdef extern from "lsbatch.h":
 		int    minProcLimit
 		int    defProcLimit
 
-	extern struct submit:
-		int     options
-		int     options2
-		char    *jobName
-		char    *queue
-		int     numAskedHosts
-		char    **askedHosts
-		char    *resReq
-		int     rLimits[11]
-		char    *hostSpec
-		int     numProcessors
-		char    *dependCond
-		time_t  beginTime
-		time_t  termTime
-		int     sigValue
-		char    *inFile
-		char    *outFile
-		char    *errFile
-		char    *command
-		char    *newCommand
-		time_t  chkpntPeriod
-		char    *chkpntDir
-		int     nxf
-		xFile *xf
-		char    *preExecCmd
-		char    *mailUser
-		int    delOptions
-		int    delOptions2
-		char   *projectName
-		int    maxNumProcessors
-		char   *loginShell
-		int    userPriority
-
 	extern struct submitReply:
 		char    *queue
 		LS_LONG_INT  badJobId
@@ -227,21 +215,27 @@ cdef extern from "lsbatch.h":
 		char execFn[256]
 		int options
 
+	extern void 		 lsb_closejobinfo()
+	extern int  		 lsb_deletejob (LS_LONG_INT jobId, int times, int options)
+	extern int 		 lsb_hostcontrol(char *host, int opCode) 
+	extern hostInfoEnt 	*lsb_hostinfo(char **hosts, int *numHosts)
+	extern int 		 lsb_init (char *appName)
+	extern LS_LONG_INT 	 lsb_modify (submit *, submitReply *, LS_LONG_INT)
+	extern int 		 lsb_openjobinfo (long, char *, char *, char *, char *,int)
+	extern int		 lsb_queuecontrol(char *queue, int opCode)
+	extern queueInfoEnt 	*lsb_queueinfo (char **queues, int *numQueues, char *host, char *userName, int options)
+	extern jobInfoEnt 	*lsb_readjobinfo( int * )
+	extern int 		 lsb_requeuejob(jobrequeue * reqPtr)
+	extern int		 lsb_reconfig(int) 
+	extern int		 lsb_signaljob (LS_LONG_INT jobId, int sigValue)
+	extern LS_LONG_INT	 lsb_submit ( submit * subPtr, submitReply * repPtr)
+	extern userInfoEnt	*lsb_userinfo(char **users, int *numUsers)
+	
 	
 
 	
 
 cdef extern from "lsf.h":
-	extern char * ls_getclustername()
-	extern float *ls_gethostfactor(char *hostname)
-	extern hostInfo *ls_gethostinfo(char *resreq, int *numhosts, char **hostlist, int listsize, int options)
-	extern char  *ls_gethostmodel(char *hostname)
-	extern char  *ls_gethosttype(char *hostname)
-	extern char * ls_getmastername()
-	extern lsInfo *ls_info()
-	extern hostLoad *ls_load(char *resreq, int *numhosts, int options, char *fromhost)
-	extern void    ls_perror(char *usrMsg)
-	extern char    *ls_sysmsg()
 
 	extern enum valueType: LS_BOOLEAN, LS_NUMERIC, LS_STRING, LS_EXTERNAL
 	extern enum orderType: INCR, DECR, NA
@@ -289,4 +283,15 @@ cdef extern from "lsf.h":
 		orderType orderType
 		int  flags
 		int  interval
+		
+	extern char * ls_getclustername()
+	extern float *ls_gethostfactor(char *hostname)
+	extern hostInfo *ls_gethostinfo(char *resreq, int *numhosts, char **hostlist, int listsize, int options)
+	extern char  *ls_gethostmodel(char *hostname)
+	extern char  *ls_gethosttype(char *hostname)
+	extern char * ls_getmastername()
+	extern lsInfo *ls_info()
+	extern hostLoad *ls_load(char *resreq, int *numhosts, int options, char *fromhost)
+	extern void    ls_perror(char *usrMsg)
+	extern char    *ls_sysmsg()
 

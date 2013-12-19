@@ -17,12 +17,11 @@
 import cython
 cimport openlava_base
 from libc.stdlib cimport malloc, free
-from libc.string cimport strcmp, memset
+from libc.string cimport strcmp, memset, strcpy
 from cpython.string cimport PyString_AsString
 from cpython cimport bool
 cimport openlava_base
 from openlava.lslib import ls_perror, LSF_RLIM_NLIMITS, DEFAULT_RLIMIT
-
 
 cdef extern from "lsbatch.h":
 	ctypedef long long int LS_LONG_INT
@@ -31,7 +30,40 @@ cdef extern from "lsbatch.h":
 	ctypedef long time_t
 	ctypedef unsigned short u_short
 
-    extern struct hostInfoEnt:
+	extern struct submit:
+		int     options
+		int     options2
+		char    *jobName
+		char    *queue
+		int     numAskedHosts
+		char    **askedHosts
+		char    *resReq
+		int     rLimits[11]
+		char    *hostSpec
+		int     numProcessors
+		char    *dependCond
+		time_t  beginTime
+		time_t  termTime
+		int     sigValue
+		char    *inFile
+		char    *outFile
+		char    *errFile
+		char    *command
+		char    *newCommand
+		time_t  chkpntPeriod
+		char    *chkpntDir
+		int     nxf
+		xFile *xf
+		char    *preExecCmd
+		char    *mailUser
+		int    delOptions
+		int    delOptions2
+		char   *projectName
+		int    maxNumProcessors
+		char   *loginShell
+		int    userPriority
+		
+	extern struct hostInfoEnt:
 		char   *host
 		int    hStatus
 		int    *busySched
@@ -53,7 +85,17 @@ cdef extern from "lsbatch.h":
 		float *realLoad
 		int   numRESERVE
 		int   chkSig
-
+	
+	extern struct jRusage:
+		int mem
+		int swap
+		int utime
+		int stime
+		int npids
+		pidInfo *pidInfo
+		int npgids
+		int *pgid
+		
 	extern struct jobInfoEnt:
 		LS_LONG_INT jobId
 		char    *user
@@ -98,16 +140,6 @@ cdef extern from "lsbatch.h":
 		LS_LONG_INT      jobId
 		int              status
 		int              options
-
-	extern struct jRusage:
-		int mem
-		int swap
-		int utime
-		int stime
-		int npids
-		pidInfo *pidInfo
-		int npgids
-		int *pgid
 
 	extern struct pidInfo:
 		int pid
@@ -166,39 +198,6 @@ cdef extern from "lsbatch.h":
 		int    minProcLimit
 		int    defProcLimit
 
-	extern struct submit:
-		int     options
-		int     options2
-		char    *jobName
-		char    *queue
-		int     numAskedHosts
-		char    **askedHosts
-		char    *resReq
-		int     rLimits[11]
-		char    *hostSpec
-		int     numProcessors
-		char    *dependCond
-		time_t  beginTime
-		time_t  termTime
-		int     sigValue
-		char    *inFile
-		char    *outFile
-		char    *errFile
-		char    *command
-		char    *newCommand
-		time_t  chkpntPeriod
-		char    *chkpntDir
-		int     nxf
-		xFile *xf
-		char    *preExecCmd
-		char    *mailUser
-		int    delOptions
-		int    delOptions2
-		char   *projectName
-		int    maxNumProcessors
-		char   *loginShell
-		int    userPriority
-
 	extern struct submitReply:
 		char    *queue
 		LS_LONG_INT  badJobId
@@ -221,7 +220,6 @@ cdef extern from "lsbatch.h":
 		char subFn[256]
 		char execFn[256]
 		int options
-
 
 EVENT_JOB_NEW = 1
 EVENT_JOB_START = 2
@@ -268,6 +266,10 @@ HOST_STAT_UNAVAIL = 0x40
 HOST_STAT_NO_LIM = 0x80
 HOST_STAT_EXCLUSIVE = 0x100
 HOST_STAT_LOCKED_MASTER = 0x200
+HOST_OPEN         =1
+HOST_CLOSE        =2
+HOST_REBOOT       =3
+HOST_SHUTDOWN     =4
 JOB_STAT_NULL = 0x00
 JOB_STAT_PEND = 0x01
 JOB_STAT_PSUSP = 0x02
@@ -281,6 +283,9 @@ JOB_STAT_PERR = (0x100)
 JOB_STAT_WAIT = (0x200)
 JOB_STAT_UNKWN = 0x10000
 LSB_KILL_REQUEUE=0x10
+MBD_RESTART       =	0
+MBD_RECONFIG      =	1
+MBD_CKCONFIG      =	2
 NUM_JGRP_COUNTERS=8
 PEND_JOB_REASON        =0
 PEND_JOB_NEW           =1
@@ -379,6 +384,10 @@ QUEUE_STAT_RUN = 0x04
 QUEUE_STAT_NOPERM = 0x08
 QUEUE_STAT_DISC = 0x10
 QUEUE_STAT_RUNWIN_CLOSE = 0x20
+QUEUE_OPEN        =1
+QUEUE_CLOSED      =2
+QUEUE_ACTIVATE    =3
+QUEUE_INACTIVATE  =4
 REQUEUE_DONE=  0x1
 REQUEUE_EXIT=  0x2
 REQUEUE_RUN =  0x4
@@ -478,6 +487,11 @@ def lsb_closejobinfo():
 def lsb_deletejob(job_id, submit_time, options=0):
 	return openlava_base.lsb_deletejob(job_id, submit_time, options)
 
+def lsb_hostcontrol(host, opCode):
+	opCode=int(opCode)
+	host=str(host)
+	return openlava_base.lsb_hostcontrol(host, opCode)
+
 def lsb_hostinfo(hosts=[], numHosts=0):
 		assert(isinstance(hosts,list))
 		cdef int num_hosts
@@ -519,6 +533,11 @@ def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", option
 	cdef int numJobs
 	numJobs=openlava_base.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
 	return numJobs
+
+def lsb_queuecontrol(queue, opCode):
+	queue=str(queue)
+	opCode=int(opCode)
+	return openlava_base.lsb_queuecontrol(queue, opCode)
 
 def lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0):
 	queue_list=[]
@@ -569,6 +588,10 @@ def lsb_readjobinfo():
 	a._load_struct(j)
 	return a
 
+def lsb_reconfig(opCode):
+	opCode=int(opCode)
+	return openlava_base.lsb_reconfig(opCode)
+
 def lsb_requeuejob(rq):
 	assert(isinstance(rq,JobRequeue))
 	return rq._requeue()
@@ -605,13 +628,6 @@ def lsb_userinfo(user_list=[]):
 			user._load_struct(u)
 			usrs.append(user)
 		return usrs
-
-
-
-
-
-
-
 
 cdef class HostInfoEnt:
 	cdef hostInfoEnt * _data
@@ -1554,20 +1570,50 @@ cdef class UserInfoEnt:
 
 cdef class XFile:
 	cdef xFile * _data
-
+	cdef bool _tainted
+	
+	def __cinit__(self):
+		self._tainted=False
+	
 	cdef _load_struct(self, xFile * data ):
+		self._tainted=True
 		self._data=data
-
+	
+	def _check_set(self):
+		if self._tainted:
+			raise ValueError
+		if self._data==NULL:
+			self._data = <xFile *>malloc(sizeof(xFile))
+			self._data.options=0
 	property subFn:
 		def __get__(self):
 			return self._data.subFn
-
+		def __set__(self,v):
+			cdef char * b
+			self._check_set()
+			v=str(v)
+			if len(v)>256:
+				raise ValueError("String to big")
+			b=v
+			strcpy(self._data.subFn, b)
+		
 	property execFn:
 		def __get__(self):
 			return self._data.execFn
+		def __set__(self,v):
+			cdef char * b
+			self._check_set()
+			v=str(v)
+			if len(v)>256:
+				raise ValueError("String to big")
+			b=v
+			strcpy(self._data.execFn, b)
 
 	property options:
 		def __get__(self):
 			return self._data.options
-
+		def __set__(self,v):
+			v=int(v)
+			self._data.options=v
+		
 
