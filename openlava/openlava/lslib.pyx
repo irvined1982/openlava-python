@@ -304,11 +304,9 @@ def ls_getclustername():
 	return openlava_base.ls_getclustername()
 
 def ls_gethostfactor(hostname):
-	return 0.0
-#	cdef float *factor
-#	factor= openlava_base.ls_gethostfactor(hostname)
-#	cdef float f
-#	f=<float> factor
+	cdef float *factor
+	factor = openlava_base.ls_gethostfactor(hostname)
+	return factor[0]
 
 def ls_gethostinfo(resReq="", hostList=[], options=0):
 	host_list=[]
@@ -333,10 +331,16 @@ def ls_gethostinfo(resReq="", hostList=[], options=0):
 	return host_list
 
 def ls_gethostmodel(hostname):
-	return unicode(openlava_base.ls_gethostmodel(hostname))
+	cdef char * model=openlava_base.ls_gethostmodel(hostname)
+	if model==NULL:
+		return None
+	return unicode(model)
 
 def ls_gethosttype(hostname):
-	return unicode(openlava_base.ls_gethosttype(hostname))
+	cdef char * hosttype=openlava_base.ls_gethosttype(hostname)
+	if hosttype==NULL:
+		return None
+	return unicode(hosttype)
 
 def ls_getmastername():
 	return openlava_base.ls_getmastername()
@@ -350,11 +354,13 @@ def ls_info():
 	ls._load_struct(l)
 	return ls
 
-def ls_load(resreq="", numhosts=0, options=0, fromhost=None):
+def ls_load(resreq=None, numhosts=0, options=0, fromhost=None):
 	cdef hostLoad *hosts
 	cdef char *resReq
-	resreq=str(resreq)
-	resReq=resreq
+	resReq=NULL
+	if resreq:
+		resreq=str(resreq)
+		resReq=resreq
 	cdef int numHosts
 	options=int(options)
 	cdef char * fromHost
@@ -363,7 +369,7 @@ def ls_load(resreq="", numhosts=0, options=0, fromhost=None):
 		fromhost=str(fromhost)
 		fromHost=fromhost
 
-	if numHosts==None:
+	if numhosts==None:
 		hosts = openlava_base.ls_load(resReq, NULL, options, fromHost)
 		numHosts=1
 	else:
@@ -379,6 +385,47 @@ def ls_load(resreq="", numhosts=0, options=0, fromhost=None):
 		hlist.append(h)
 	return hlist
 
+def ls_loadinfo(resreq=None, numhosts=0, options=0, fromhost=None, hostlist=[], indxnamelist=[]):
+	cdef hostLoad *hosts
+	cdef char *resReq
+	resReq=NULL
+	if resreq:
+		resreq=str(resreq)
+		resReq=resreq
+	cdef int numHosts
+	options=int(options)
+	cdef char * fromHost
+	fromHost=NULL
+	if fromhost:
+		fromhost=str(fromhost)
+		fromHost=fromhost
+	cdef char **hostList
+	hostList=NULL
+	if len(hostlist)>0:
+		hostList=to_cstring_array(hostlist)
+	cdef int listsize
+	listsize=len(hostlist)
+	cdef char ** IndexList
+	IndexList=NULL
+	if len(indxnamelist)>0:
+		IndexList=to_cstring_array(indxnamelist)
+	
+	if numhosts==None:
+		hosts = openlava_base.ls_loadinfo(resReq, NULL, options, fromHost, hostList, listsize, &IndexList)
+		numHosts=1
+	else:
+		numHosts=int(numhosts)
+		hosts = openlava_base.ls_loadinfo(resReq, &numHosts, options, fromHost, hostList, listsize, &IndexList)
+	free(hostList)
+	if hosts==NULL:
+		return None
+	hlist=[]
+	for i in range(numHosts):
+		h=HostLoad()
+		h._load_struct(&hosts[i])
+		hlist.append(h)
+	return hlist	
+	
 def ls_perror(message):
 	cdef char * m
 	message=str(message)
@@ -386,8 +433,13 @@ def ls_perror(message):
 	openlava_base.ls_perror(m)
 
 def ls_sysmsg():
-	return openlava_base.ls_sysmsg()
-
+	cdef char * msg
+	msg=openlava_base.ls_sysmsg()
+	if msg==NULL:
+		return u""
+	else:
+		return u"%s" % msg
+	
 
 cdef class HostInfo:
 	cdef hostInfo * _data
@@ -481,6 +533,7 @@ cdef class HostLoad:
 		def __get__(self):
 			return [self._data.li[i] for i in range(12)]
 
+	
 cdef class LsInfo:
 	cdef lsInfo * _data
 	cdef _load_struct(self, lsInfo * data):

@@ -203,7 +203,7 @@ cdef extern from "lsbatch.h":
 		LS_LONG_INT  badJobId
 		char    *badJobName
 		int     badReqIndx
-
+	
 	extern struct userInfoEnt:
 		char   *user
 		float  procJobLimit
@@ -221,6 +221,20 @@ cdef extern from "lsbatch.h":
 		char execFn[256]
 		int options
 
+	extern struct jobInfoHead:
+		int   numJobs
+		LS_LONG_INT *jobIds
+		int   numHosts
+		char  **hostNames
+
+	extern struct loadIndexLog:
+		int nIdx
+		char **name
+		
+
+		
+		
+		
 EVENT_JOB_NEW = 1
 EVENT_JOB_START = 2
 EVENT_JOB_STATUS = 3
@@ -477,9 +491,28 @@ def get_job_id(job_id):
 
 cdef char ** to_cstring_array(list_str):
 	cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
+	if ret==NULL:
+		raise MemoryError()
 	for i in xrange(len(list_str)):
 		ret[i] = PyString_AsString(list_str[i])
 	return ret
+
+cdef int * to_int_array(list_int):
+	cdef int *ret=<int *>malloc(sizeof(int) * len(list_int))
+	if ret==NULL:
+		raise MemoryError()
+	for i in range(len(list_int)):
+		ret[i]=list_int[i]
+	return ret
+
+cdef LS_LONG_INT * to_ls_long_int_array(list_int):
+	cdef LS_LONG_INT *ret=<LS_LONG_INT *>malloc(sizeof(LS_LONG_INT) * len(list_int))
+	if ret==NULL:
+		raise MemoryError()
+	for i in range(len(list_int)):
+		ret[i]=list_int[i]
+	return ret
+
 
 def lsb_closejobinfo():
 	openlava_base.lsb_closejobinfo()
@@ -534,6 +567,36 @@ def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", option
 	numJobs=openlava_base.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
 	return numJobs
 
+def lsb_pendreason (numReasons, rsTb, jInfoH, ld):
+	cdef int * reasonsTb 
+	reasonsTb=to_int_array(rsTb)
+	cdef jobInfoHead jInfo
+	
+	if jInfoH != None:
+		jInfo.jobIds=NULL
+		jInfo.hostNames=NULL
+		jInfo.numJobs=jInfoH.numJobs
+		jInfo.jobIds=to_ls_long_int_array(jInfoH.hobIds)
+		jInfo.numHosts=jInfoH.numHosts
+		jInfo.hostNames=to_cstring_array(jInfoH.hostNames)
+	cdef loadIndexLog loadIndex
+	loadIndex.nIdx=ld.nIdx
+	loadIndex.name=to_cstring_array(ld.name)
+	reasons=openlava_base.lsb_pendreason(numReasons, reasonsTb, &jInfo, &loadIndex)
+	if jInfoH != None:
+		free(jInfo.jobIds)
+		free(jInfo.hostNames)
+	return u"%s" % reasons
+
+def lsb_peekjob(jobId):
+	jobId=int(jobId)
+	cdef char * fname
+	fname=openlava_base.lsb_peekjob(jobId)
+	if fname==NULL:
+		return None
+	else:
+		return fname
+	
 def lsb_queuecontrol(queue, opCode):
 	queue=str(queue)
 	opCode=int(opCode)
@@ -605,6 +668,13 @@ def lsb_submit(jobSubReq, jobSubReply):
 	job_id=jobSubReq._submit(jobSubReply)
 	return job_id
 
+def lsb_suspreason (reasons, subreasons, ld):
+	cdef loadIndexLog loadIndex
+	loadIndex.nIdx=ld.nIdx
+	loadIndex.name=to_cstring_array(ld.name)
+	reasons=openlava_base.lsb_suspreason(reasons, subreasons, &loadIndex)
+	return u"%s" % reasons
+
 def lsb_userinfo(user_list=[]):
 		assert(isinstance(user_list,list))
 		cdef int num_users
@@ -661,7 +731,7 @@ cdef class HostInfoEnt:
 
 	property load:
 		def __get__(self):
-			return [self._data.loadStop[i] for i in range(self.nIdx)]
+			return [self._data.load[i] for i in range(self.nIdx)]
 
 	property loadSched:
 		def __get__(self):
@@ -1616,4 +1686,29 @@ cdef class XFile:
 			v=int(v)
 			self._data.options=v
 		
-
+cdef class JobInfoHead:
+	cdef jobInfoHead * _data
+	cdef _load_struct(self, jobInfoHead * data ):
+		self._data=data
+		
+	property numJobs:
+		def __get__(self):
+			return int(self._data.numJobs)
+	property jobIds:
+		def __get__(self):
+			[int(self._data.jobIds[i]) for i in range(self.numJobs)]
+	property numHosts:
+		def __get__(self):
+			return int(self._data.numHosts)
+	property hostNames:
+		def __get__(self):
+			[int(self._data.hostNames[i]) for i in range(self.numHosts)]
+		
+class LoadIndexLog:
+	def __init__(self):
+		self.name=[]
+	
+	@property
+	def nIdx(self):
+		return len(self.name)
+	

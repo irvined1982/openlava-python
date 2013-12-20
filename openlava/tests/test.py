@@ -17,10 +17,12 @@
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 from openlava.lslib import ls_getclustername, ls_getmastername, ls_gethostinfo, HostInfo, ls_info, LsInfo, ResItem,ls_gethosttype,ls_gethostmodel, get_lserrno, LSBE_NO_ERROR, ls_perror
-from openlava.lsblib import lsb_init,lsb_queueinfo,lsb_hostinfo,HostInfoEnt, lsb_openjobinfo, lsb_readjobinfo, lsb_closejobinfo, JobInfoEnt, Submit, lsb_userinfo, UserInfoEnt,lsb_submit, Submit, SubmitReply, XFile
+from openlava.lsblib import lsb_init,lsb_queueinfo,lsb_hostinfo,HostInfoEnt, lsb_openjobinfo, lsb_readjobinfo, lsb_closejobinfo, JobInfoEnt, Submit, lsb_userinfo, UserInfoEnt,lsb_submit, Submit, SubmitReply, XFile, LoadIndexLog
 import openlava.lsblib
 
 class LsBlib(unittest.TestCase):
+	def setUp(self):
+		lsb_init("test case")
 	def test_users(self):
 		self.assertGreaterEqual(lsb_init("Test Case"), 0)
 		users=lsb_userinfo()
@@ -38,7 +40,6 @@ class LsBlib(unittest.TestCase):
 		self.assertGreaterEqual(job_id,0)
 		
 	def test_queuecontrol(self):
-		lsb_init("test queues")
 		queues=lsb_queueinfo()
 		for q in queues:
 			queueName=q.queue
@@ -88,7 +89,6 @@ class LsBlib(unittest.TestCase):
 
 		
 	def test_job(self):
-		self.assertGreaterEqual(lsb_init("Test Case"), 0)
 		num_jobs=lsb_openjobinfo(job_id=1)
 		self.assertEqual( num_jobs, -1)
 		lsb_closejobinfo()
@@ -99,8 +99,13 @@ class LsBlib(unittest.TestCase):
 		for i in range(num_jobs):
 			job=lsb_readjobinfo()
 			self.check_job(job)
-			lsb_closejobinfo()
-			self.assertEqual( get_lserrno(), LSBE_NO_ERROR )
+			ld=LoadIndexLog()
+			reasons=openlava.lsblib.lsb_pendreason(job.numReasons, job.reasonTb, None, ld)
+			reasons=openlava.lsblib.lsb_suspreason(job.reasons, job.subreasons, ld)
+			filename=openlava.lsblib.lsb_peekjob(job.jobId)
+			
+		lsb_closejobinfo()
+		self.assertEqual( get_lserrno(), LSBE_NO_ERROR )
 
 	def check_job(self,job):
 		self.assertIsInstance(job, JobInfoEnt)
@@ -218,7 +223,6 @@ class LsBlib(unittest.TestCase):
 			self.check_queue(queue)
 
 	def test_hostinfo(self):
-		lsb_init("test hosts")
 		hosts=lsb_hostinfo()
 		self.assertIsInstance(hosts,list)
 		for host in hosts:
