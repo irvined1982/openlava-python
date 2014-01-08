@@ -233,27 +233,19 @@ cdef extern from "lsbatch.h":
 
 cdef extern from "lsf.h":
 	extern char * ls_getclustername()
+	extern float *ls_gethostfactor(char *hostname)
+	extern hostInfo *ls_gethostinfo(char *resreq, int *numhosts, char **hostlist, int listsize, int options)
+	extern char  *ls_gethostmodel(char *hostname)
+	extern char  *ls_gethosttype(char *hostname)
 	extern char * ls_getmastername()
 	extern lsInfo *ls_info()
-	extern hostInfo *ls_gethostinfo(char *resreq, int *numhosts, char **hostlist, int listsize, int options)
-	extern char  *ls_gethosttype(char *hostname)
-	extern char  *ls_gethostmodel(char *hostname)
-	extern float *ls_gethostfactor(char *hostname)
 	extern hostLoad *ls_load(char *resreq, int *numhosts, int options, char *fromhost)
 	extern void    ls_perror(char *usrMsg)
 	extern char    *ls_sysmsg()
 
-
-
-
 	extern enum valueType: LS_BOOLEAN, LS_NUMERIC, LS_STRING, LS_EXTERNAL
 	extern enum orderType: INCR, DECR, NA
-
-	extern struct hostLoad:
-		char  hostName[64]
-		int   *status
-		float *li
-
+	
 	extern struct hostInfo:
 		char  hostName[64]
 		char  *hostType
@@ -272,13 +264,10 @@ cdef extern from "lsf.h":
 		char  isServer
 		int   rexPriority
 
-	extern struct resItem:
-		char name[128]
-		char des[256]
-		valueType valueType
-		orderType orderType
-		int  flags
-		int  interval
+	extern struct hostLoad:
+		char  hostName[64]
+		int   *status
+		float *li
 
 	extern struct lsInfo:
 		int    nRes
@@ -293,4 +282,11 @@ cdef extern from "lsf.h":
 		int    numIndx
 		int    numUsrIndx
 
+	extern struct resItem:
+		char name[128]
+		char des[256]
+		valueType valueType
+		orderType orderType
+		int  flags
+		int  interval
 
