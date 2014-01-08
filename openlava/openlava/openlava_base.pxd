@@ -17,100 +17,47 @@
 
 
 cdef extern from "lsbatch.h":
-	ctypedef long time_t
-	ctypedef long long int LS_LONG_INT
-	ctypedef unsigned short u_short
-
-	extern int lsb_init (char *appName)
-	extern int lsb_openjobinfo (long, char *, char *, char *, char *,int)
-	extern jobInfoEnt * lsb_readjobinfo( int * )
 	extern void lsb_closejobinfo()
 	extern int lsb_deletejob (LS_LONG_INT jobId, int times, int options)
-	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
-	extern int lsb_requeuejob(jobrequeue * reqPtr)
-	extern LS_LONG_INT lsb_submit ( submit * subPtr, submitReply * repPtr)
+	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
+	extern int lsb_init (char *appName)
 	extern LS_LONG_INT lsb_modify (submit *, submitReply *, LS_LONG_INT)
-	extern struct submitReply:
-		char    *queue
-		LS_LONG_INT  badJobId
-		char    *badJobName
-		int     badReqIndx
+	extern int lsb_openjobinfo (long, char *, char *, char *, char *,int)
+	extern queueInfoEnt *lsb_queueinfo (char **queues, int *numQueues, char *host, char *userName, int options)
+	extern jobInfoEnt * lsb_readjobinfo( int * )
+	extern int lsb_requeuejob(jobrequeue * reqPtr)
+	extern int lsb_signaljob (LS_LONG_INT jobId, int sigValue)
+	extern LS_LONG_INT lsb_submit ( submit * subPtr, submitReply * repPtr)
+	extern userInfoEnt *lsb_userinfo(char **users, int *numUsers)
+	
+	ctypedef long long int LS_LONG_INT
+	ctypedef unsigned long long LS_UNS_LONG_INT
 
+	ctypedef long time_t
+	ctypedef unsigned short u_short
 
-	extern struct jobrequeue:
-		LS_LONG_INT      jobId
-		int              status
-		int              options
-
-
-	extern struct userInfoEnt:
-		char   *user
-		float  procJobLimit
+	extern struct hostInfoEnt:
+		char   *host
+		int    hStatus
+		int    *busySched
+		int    *busyStop
+		float  cpuFactor
+		int    nIdx
+		float *load
+		float  *loadSched
+		float  *loadStop
+		char   *windows
+		int    userJobLimit
 		int    maxJobs
-		int    numStartJobs
 		int    numJobs
-		int    numPEND
 		int    numRUN
 		int    numSSUSP
 		int    numUSUSP
-		int    numRESERVE
-
-	extern userInfoEnt *lsb_userinfo(char **users, int *numUsers)
-
-
-	extern struct xFile:
-		char subFn[256]
-		char execFn[256]
-		int options
-
-	extern struct submit:
-		int     options
-		int     options2
-		char    *jobName
-		char    *queue
-		int     numAskedHosts
-		char    **askedHosts
-		char    *resReq
-		int     rLimits[11]
-		char    *hostSpec
-		int     numProcessors
-		char    *dependCond
-		time_t  beginTime
-		time_t  termTime
-		int     sigValue
-		char    *inFile
-		char    *outFile
-		char    *errFile
-		char    *command
-		char    *newCommand
-		time_t  chkpntPeriod
-		char    *chkpntDir
-		int     nxf
-		xFile *xf
-		char    *preExecCmd
-		char    *mailUser
-		int    delOptions
-		int    delOptions2
-		char   *projectName
-		int    maxNumProcessors
-		char   *loginShell
-		int    userPriority
-	extern struct pidInfo:
-		int pid
-		int ppid
-		int pgid
-		int jobid
-
-	extern struct jRusage:
-		int mem
-		int swap
-		int utime
-		int stime
-		int npids
-		pidInfo *pidInfo
-		int npgids
-		int *pgid
-
+		int    mig
+		int    attr
+		float *realLoad
+		int   numRESERVE
+		int   chkSig
 
 	extern struct jobInfoEnt:
 		LS_LONG_INT jobId
@@ -152,32 +99,26 @@ cdef extern from "lsbatch.h":
 		u_short port
 		int     jobPriority
 
+	extern struct jobrequeue:
+		LS_LONG_INT      jobId
+		int              status
+		int              options
 
-	extern struct hostInfoEnt:
-		char   *host
-		int    hStatus
-		int    *busySched
-		int    *busyStop
-		float  cpuFactor
-		int    nIdx
-		float *load
-		float  *loadSched
-		float  *loadStop
-		char   *windows
-		int    userJobLimit
-		int    maxJobs
-		int    numJobs
-		int    numRUN
-		int    numSSUSP
-		int    numUSUSP
-		int    mig
-		int    attr
-		float *realLoad
-		int   numRESERVE
-		int   chkSig
+	extern struct jRusage:
+		int mem
+		int swap
+		int utime
+		int stime
+		int npids
+		pidInfo *pidInfo
+		int npgids
+		int *pgid
 
-	extern hostInfoEnt *lsb_hostinfo(char **hosts, int *numHosts)
-
+	extern struct pidInfo:
+		int pid
+		int ppid
+		int pgid
+		int jobid
 
 	extern struct queueInfoEnt:
 		char   *queue
@@ -230,10 +171,65 @@ cdef extern from "lsbatch.h":
 		int    minProcLimit
 		int    defProcLimit
 
-	extern queueInfoEnt *lsb_queueinfo (char **queues, int *numQueues, char *host, char *userName, int options)
+	extern struct submit:
+		int     options
+		int     options2
+		char    *jobName
+		char    *queue
+		int     numAskedHosts
+		char    **askedHosts
+		char    *resReq
+		int     rLimits[11]
+		char    *hostSpec
+		int     numProcessors
+		char    *dependCond
+		time_t  beginTime
+		time_t  termTime
+		int     sigValue
+		char    *inFile
+		char    *outFile
+		char    *errFile
+		char    *command
+		char    *newCommand
+		time_t  chkpntPeriod
+		char    *chkpntDir
+		int     nxf
+		xFile *xf
+		char    *preExecCmd
+		char    *mailUser
+		int    delOptions
+		int    delOptions2
+		char   *projectName
+		int    maxNumProcessors
+		char   *loginShell
+		int    userPriority
 
+	extern struct submitReply:
+		char    *queue
+		LS_LONG_INT  badJobId
+		char    *badJobName
+		int     badReqIndx
 
+	extern struct userInfoEnt:
+		char   *user
+		float  procJobLimit
+		int    maxJobs
+		int    numStartJobs
+		int    numJobs
+		int    numPEND
+		int    numRUN
+		int    numSSUSP
+		int    numUSUSP
+		int    numRESERVE
+        
+	extern struct xFile:
+		char subFn[256]
+		char execFn[256]
+		int options
 
+	
+
+	
 
 cdef extern from "lsf.h":
 	extern char * ls_getclustername()
