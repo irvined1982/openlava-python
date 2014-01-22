@@ -14,6 +14,60 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
+"""
+.. py:module:: openlava.lsblib
+ 
+This module provides access to the openlava lsblib C API.  Lsblib enables
+applications to manipulate hosts, users, queues, and jobs.
+
+Usage
+-----
+Import the appropriate functions from each module::
+
+	from openlava.lslib import ls_perror
+	from openlava.lsblib import lsb_init, lsb_hostinfo, 
+
+Initialize the openlava library by calling lsb_init, if lsb_init fails, print
+the error message.
+::
+
+	if lsb_init("Hosts") < 0:
+		ls_perror("lsb_init")
+		sys.exit(-1)
+
+Call the appropriate functions, in this case, get information about each host.
+Where the lsblib function would normally return a struct, or array of structs,
+openlava.lsblib returns an array of python objects with attributes set to the
+data returned within the underlying C structures.
+::
+
+	hosts=lsb_hostinfo()
+	if hosts==None:
+		ls_perror("lsb_hostinfo");
+		sys.exit(-1)
+
+Function calls are kept as close as possible to the original LSB functions,
+generally this means they return -1 or None on failure.  Where &num_x is
+supplied as an output parameter this is generally ignored as this is
+unsupported in python.  Instead use len(returned_array).
+::
+
+    for h in hosts:
+	print "Host: %s has %d jobs" % (h.host, h.numJobs)
+
+
+Warning
+-------
+Openlava reuses memory for many of its internal datastructures, this behavior is
+the same in the python bindings.  Attributes and methods are lazy, that is to
+say that data is only copied and returned from the underlying struct when
+accessed by the python code.  As such, be careful when creating lists of jobs from
+readjobinfo() calls.
+
+Members
+-------
+"""
+
 import cython
 cimport openlava_base
 from libc.stdlib cimport malloc, free
@@ -470,12 +524,43 @@ SUSP_SBD_STARTUP = 0x00040000
 SUSP_HOST_LOCK_MASTER = 0x00080000
 
 def create_job_id(job_id, array_index):
+	"""openlava.lsblib.create_job_id(job_id, array_index)
+	
+Takes a job_id, and array_index, and returns the Openlava JOB id specific to that job/array_id combination.
+
+:param int job_id: The job id
+:param int array_index: The array index of the job
+:return: full job id
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.create_job_id(1000, 1)
+	4294968296
+	
+"""
 	id=array_index
 	id=id << 32
 	id=id | job_id
 	return id
 
 def get_array_index(LS_LONG_INT job_id):
+	"""openlava.lsblib.get_array_index(job_id)
+	
+Takes an Openlava job id, and returns the array index
+
+:param int job_id: full job id as returned from openlava
+:return: The array index of the job
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.get_array_index(4294968296)
+	1
+	
+"""
 	if job_id == -1:
 		array_index=0
 	else:
@@ -483,6 +568,16 @@ def get_array_index(LS_LONG_INT job_id):
 	return array_index
 
 def get_job_id(job_id):
+	"""openlava.lsblib.get_job_id(job_id)
+
+Takes an Openlava job id, and returns the Job ID
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.get_job_id(4294968296)
+	1000
+	
+"""
 	if job_id==-1:
 		id=-1
 	else:
@@ -515,47 +610,156 @@ cdef LS_LONG_INT * to_ls_long_int_array(list_int):
 
 
 def lsb_closejobinfo():
+	"""
+Closes the connection to the MBD that was opened with lsb_openjobinfo()
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("closejobinfo")
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...     job=lsblib.lsb_readjobinfo()
+	...     print job.jobId
+	... 
+	4562
+	>>> lsblib.lsb_closejobinfo()
+
+"""
 	openlava_base.lsb_closejobinfo()
 
 def lsb_deletejob(job_id, submit_time, options=0):
+	"""openlava.lsblib.lsb_deletejob(job_id, submit_time, [options=0])
+	
+Removes a job from the schedluing system.  If the job is running it is killed.
+
+:param str job_id: Job ID of the job to kill
+:param int submit_time: epoch time of the job submission
+:param int options: If options == lsblib.LSB_KILL_REQUEUE job will be requeued with the same job id, else it is completely removed
+:return: 0 on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("deletejob")
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...     job=lsblib.lsb_readjobinfo()
+	...     print "Killing job: %d" % job.jobId
+	...     lsblib.lsb_deletejob(job.jobId, job.submitTime)
+	... 
+	Killing job: 4562
+	-1
+	>>> lsblib.lsb_closejobinfo()
+
+"""
 	return openlava_base.lsb_deletejob(job_id, submit_time, options)
 
 def lsb_hostcontrol(host, opCode):
+	"""openlava.lsblib.lsb_hostcontrol(host, opCode)
+
+Opens or closes a host, shutsdown or restarts SBD.
+
+:param str host: Hostname of host
+:param int opCode: Opcode, one of either HOST_CLOSE, HOST_OPEN, HOST_REBOOT, HOST_SHUTDOWN.
+:return: 0 on success, -1 on failure.
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("hostcontrol")
+	>>> lsblib.lsb_hostcontrol("localhost", lsblib.HOST_OPEN)
+	-1
+
+"""
+
 	opCode=int(opCode)
 	host=str(host)
 	return openlava_base.lsb_hostcontrol(host, opCode)
 
 def lsb_hostinfo(hosts=[], numHosts=0):
-		assert(isinstance(hosts,list))
-		cdef int num_hosts
+	"""openlava.lsblib.lsb_hostinfo(hosts=[], numHosts=0)
 
-		cdef char ** host_list
-		if numHosts==1 and len(hosts)==0:
-			host_list=NULL
-			num_hosts=numHosts
-		else:
-			host_list=to_cstring_array(hosts)
-			num_hosts=len(hosts)
+Returns information about Openlava hosts.
 
-		cdef hostInfoEnt *host_info
-		cdef hostInfoEnt *h
+:param array hosts: Array of hostnames
+:param int numHosts: Number of hosts, if set to 1 and hosts is empty, returns information on the local host
+:return: Array of HostInfoEnt objects
+:rtype: array
 
-		host_info=openlava_base.lsb_hostinfo(host_list, &num_hosts)
-		if host_info==NULL:
-			return None
+::
 
-		hl=[]
-		for i in range (num_hosts):
-			h=&host_info[i]
-			host=HostInfoEnt()
-			host._load_struct(h)
-			hl.append(host)
-		return hl
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("host test")
+	0
+	>>> for host in lsblib.lsb_hostinfo():
+	...     print host.host
+	... 
+	master
+	comp00
+	comp01
+	comp02
+	comp03
+	comp04
+	>>> for host in lsblib.lsb_hostinfo(numHosts=1):
+	...     print host.host
+	... 
+	master
+	
+"""
+	assert(isinstance(hosts,list))
+	cdef int num_hosts
+
+	cdef char ** host_list
+	if numHosts==1 and len(hosts)==0:
+		host_list=NULL
+		num_hosts=numHosts
+	else:
+		host_list=to_cstring_array(hosts)
+		num_hosts=len(hosts)
+
+	cdef hostInfoEnt *host_info
+	cdef hostInfoEnt *h
+
+	host_info=openlava_base.lsb_hostinfo(host_list, &num_hosts)
+	if host_info==NULL:
+		return None
+
+	hl=[]
+	for i in range (num_hosts):
+		h=&host_info[i]
+		host=HostInfoEnt()
+		host._load_struct(h)
+		hl.append(host)
+	return hl
 
 def lsb_init(appName):
+	"""openlava.lsblib.lsb_init(appName)	
+
+Initialize the lsb library
+
+:param str appName: A name for the calling application
+:return: status - 0 on success, -1 on failure.
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("testing")
+	0
+
+"""
 	return openlava_base.lsb_init(appName)
 
 def lsb_modify(jobSubReq, jobSubReply, jobId):
+	"""openlava.lsblib.lsb_modify(jobSubReq, jobSubReply, jobId)	
+Modifies an existing job
+
+:param Submit jobSubReq: Submit request
+:param SubmitReply jobSubReply: Submit reply
+:param int jobId: Job ID
+:return: Job ID, -1 on failure.
+:rtype: int
+"""
 	assert(isinstance(jobSubReq, Submit))
 	assert(isinstance(jobSubReply,SubmitReply))
 	assert(isinstance(jobId,int))
@@ -563,11 +767,61 @@ def lsb_modify(jobSubReq, jobSubReply, jobId):
 	return job_id
 
 def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=0):
-	cdef int numJobs
+	"""openlava.lsblib.lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=0)
+Get information about jobs that match the specified criteria.
+
+.. note:: Only one parameter may be used at any given time.   
+
+:param int job_id: Return jobs with this job id.
+:param str job_name: Return jobs with this name
+:param str user: Return jobs owned by this user
+:param str host: Return jobs on this host
+:param int options: Return jobs that match the following options, where option is a bitwise or of the following paramters: ALL_JOB - All jobs; CUR_JOB - All unfinished jobs; DONE_JOB - Jobs that have finished or exited; PEND_JOB - Jobs that are pending; SUSP_JOB - Jobs that are suspended; LAST_JOB - The last submitted job
+:return: Number of jobs that match, -1 on error
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("testing")
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...     job=lsblib.lsb_readjobinfo()
+	...     print job.jobId
+	... 
+	4562
+	>>> lsblib.lsb_closejobinfo()
+	
+
+"""
+	cdef int numJob
 	numJobs=openlava_base.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
 	return numJobs
 
 def lsb_pendreason (numReasons, rsTb, jInfoH, ld):
+	"""openlava.lsblib.lsb_pendreason(numReasons, rsTb, jInfoH, ld)
+Get the reason a job is pending
+
+:param int numReasons: The length of the reasons array
+:param list rsTb: An array of integer reasons
+:param JobInfoHead jInfoH: Job info header, may be None
+:param LoadIndexLog ld: LoadIndexLog, use to set specific names of load indexes.
+:return: Description of job pending reasons
+:rtype: str
+    
+::
+	
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("Job Test")
+	0
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...         job=lsblib.lsb_readjobinfo()
+	...         ld=lsblib.LoadIndexLog()
+	...         if job.status & lsblib.JOB_STAT_PEND != 0:
+	...                 print "Job %d: %s" % (job.jobId, lsblib.lsb_pendreason(job.numReasons, job.reasonTb, None, ld))
+	... 
+
+
+"""
 	cdef int * reasonsTb 
 	reasonsTb=to_int_array(rsTb)
 	cdef jobInfoHead jInfo
@@ -589,6 +843,29 @@ def lsb_pendreason (numReasons, rsTb, jInfoH, ld):
 	return u"%s" % reasons
 
 def lsb_peekjob(jobId):
+	"""
+Get the name of the file where job output is being spooled.
+
+:param int jobId: The ID of the job
+:return: Path to the file, or None if not available
+:rtype: str
+
+::
+
+	>>> from openlava import lsblib
+	>>> 
+	>>> 
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("peek")
+	0
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...     job=lsblib.lsb_readjobinfo()
+	...     print "Job: %s: %s" % (job.jobId, lsblib.lsb_peekjob(job.jobId))
+	... 
+	Job: 4562: /home/brian/.lsbatch/1390404552.4562
+	>>> 
+
+"""
 	jobId=int(jobId)
 	cdef char * fname
 	fname=openlava_base.lsb_peekjob(jobId)

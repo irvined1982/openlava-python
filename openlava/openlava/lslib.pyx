@@ -14,6 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
+"""
+This module provides access to the openlava lslib C API.  Lslib enables applications to contact the LIM and RES daemons.
+"""
+
 import cython
 from libc.stdlib cimport malloc, free
 from libc.string cimport strcmp, memset
@@ -22,7 +26,7 @@ from cpython.string cimport PyString_AsString
 cimport openlava_base
 
 cdef extern from "lsf.h":
-	extern int lserrno
+	extern int lsberrno
 	extern enum valueType: LS_BOOLEAN, LS_NUMERIC, LS_STRING, LS_EXTERNAL
 	extern enum orderType: INCR, DECR, NA
 	
@@ -262,33 +266,43 @@ LIM_OK_MASK          =  0x00bf0000
 LIM_SBDDOWN          =  0x00400000
 
 def LS_ISUNAVAIL(status):
+	"""Returns True if the LIM on the host is not available.  For example it is not running, or the host is down"""
 	return (status[0] & LIM_UNAVAIL) != 0
 
 def LS_ISBUSY(status):
+	"""Returns true if the host is busy"""
 	return (status[0] & LIM_BUSY) != 0
 
 def LS_ISLOCKEDU(status):
+	"""Returns true if the host has been locked by an administrator"""
 	return (status[0] & LIM_LOCKEDU) != 0
 
 def LS_ISLOCKEDW(status):
+	"""Returns true if the host is locked because its run window is closed"""
 	return (status[0] & LIM_LOCKEDW) != 0
 
 def LS_ISLOCKEDM(status):
+	"""Returns true if the host LIM is locked by the master LIM"""
 	return (status[0] & LIM_LOCKEDM) != 0
 
 def LS_ISLOCKED(status):
+	"""Returns true if the host is locked for any reason"""
 	return (status[0] & (LIM_LOCKEDU | LIM_LOCKEDW | LIM_LOCKEDM)) != 0
 
 def LS_ISRESDOWN(status):
+	"""Returns true if the RES is down on the host"""
 	return (status[0] & LIM_RESDOWN) != 0
 
 def LS_ISSBDDOWN(status):
+	"""Returns true if the SBD is down on the host"""
 	return (status[0] & LIM_SBDDOWN) != 0
  
 def LS_ISOK(status):
+	"""Returns true if the host is OK"""
 	return (status[0] & LIM_OK_MASK) == 0
 
 def LS_ISOKNRES(status):
+	"""Returns true as long as the RES and SBD are not down"""
 	return ((status[0]) & (LIM_RESDOWN | LIM_SBDDOWN)) == 0
 
 cdef char ** to_cstring_array(list_str):
@@ -297,18 +311,22 @@ cdef char ** to_cstring_array(list_str):
 		ret[i] = PyString_AsString(list_str[i])
 	return ret
 
-def get_lserrno():
-	return lserrno
+def get_lsberrno():
+	"""Returns the lsberrno from openlava"""
+	return lsberrno
 
 def ls_getclustername():
+	"""Returns the name of the cluster"""
 	return openlava_base.ls_getclustername()
 
 def ls_gethostfactor(hostname):
+	"""Returns the host factor of the host"""
 	cdef float *factor
 	factor = openlava_base.ls_gethostfactor(hostname)
 	return factor[0]
 
 def ls_gethostinfo(resReq="", hostList=[], options=0):
+	"""Returns an array of HostList objects that meet the criteria specified"""
 	host_list=[]
 	cdef hostInfo * h
 	cdef int numHosts
@@ -331,21 +349,25 @@ def ls_gethostinfo(resReq="", hostList=[], options=0):
 	return host_list
 
 def ls_gethostmodel(hostname):
+	"""Returns the model name of the host"""
 	cdef char * model=openlava_base.ls_gethostmodel(hostname)
 	if model==NULL:
 		return None
 	return unicode(model)
 
 def ls_gethosttype(hostname):
+	"""Returns the type of the host"""
 	cdef char * hosttype=openlava_base.ls_gethosttype(hostname)
 	if hosttype==NULL:
 		return None
 	return unicode(hosttype)
 
 def ls_getmastername():
+	"""Returns the name of the master host"""
 	return openlava_base.ls_getmastername()
 
 def ls_info():
+	"""Returns an LsInfo object for the cluster"""
 	cdef lsInfo * l
 	l=openlava_base.ls_info()
 	if l==NULL:
@@ -355,6 +377,7 @@ def ls_info():
 	return ls
 
 def ls_load(resreq=None, numhosts=0, options=0, fromhost=None):
+	"""Returns an array of HostLoad objects for hosts that meet the criteria"""
 	cdef hostLoad *hosts
 	cdef char *resReq
 	resReq=NULL
@@ -386,6 +409,7 @@ def ls_load(resreq=None, numhosts=0, options=0, fromhost=None):
 	return hlist
 
 def ls_loadinfo(resreq=None, numhosts=0, options=0, fromhost=None, hostlist=[], indxnamelist=[]):
+	"""Returns an array of HostLoad objects for hosts that meet the specified criteria"""
 	cdef hostLoad *hosts
 	cdef char *resReq
 	resReq=NULL
@@ -427,12 +451,14 @@ def ls_loadinfo(resreq=None, numhosts=0, options=0, fromhost=None, hostlist=[], 
 	return hlist	
 	
 def ls_perror(message):
+	"""Prints the error message corresponding to lsberrno"""
 	cdef char * m
 	message=str(message)
 	m=message
 	openlava_base.ls_perror(m)
 
 def ls_sysmsg():
+	"""Returns the error message corresponding to lsberrno"""
 	cdef char * msg
 	msg=openlava_base.ls_sysmsg()
 	if msg==NULL:
