@@ -24,6 +24,8 @@ cdef extern from "lsbatch.h":
 	ctypedef long time_t
 	ctypedef unsigned short u_short
 
+	extern int lsberrno
+
 	extern struct submit:
 		int     options
 		int     options2
@@ -234,6 +236,7 @@ cdef extern from "lsbatch.h":
 	extern int 		 lsb_openjobinfo (long, char *, char *, char *, char *,int)
 	extern char		*lsb_peekjob(int jobId)
 	extern char 		*lsb_pendreason (int numReasons, int *rsTb, jobInfoHead *jInfoH, loadIndexLog *ld)
+	extern void lsb_perror(char *)
 	extern int		 lsb_queuecontrol(char *queue, int opCode)
 	extern queueInfoEnt 	*lsb_queueinfo (char **queues, int *numQueues, char *host, char *userName, int options)
 	extern jobInfoEnt 	*lsb_readjobinfo( int * )
@@ -241,6 +244,7 @@ cdef extern from "lsbatch.h":
 	extern int		 lsb_reconfig(int) 
 	extern int		 lsb_signaljob (LS_LONG_INT jobId, int sigValue)
 	extern LS_LONG_INT	 lsb_submit ( submit * subPtr, submitReply * repPtr)
+	extern char * lsb_sysmsg()
 	extern userInfoEnt	*lsb_userinfo(char **users, int *numUsers)
 	extern char 		*lsb_suspreason (int, int, loadIndexLog *)
 

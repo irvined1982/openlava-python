@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 """
-.. py:module:: openlava.lsblib
  
 This module provides access to the openlava lsblib C API.  Lsblib enables
 applications to manipulate hosts, users, queues, and jobs.
@@ -56,13 +55,9 @@ unsupported in python.  Instead use len(returned_array).
 	print "Host: %s has %d jobs" % (h.host, h.numJobs)
 
 
-Warning
--------
-Openlava reuses memory for many of its internal datastructures, this behavior is
-the same in the python bindings.  Attributes and methods are lazy, that is to
-say that data is only copied and returned from the underlying struct when
-accessed by the python code.  As such, be careful when creating lists of jobs from
-readjobinfo() calls.
+.. Warning :: Openlava reuses memory for many of its internal datastructures, this behavior is the same in the python bindings. 
+	Attributes and methods are lazy, that is to say that data is only copied and returned from the underlying struct when
+	accessed by the python code.  As such, be careful when creating lists of jobs from readjobinfo() calls.
 
 Members
 -------
@@ -83,7 +78,9 @@ cdef extern from "lsbatch.h":
 
 	ctypedef long time_t
 	ctypedef unsigned short u_short
-
+	
+	extern int lsberrno
+	
 	extern struct submit:
 		int     options
 		int     options2
@@ -523,6 +520,141 @@ SUSP_RES_LIMIT = 0x00020000
 SUSP_SBD_STARTUP = 0x00040000
 SUSP_HOST_LOCK_MASTER = 0x00080000
 
+LSBE_NO_ERROR = 00
+LSBE_NO_JOB = 01
+LSBE_NOT_STARTED = 02
+LSBE_JOB_STARTED = 03
+LSBE_JOB_FINISH = 04
+LSBE_STOP_JOB = 05
+LSBE_DEPEND_SYNTAX = 6
+LSBE_EXCLUSIVE = 7
+LSBE_ROOT = 8
+LSBE_MIGRATION = 9
+LSBE_J_UNCHKPNTABLE = 10
+LSBE_NO_OUTPUT = 11
+LSBE_NO_JOBID = 12
+LSBE_ONLY_INTERACTIVE = 13
+LSBE_NO_INTERACTIVE = 14
+LSBE_NO_USER = 15
+LSBE_BAD_USER = 16
+LSBE_PERMISSION = 17
+LSBE_BAD_QUEUE = 18
+LSBE_QUEUE_NAME = 19
+LSBE_QUEUE_CLOSED = 20
+LSBE_QUEUE_WINDOW = 21
+LSBE_QUEUE_USE = 22
+LSBE_BAD_HOST = 23
+LSBE_PROC_NUM = 24
+LSBE_RESERVE1 = 25
+LSBE_RESERVE2 = 26
+LSBE_NO_GROUP = 27
+LSBE_BAD_GROUP = 28
+LSBE_QUEUE_HOST = 29
+LSBE_UJOB_LIMIT = 30
+LSBE_NO_HOST = 31
+LSBE_BAD_CHKLOG = 32
+LSBE_PJOB_LIMIT = 33
+LSBE_NOLSF_HOST = 34
+LSBE_BAD_ARG = 35
+LSBE_BAD_TIME = 36
+LSBE_START_TIME = 37
+LSBE_BAD_LIMIT = 38
+LSBE_OVER_LIMIT = 39
+LSBE_BAD_CMD = 40
+LSBE_BAD_SIGNAL = 41
+LSBE_BAD_JOB = 42
+LSBE_QJOB_LIMIT = 43
+LSBE_UNKNOWN_EVENT = 44
+LSBE_EVENT_FORMAT = 45
+LSBE_EOF = 46
+LSBE_MBATCHD = 47
+LSBE_SBATCHD = 48
+LSBE_LSBLIB = 49
+LSBE_LSLIB = 50
+LSBE_SYS_CALL = 51
+LSBE_NO_MEM = 52
+LSBE_SERVICE = 53
+LSBE_NO_ENV = 54
+LSBE_CHKPNT_CALL = 55
+LSBE_NO_FORK = 56
+LSBE_PROTOCOL = 57
+LSBE_XDR = 58
+LSBE_PORT = 59
+LSBE_TIME_OUT = 60
+LSBE_CONN_TIMEOUT = 61
+LSBE_CONN_REFUSED = 62
+LSBE_CONN_EXIST = 63
+LSBE_CONN_NONEXIST = 64
+LSBE_SBD_UNREACH = 65
+LSBE_OP_RETRY = 66
+LSBE_USER_JLIMIT = 67
+LSBE_JOB_MODIFY = 68
+LSBE_JOB_MODIFY_ONCE = 69
+LSBE_J_UNREPETITIVE = 70
+LSBE_BAD_CLUSTER = 71
+LSBE_JOB_MODIFY_USED = 72
+LSBE_HJOB_LIMIT = 73
+LSBE_NO_JOBMSG = 74
+LSBE_BAD_RESREQ = 75
+LSBE_NO_ENOUGH_HOST = 76
+LSBE_CONF_FATAL = 77
+LSBE_CONF_WARNING = 78
+LSBE_NO_RESOURCE = 79
+LSBE_BAD_RESOURCE = 80
+LSBE_INTERACTIVE_RERUN = 81
+LSBE_PTY_INFILE = 82
+LSBE_BAD_SUBMISSION_HOST = 83
+LSBE_LOCK_JOB = 84
+LSBE_UGROUP_MEMBER = 85
+LSBE_OVER_RUSAGE = 86
+LSBE_BAD_HOST_SPEC = 87
+LSBE_BAD_UGROUP = 88
+LSBE_ESUB_ABORT = 89
+LSBE_EXCEPT_ACTION = 90
+LSBE_JOB_DEP = 91
+LSBE_JGRP_NULL = 92
+LSBE_JGRP_BAD = 93
+LSBE_JOB_ARRAY = 94
+LSBE_JOB_SUSP = 95
+LSBE_JOB_FORW = 96
+LSBE_BAD_IDX = 97
+LSBE_BIG_IDX = 98
+LSBE_ARRAY_NULL = 99
+LSBE_JOB_EXIST = 100
+LSBE_JOB_ELEMENT = 101
+LSBE_BAD_JOBID = 102
+LSBE_MOD_JOB_NAME = 103
+LSBE_PREMATURE = 104
+LSBE_BAD_PROJECT_GROUP = 105
+LSBE_NO_HOST_GROUP = 106
+LSBE_NO_USER_GROUP = 107
+LSBE_INDEX_FORMAT = 108
+LSBE_SP_SRC_NOT_SEEN = 109
+LSBE_SP_FAILED_HOSTS_LIM = 110
+LSBE_SP_COPY_FAILED = 111
+LSBE_SP_FORK_FAILED = 112
+LSBE_SP_CHILD_DIES = 113
+LSBE_SP_CHILD_FAILED = 114
+LSBE_SP_FIND_HOST_FAILED = 115
+LSBE_SP_SPOOLDIR_FAILED = 116
+LSBE_SP_DELETE_FAILED = 117
+LSBE_BAD_USER_PRIORITY = 118
+LSBE_NO_JOB_PRIORITY = 119
+LSBE_JOB_REQUEUED = 120
+LSBE_MULTI_FIRST_HOST = 121
+LSBE_HG_FIRST_HOST = 122
+LSBE_HP_FIRST_HOST = 123
+LSBE_OTHERS_FIRST_HOST = 124
+LSBE_PROC_LESS = 125
+LSBE_MOD_MIX_OPTS = 126
+LSBE_MOD_CPULIMIT = 127
+LSBE_MOD_MEMLIMIT = 128
+LSBE_MOD_ERRFILE = 129
+LSBE_LOCKED_MASTER = 130
+LSBE_DEP_ARRAY_SIZE = 131
+LSBE_NUM_ERR = 131
+
+
 def create_job_id(job_id, array_index):
 	"""openlava.lsblib.create_job_id(job_id, array_index)
 	
@@ -583,6 +715,166 @@ Takes an Openlava job id, and returns the Job ID
 	else:
 		id=job_id & 0x0FFFFFFFF
 	return id
+
+def get_lsberrno():
+	"""openlava.lsblib.get_lsberrno()
+
+Returns the lsberrno
+
+:return: LSB Errno
+:rtype: int
+
+::
+
+	LSBE_NO_ERROR = 00
+	LSBE_NO_JOB = 01
+	LSBE_NOT_STARTED = 02
+	LSBE_JOB_STARTED = 03
+	LSBE_JOB_FINISH = 04
+	LSBE_STOP_JOB = 05
+	LSBE_DEPEND_SYNTAX = 6
+	LSBE_EXCLUSIVE = 7
+	LSBE_ROOT = 8
+	LSBE_MIGRATION = 9
+	LSBE_J_UNCHKPNTABLE = 10
+	LSBE_NO_OUTPUT = 11
+	LSBE_NO_JOBID = 12
+	LSBE_ONLY_INTERACTIVE = 13
+	LSBE_NO_INTERACTIVE = 14
+	LSBE_NO_USER = 15
+	LSBE_BAD_USER = 16
+	LSBE_PERMISSION = 17
+	LSBE_BAD_QUEUE = 18
+	LSBE_QUEUE_NAME = 19
+	LSBE_QUEUE_CLOSED = 20
+	LSBE_QUEUE_WINDOW = 21
+	LSBE_QUEUE_USE = 22
+	LSBE_BAD_HOST = 23
+	LSBE_PROC_NUM = 24
+	LSBE_RESERVE1 = 25
+	LSBE_RESERVE2 = 26
+	LSBE_NO_GROUP = 27
+	LSBE_BAD_GROUP = 28
+	LSBE_QUEUE_HOST = 29
+	LSBE_UJOB_LIMIT = 30
+	LSBE_NO_HOST = 31
+	LSBE_BAD_CHKLOG = 32
+	LSBE_PJOB_LIMIT = 33
+	LSBE_NOLSF_HOST = 34
+	LSBE_BAD_ARG = 35
+	LSBE_BAD_TIME = 36
+	LSBE_START_TIME = 37
+	LSBE_BAD_LIMIT = 38
+	LSBE_OVER_LIMIT = 39
+	LSBE_BAD_CMD = 40
+	LSBE_BAD_SIGNAL = 41
+	LSBE_BAD_JOB = 42
+	LSBE_QJOB_LIMIT = 43
+	LSBE_UNKNOWN_EVENT = 44
+	LSBE_EVENT_FORMAT = 45
+	LSBE_EOF = 46
+	LSBE_MBATCHD = 47
+	LSBE_SBATCHD = 48
+	LSBE_LSBLIB = 49
+	LSBE_LSLIB = 50
+	LSBE_SYS_CALL = 51
+	LSBE_NO_MEM = 52
+	LSBE_SERVICE = 53
+	LSBE_NO_ENV = 54
+	LSBE_CHKPNT_CALL = 55
+	LSBE_NO_FORK = 56
+	LSBE_PROTOCOL = 57
+	LSBE_XDR = 58
+	LSBE_PORT = 59
+	LSBE_TIME_OUT = 60
+	LSBE_CONN_TIMEOUT = 61
+	LSBE_CONN_REFUSED = 62
+	LSBE_CONN_EXIST = 63
+	LSBE_CONN_NONEXIST = 64
+	LSBE_SBD_UNREACH = 65
+	LSBE_OP_RETRY = 66
+	LSBE_USER_JLIMIT = 67
+	LSBE_JOB_MODIFY = 68
+	LSBE_JOB_MODIFY_ONCE = 69
+	LSBE_J_UNREPETITIVE = 70
+	LSBE_BAD_CLUSTER = 71
+	LSBE_JOB_MODIFY_USED = 72
+	LSBE_HJOB_LIMIT = 73
+	LSBE_NO_JOBMSG = 74
+	LSBE_BAD_RESREQ = 75
+	LSBE_NO_ENOUGH_HOST = 76
+	LSBE_CONF_FATAL = 77
+	LSBE_CONF_WARNING = 78
+	LSBE_NO_RESOURCE = 79
+	LSBE_BAD_RESOURCE = 80
+	LSBE_INTERACTIVE_RERUN = 81
+	LSBE_PTY_INFILE = 82
+	LSBE_BAD_SUBMISSION_HOST = 83
+	LSBE_LOCK_JOB = 84
+	LSBE_UGROUP_MEMBER = 85
+	LSBE_OVER_RUSAGE = 86
+	LSBE_BAD_HOST_SPEC = 87
+	LSBE_BAD_UGROUP = 88
+	LSBE_ESUB_ABORT = 89
+	LSBE_EXCEPT_ACTION = 90
+	LSBE_JOB_DEP = 91
+	LSBE_JGRP_NULL = 92
+	LSBE_JGRP_BAD = 93
+	LSBE_JOB_ARRAY = 94
+	LSBE_JOB_SUSP = 95
+	LSBE_JOB_FORW = 96
+	LSBE_BAD_IDX = 97
+	LSBE_BIG_IDX = 98
+	LSBE_ARRAY_NULL = 99
+	LSBE_JOB_EXIST = 100
+	LSBE_JOB_ELEMENT = 101
+	LSBE_BAD_JOBID = 102
+	LSBE_MOD_JOB_NAME = 103
+	LSBE_PREMATURE = 104
+	LSBE_BAD_PROJECT_GROUP = 105
+	LSBE_NO_HOST_GROUP = 106
+	LSBE_NO_USER_GROUP = 107
+	LSBE_INDEX_FORMAT = 108
+	LSBE_SP_SRC_NOT_SEEN = 109
+	LSBE_SP_FAILED_HOSTS_LIM = 110
+	LSBE_SP_COPY_FAILED = 111
+	LSBE_SP_FORK_FAILED = 112
+	LSBE_SP_CHILD_DIES = 113
+	LSBE_SP_CHILD_FAILED = 114
+	LSBE_SP_FIND_HOST_FAILED = 115
+	LSBE_SP_SPOOLDIR_FAILED = 116
+	LSBE_SP_DELETE_FAILED = 117
+	LSBE_BAD_USER_PRIORITY = 118
+	LSBE_NO_JOB_PRIORITY = 119
+	LSBE_JOB_REQUEUED = 120
+	LSBE_MULTI_FIRST_HOST = 121
+	LSBE_HG_FIRST_HOST = 122
+	LSBE_HP_FIRST_HOST = 123
+	LSBE_OTHERS_FIRST_HOST = 124
+	LSBE_PROC_LESS = 125
+	LSBE_MOD_MIX_OPTS = 126
+	LSBE_MOD_CPULIMIT = 127
+	LSBE_MOD_MEMLIMIT = 128
+	LSBE_MOD_ERRFILE = 129
+	LSBE_LOCKED_MASTER = 130
+	LSBE_DEP_ARRAY_SIZE = 131
+	LSBE_NUM_ERR = 131
+	
+	>>> from openlava import lsblib, lslib
+	>>> lsblib.lsb_init("foo")
+	0
+	>>> lsblib.lsb_hostcontrol("foo", 2)
+	-1
+	>>> lsblib.get_lsberrno()
+	17
+	>>> lsblib.lsb_perror("foo")
+	foo: User permission denied
+	>>> lsblib.lsb_sysmsg()
+	u'User permission denied'
+	>>> 
+
+"""
+	return lsberrno
 
 cdef char ** to_cstring_array(list_str):
 	cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
@@ -797,6 +1089,8 @@ Get information about jobs that match the specified criteria.
 	numJobs=openlava_base.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
 	return numJobs
 
+
+
 def lsb_pendreason (numReasons, rsTb, jInfoH, ld):
 	"""openlava.lsblib.lsb_pendreason(numReasons, rsTb, jInfoH, ld)
 Get the reason a job is pending
@@ -874,24 +1168,104 @@ Get the name of the file where job output is being spooled.
 	else:
 		return fname
 	
+
+def lsb_perror(message):
+	"""openlava.lsblib.lsb_perror(message)
+
+Prints the lsblib error message associated with the lsberrno prefixed by message.
+
+:param str message: User defined error message
+:return: None
+:rtype: None
+
+::
+
+	>>> from openlava import lsblib, lslib
+	>>> lsblib.lsb_init("foo")
+	0
+	>>> lsblib.lsb_hostcontrol("foo", 2)
+	-1
+	>>> lsblib.get_lsberrno()
+	17
+	>>> lsblib.lsb_perror("foo")
+	foo: User permission denied
+	>>> lsblib.lsb_sysmsg()
+	u'User permission denied'
+	>>> 
+
+"""
+	cdef char * m
+	message=str(message)
+	m=message
+	openlava_base.lsb_perror(m)
+	
+	
 def lsb_queuecontrol(queue, opCode):
-	queue=str(queue)
-	opCode=int(opCode)
-	return openlava_base.lsb_queuecontrol(queue, opCode)
+	"""openlava.lsblib.lsb_queuecontrol(queue, opCode)
+Opens, closes, activates or inactivates a queue.
+	
+:param str queue: Name of queue to control
+:param int opCode: OpCode to use, one of either: lslblib.QUEUE_OPEN - open the queue; lsblib.QUEUE_CLOSED - close the queue; QUEUE_ACTIVATE - activate the queue; QUEUE_INACTIVATE - inactivate the queue
+:return: 0 on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("queuecontrol")
+	0
+	>>> lsblib.lsb_queuecontrol("normal", lsblib.QUEUE_CLOSED)
+	-1
+
+
+"""
 
 def lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0):
+	"""openlava.lsblib.lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0)
+Get information on specified queues.
+
+:param array queues: list of queue names to get information on
+:param int numqueues: number of queues to get information on, if queues is empty, and numqueues=1, gets information on the default queue
+:param str hostname: get queues that can execute on hostname
+:param str username: get queues that username can submit to
+:param int options: Options
+:return: array of QueueInfoEnt objects, None on error.
+:rtype: array
+
+.. note:: Unlike the C api, numqueues is not set to to the number of queues returned as this is not supported in Python. Instead use len on the returned array.
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("testing")
+	0
+	>>> for q in lsblib.lsb_queueinfo():
+	...     print q.queue
+	... 
+	normal
+	>>> for q in lsblib.lsb_queueinfo(numqueues=1):
+	...     print q.queue
+	... 
+	normal
+	>>> for q in lsblib.lsb_queueinfo(hostname='master'):
+	...     print q.queue
+	... 
+	normal
+	>>> 
+
+"""
 	queue_list=[]
 	cdef queueInfoEnt * qs
 
 	cdef char **queueNames
+	cdef int numQueues
+	numqueues=len(queues)
 	if len(queues)>0:
 		queueNames=to_cstring_array(queues)
 	else:
 		queueNames=NULL
-
-	cdef int numQueues
-	numqueues=int(numqueues)
-	numQueues=numqueues
+		numqueues=int(numqueues)
+		numQueues=numqueues
 
 	cdef char * hostName
 	hostName=NULL
@@ -920,6 +1294,28 @@ def lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0):
 	return queue_list
 
 def lsb_readjobinfo():
+	"""openlava.lsblib.lsb_readjobinfo()
+Get the next job in the list from the MBD.
+
+.. note:: The more parameter is not supported as passing integers as in/out parameters is not supported by Python.  
+
+:param int options: Return jobs that match the following options, where option is a bitwise or of the following paramters: ALL_JOB - All jobs; CUR_JOB - All unfinished jobs; DONE_JOB - Jobs that have finished or exited; PEND_JOB - Jobs that are pending; SUSP_JOB - Jobs that are suspended; LAST_JOB - The last submitted job
+:return: JobInfoEnt object or None on error
+:rtype: JobInfoEnt
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("testing")
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...     job=lsblib.lsb_readjobinfo()
+	...     print job.jobId
+	... 
+	4562
+	>>> lsblib.lsb_closejobinfo()
+	
+
+"""
 	cdef jobInfoEnt * j
 	cdef int * more
 	more=NULL
@@ -929,52 +1325,225 @@ def lsb_readjobinfo():
 	return a
 
 def lsb_reconfig(opCode):
+	"""openlava.lsblib.lsb_reconfig(opCode)
+
+Reloads configuration information for the batch system.
+
+:param int opCode: Operation to perform: lsblib.MBD_RESTART - restart the MBD; lsblib.MBD_RECONFIG - Reconfigure the MBD; lsblib.MBD_CKCONFIG - Check the configuration
+:return: 0 on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("mbd control")
+	0
+	>>> lsblib.lsb_reconfig(lsblib.MBD_CKCONFIG)
+	-1
+	>>>
+
+"""
 	opCode=int(opCode)
 	return openlava_base.lsb_reconfig(opCode)
 
 def lsb_requeuejob(rq):
+	"""openlava.lsblib.lsb_requeuejob(rq)
+
+Requeues a job.
+
+:param JobRequeue rq: JobRequeue object
+:return: 0 on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("requeue")
+	0
+	>>> rq=lsblib.JobRequeue()
+	>>> rq.jobId=lsblib.create_job_id(4563,0)
+	>>> rq.status=lsblib.JOB_STAT_PEND
+	>>> rq.options=lsblib.REQUEUE_RUN
+	>>> lsblib.lsb_requeuejob(rq)
+	0
+
+"""
 	assert(isinstance(rq,JobRequeue))
 	return rq._requeue()
 
 def lsb_signaljob (jobId, sigValue):
+	"""openlava.lsblib.lsb_signaljob(jobId, sigValue)
+
+Sends the specified signal to the job.
+
+:param int jobId: Id of the job
+:param int sigValue: signal to send
+:return: 0 on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib	
+	>>> lsblib.lsb_init("signaljob")
+	0
+	>>> lsblib.lsb_signaljob(4563, lsblib.SIGSTOP)
+	0
+	>>> lsblib.lsb_signaljob(4563, lsblib.SIGCONT)
+	0
+
+"""
 	return openlava_base.lsb_signaljob(jobId, sigValue)
 
 def lsb_submit(jobSubReq, jobSubReply):
+	"""openlava.lsblib.lsb_submit(jobSubReq, jobSubReply)
+
+Submits a new job into the scheduling environment.
+
+:param Submit jobSubReq: Submit object containing job submission information
+:param SubmitReply jobSubReply: SubmitReply object
+:return: job_id on success, -1 on failure
+:rtype: int
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("submit")
+	0
+	>>> sr=lsblib.Submit()
+	>>> sr.command="hostname"
+	>>> sr.numProcessors=1
+	>>> sr.maxNumProcessors=1
+	>>> srep=lsblib.SubmitReply()
+	>>> lsblib.lsb_submit(sr, srep)
+	Job <4564> is submitted to default queue <normal>.
+	4564
+	>>> 
+
+"""
 	assert(isinstance(jobSubReq, Submit))
 	assert(isinstance(jobSubReply,SubmitReply))
 	job_id=jobSubReq._submit(jobSubReply)
 	return job_id
 
 def lsb_suspreason (reasons, subreasons, ld):
+	"""openlava.lsblib.lsb_suspreason(reasons, subreasons, ld)
+
+Get reasons why a job is suspended
+
+:param int reasons: reasons from jobinfoent
+:param int subreasons: subreasons from jobinfoent
+:param LoadIndexLog ld: LoadIndexLog with index names
+:returns: Description of why job is pending
+:rtype: str
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("suspreasons")
+	0
+	>>> lsblib.lsb_signaljob(4563, lsblib.SIGSTOP)
+	0
+	>>> for i in range(lsblib.lsb_openjobinfo()):
+	...         job=lsblib.lsb_readjobinfo()
+	...         ld=lsblib.LoadIndexLog()
+	...         if job.status & lsblib.JOB_STAT_USUSP !=0 or job.status & lsblib.JOB_STAT_SSUSP != 0:
+	...                 print "Job %d: %s" % (job.jobId, lsblib.lsb_suspreason(job.reasons, job.subreasons, ld))
+	... 
+	
+	Job 4563:  The job was suspended by user;
+
+"""
+
 	cdef loadIndexLog loadIndex
 	loadIndex.nIdx=ld.nIdx
 	loadIndex.name=to_cstring_array(ld.name)
 	reasons=openlava_base.lsb_suspreason(reasons, subreasons, &loadIndex)
 	return u"%s" % reasons
 
-def lsb_userinfo(user_list=[]):
-		assert(isinstance(user_list,list))
-		cdef int num_users
+def lsb_sysmsg():
+	"""openlava.lsblib.lsb_sysmsg()
+
+Get the lsblib error message associated with lsberrno
+
+:return: LSBLIB error message
+:rtype: str
+
+::
+
+	>>> from openlava import lsblib, lslib
+	>>> lsblib.lsb_init("foo")
+	0
+	>>> lsblib.lsb_hostcontrol("foo", 2)
+	-1
+	>>> lsblib.get_lsberrno()
+	17
+	>>> lsblib.lsb_perror("foo")
+	foo: User permission denied
+	>>> lsblib.lsb_sysmsg()
+	u'User permission denied'
+	>>> 
+
+"""
+	cdef char * msg
+	msg=openlava_base.lsb_sysmsg()
+	if msg==NULL:
+		return u""
+	else:
+		return u"%s" % msg
+
+def lsb_userinfo(user_list=[], numusers=0):
+	"""openlava.lsblib.lsb_userinfo(user_list=[])
+
+Get information on specified users
+
+.. note:: Unlike in the C API, numusers is not set to the size of the returned array, as this is not supported in Python.
+
+:param array user_list: List of usernames to get information on
+:param int numusers: ignored unless user_list is empty, if numusers is set to one, then returns information about the current user.
+:rtype: array
+:return: List of UserInfoEnt objects
+
+::
+
+	>>> from openlava import lsblib
+	>>> lsblib.lsb_init("userinfo")
+	0
+	>>> for user in lsblib.lsb_userinfo():
+	...     print user.user
+	... 
+	default
+	root
+	irvined
+	>>> for user in lsblib.lsb_userinfo(user_list=[], numusers=1):
+	...     print user.user
+	... 
+	irvined
+	>>> 
+	
+"""
+	assert(isinstance(user_list,list))
+	numusers=int(numusers)
+	cdef int num_users
+	cdef char ** users
+	users=NULL
+	
+	if len(user_list)>0:
 		num_users=len(user_list)
+		users=to_cstring_array(user_list)
+	else:
+		num_users=numusers
+		
+	cdef userInfoEnt *user_info
+	cdef userInfoEnt *u
 
-		cdef char ** users
-		users=NULL
-
-		if num_users>0:
-			users=to_cstring_array(user_list)
-
-		cdef userInfoEnt *user_info
-		cdef userInfoEnt *u
-
-		user_info=openlava_base.lsb_userinfo(users,&num_users)
-
-		usrs=[]
-		for i in range(num_users):
-			u=&user_info[i]
-			user=UserInfoEnt()
-			user._load_struct(u)
-			usrs.append(user)
-		return usrs
+	user_info=openlava_base.lsb_userinfo(users,&num_users)
+	usrs=[]
+	for i in range(num_users):
+		u=&user_info[i]
+		user=UserInfoEnt()
+		user._load_struct(u)
+		usrs.append(user)
+	return usrs
 
 cdef class HostInfoEnt:
 	cdef hostInfoEnt * _data

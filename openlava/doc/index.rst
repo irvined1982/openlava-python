@@ -7,43 +7,8 @@
 lslib
 =====
 .. automodule:: openlava.lslib
+    :members:
     
-    
-Usage
------
-
-Import the appropriate functions from each module::
-
-    from openlava.lslib import ls_getclustername, ls_getmastername, ls_info    
-    import sys
-
-Get and print the clustername, if ls_getclustername() fails, it will return None::
-
-    cluster = ls_getclustername();
-    if cluster==None:
-    	print "Unable to get clustername"
-    	sys.exit(1)
-    print "My cluster name is <%s>" %  cluster
-
-Do the same for the master host name::
-
-    master = ls_getmastername();
-    if master==None:
-    	print "Unable to get master"
-    	sys.exit(1)
-    print "Master host is <%s>" % master
-
-Get information about resources on the cluster using ls_info()::
-
-    lsInfo = ls_info()
-    if lsInfo==None:
-	print "Unable to get LSInfo"
-	sys.exit(1)
-
-    print "\n%-15.15s %s" % ("RESOURCE_NAME", "DESCRIPTION")
-    for i in range(lsInfo.nRes):
-	print "%-15.15s %s" % ( lsInfo.resTable[i].name, lsInfo.resTable[i].des)
-        
 lsbatch
 =======
 
