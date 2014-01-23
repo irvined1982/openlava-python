@@ -1163,9 +1163,29 @@ Returns an array of HostLoad objects for hosts that meet the specified criteria
 :param int options: flags that affect how the hostlist is created
 :param str fromhost: when used with DFT_FROMTYPE option sets the default resource requirements to that of jobs submitted from fromhost
 :param array hostlist: Hostnames to select from
+:param array indxnamelist: When empty returns all load indexes, else returns loadindexes specified in indxnamelist
 :return: Array of HostLoad objects
 :rtype: array
 
+::
+
+	#options
+	EXACT                =   0x01
+	OK_ONLY              =   0x02
+	NORMALIZE            =   0x04
+	LOCALITY             =   0x08
+	IGNORE_RES           =   0x10
+	LOCAL_ONLY           =   0x20
+	DFT_FROMTYPE         =   0x40
+	ALL_CLUSTERS         =   0x80
+	EFFECTIVE            =   0x100
+	RECV_FROM_CLUSTERS   =   0x200
+	NEED_MY_CLUSTER_NAME =   0x400
+	>>> from openlava import lslib
+	>>> hosts=lslib.ls_loadinfo(hostlist=['master'])
+	>>> print hosts[0].hostName
+	master
+	>>> 
 
 """
 	cdef hostLoad *hosts
