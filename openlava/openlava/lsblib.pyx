@@ -1259,11 +1259,9 @@ Get information on specified queues.
 
 	cdef char **queueNames
 	cdef int numQueues
-	numqueues=len(queues)
 	if len(queues)>0:
 		queueNames=to_cstring_array(queues)
-		numqueues=int(numqueues)
-		numQueues=numqueues
+		numQueues=len(queues)
 	else:
 		queueNames=NULL
 		numqueues=int(numqueues)
