@@ -1262,6 +1262,8 @@ Get information on specified queues.
 	numqueues=len(queues)
 	if len(queues)>0:
 		queueNames=to_cstring_array(queues)
+		numqueues=int(numqueues)
+		numQueues=numqueues
 	else:
 		queueNames=NULL
 		numqueues=int(numqueues)
