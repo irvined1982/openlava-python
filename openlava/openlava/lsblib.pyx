@@ -284,7 +284,19 @@ cdef extern from "lsbatch.h":
 		
 
 		
-		
+ALL_JOB        = 0x0001
+DONE_JOB       = 0x0002
+PEND_JOB       = 0x0004
+SUSP_JOB       = 0x0008
+CUR_JOB        = 0x0010
+LAST_JOB       = 0x0020
+RUN_JOB        = 0x0040
+JOBID_ONLY     = 0x0080
+HOST_NAME      = 0x0100
+NO_PEND_REASONS= 0x0200
+JGRP_ARRAY_INFO= 0x1000
+JOBID_ONLY_ALL = 0x02000
+ZOMBIE_JOB     = 0x04000		
 		
 EVENT_JOB_NEW = 1
 EVENT_JOB_START = 2
@@ -1058,7 +1070,7 @@ Modifies an existing job
 	job_id=jobSubReq._modify(jobSubReply, jobId)
 	return job_id
 
-def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=0):
+def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=ALL_JOB):
 	"""openlava.lsblib.lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=0)
 Get information about jobs that match the specified criteria.
 
@@ -1219,6 +1231,9 @@ Opens, closes, activates or inactivates a queue.
 
 
 """
+	queue=str(queue)
+	opCode=int(opCode)
+	return openlava_base.lsb_queuecontrol(queue, opCode)
 
 def lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0):
 	"""openlava.lsblib.lsb_queueinfo(queues=[], numqueues=0, hostname="", username="", options=0)
