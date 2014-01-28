@@ -1552,6 +1552,8 @@ Get information on specified users
 	cdef userInfoEnt *u
 
 	user_info=openlava_base.lsb_userinfo(users,&num_users)
+	if user_info == NULL:
+		return None
 	usrs=[]
 	for i in range(num_users):
 		u=&user_info[i]
