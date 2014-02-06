@@ -252,7 +252,26 @@ cdef extern from "lsf.h":
 
 	extern enum valueType: LS_BOOLEAN, LS_NUMERIC, LS_STRING, LS_EXTERNAL
 	extern enum orderType: INCR, DECR, NA
-	
+
+	extern struct clusterInfo:
+		char  clusterName[128]
+		int   status
+		char  masterName[64]
+		char  managerName[128]
+		int   managerId
+		int   numServers
+		int   numClients
+		int   nRes
+		char  **resources
+		int    nTypes
+		char **hostTypes
+		int    nModels
+		char **hostModels
+		int    nAdmins
+		int  *adminIds
+		char **admins
+
+
 	extern struct hostInfo:
 		char  hostName[64]
 		char  *hostType
@@ -297,6 +316,7 @@ cdef extern from "lsf.h":
 		int  flags
 		int  interval
 		
+	extern clusterInfo *ls_clusterinfo(char *resreq, int *numclusters, char **clusterlist, int listsize, int options)
 	extern char 		*ls_getclustername()
 	extern float 		*ls_gethostfactor(char *hostname)
 	extern hostInfo 	*ls_gethostinfo(char *resreq, int *numhosts, char **hostlist, int listsize, int options)

@@ -74,6 +74,23 @@ cdef extern from "lsf.h":
 	extern enum valueType: LS_BOOLEAN, LS_NUMERIC, LS_STRING, LS_EXTERNAL
 	extern enum orderType: INCR, DECR, NA
 	extern int lserrno
+	extern struct clusterInfo:
+		char  clusterName[128]
+		int   status
+		char  masterName[64]
+		char  managerName[128]
+		int   managerId
+		int   numServers
+		int   numClients
+		int   nRes
+		char  **resources
+		int    nTypes
+		char **hostTypes
+		int    nModels
+		char **hostModels
+		int    nAdmins
+		int  *adminIds
+		char **admins
 	extern struct hostInfo:
 		char  hostName[64]
 		char  *hostType
@@ -123,6 +140,10 @@ INFINIT_LOAD      = float(0x7fffffff)
 INFINIT_FLOAT     = float(0x7fffffff)
 INFINIT_INT       = int(0x7fffffff)
 INFINIT_LONG_INT  = int(0x7fffffff)
+
+CLUST_STAT_OK      =         0x01
+CLUST_STAT_UNAVAIL =         0x02
+
 
 LSF_DEFAULT_SOCKS =      15
 MAXFILENAMELEN    =      256
@@ -783,6 +804,44 @@ cdef char ** to_cstring_array(list_str):
 		ret[i] = PyString_AsString(list_str[i])
 	return ret
 
+
+def ls_clusterinfo(resReq="", numclusters=0, clusterList=[], listsize=0, options=0):
+	"""openlava.lslib.ls_clusterinfo(resReq="", numclusters=0, clusterList=[], listsize=0, options=0)
+Returns an array of ClusterInfo objects.
+
+:param str resReq: select clusters that can satisfy the resources requested
+:param int numclusters: Ignored
+:param array clusterList: Array of cluster names, will return only clusters that match
+:param int listsize: ignored
+:param int options: ignored
+:returns: Array of ClusterInfo objects, or None on error
+:rtype: Array or None
+"""
+	cdef int nClusters
+	nClusters=0
+	cdef clusterInfo * cinfo
+	cdef char * resreq
+	resreq=NULL
+	if (resReq > 0):
+		resreq=resReq
+	cdef int listSize
+	listSize=len(clusterList)
+	cdef char ** clusterlist
+	clusterlist=NULL
+	if listSize > 0:
+		clusterlist=to_cstring_array(clusterList)
+	cinfo=openlava_base.ls_clusterinfo(resreq, &nClusters, clusterlist, listSize, options)
+	if cinfo==NULL:
+		return None
+	# iterate and populat
+	ci=[]
+	for i in xrange(nClusters):
+		c=ClusterInfo()
+		c._load_struct(&cinfo[i])
+		ci.append(c)
+	return ci
+
+
 def get_lserrno():
 	"""openlava.lslib.get_lserrno()
 
@@ -1282,6 +1341,74 @@ Get the lslib error message associated with lserrno
 		return u""
 	else:
 		return u"%s" % msg
+	
+
+cdef class ClusterInfo:
+	cdef clusterInfo * _data
+	cdef _load_struct(self, clusterInfo * data):
+		self._data=data
+
+	property clusterName:
+		def __get__(self):
+			return u"%s" % self._data.clusterName
+
+	property status:
+		def __get__(self):
+			return self._data.status
+
+	property masterName:
+		def __get__(self):
+			return u"%s" % self._data.masterName
+
+	property managerName:
+		def __get__(self):
+			return u"%s" % self._data.managerName
+
+	property managerId:
+		def __get__(self):
+			return self._data.managerId
+
+	property numServers:
+		def __get__(self):
+			return self._data.numServers
+
+	property numClients:
+		def __get__(self):
+			return self._data.numClients
+
+	property nRes:
+		def __get__(self):
+			return self._data.nRes
+
+	property resources:
+		def __get__(self):
+			return [u"%s" % self._data.resources[i] for i in range(self.nRes)]
+
+	property nTypes:
+		def __get__(self):
+			return self._data.nTypes
+
+	property hostTypes:
+		def __get__(self):
+			return [u"%s" % self._data.hostTypes[i] for i in range(self.nTypes)]
+
+	property nModels:
+		def __get__(self):
+			return self._data.nModels
+
+	property hostModels:
+		def __get__(self):
+			return [u"%s" % self._data.hostModels[i] for i in range(self.nModels)]
+
+	property nAdmins:
+		def __get__(self):
+			return self._data.nAdmins
+	property adminIds:
+		def __get__(self):
+			return [self._data.adminIds[i] for i in range(self.nAdmins)]
+	property admins:
+		def __get__(self):
+			return [u"%s" % self._data.admins[i] for i in range(self.nAdmins)]
 	
 
 cdef class HostInfo:
