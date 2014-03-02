@@ -1070,7 +1070,7 @@ Modifies an existing job
 	job_id=jobSubReq._modify(jobSubReply, jobId)
 	return job_id
 
-def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=ALL_JOB):
+def lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=CUR_JOB):
 	"""openlava.lsblib.lsb_openjobinfo(job_id=0, job_name="", user="all", queue="", host="", options=0)
 Get information about jobs that match the specified criteria.
 
