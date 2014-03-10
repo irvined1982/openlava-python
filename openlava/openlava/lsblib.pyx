@@ -65,7 +65,7 @@ Members
 
 import cython
 cimport openlava_base
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport realloc, malloc, free
 from libc.string cimport strcmp, memset, strcpy
 from cpython.string cimport PyString_AsString
 from cpython cimport bool
@@ -2182,6 +2182,20 @@ cdef class Submit:
 			self._data.loginShell=NULL
 			self._data.userPriority=-1
 
+	cdef char * _copy(self, char * dest, src_p):
+		src_p=str(src_p)
+		cdef char * src
+		length = len(src_p)
+		src = src_p
+		if dest != NULL:
+			free(dest)
+		dest = <char *>malloc(sizeof(char) * length)
+		if dest == NULL:
+			raise MemoryError("Unable to allocate memory for string")
+		strcpy(dest, src)
+		return dest
+
+
 	property options:
 		def __get__(self):
 			return self._data.options
@@ -2203,16 +2217,14 @@ cdef class Submit:
 			return u'%s' % self._data.jobName
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.jobName=v
+			self._data.jobName=self._copy(self._data.jobName, v)
 
 	property queue:
 		def __get__(self):
-			return u'%s' % self._data.queue
+			return self._data.queue
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.queue=v
+			self._data.queue = self._copy(self._data.queue, v)
 
 	property numAskedHosts:
 		def __get__(self):
@@ -2232,8 +2244,7 @@ cdef class Submit:
 			return u'%s' % self._data.resReq
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.resReq=v
+			self._data.resReq=self._copy(self._data.resReq, v)
 
 	property rLimits:
 		def __get__(self):
@@ -2251,8 +2262,7 @@ cdef class Submit:
 			return u'%s' % self._data.hostSpec
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.hostSpec=v
+			self._data.hostSpec=self._copy(self._data.hostSpec, v)
 
 	property numProcessors:
 		def __get__(self):
@@ -2267,8 +2277,7 @@ cdef class Submit:
 			return u'%s' % self._data.dependCond
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.dependCond=v
+			self._data.dependCond=self._copy(self._data.dependCond, v)
 
 	property beginTime:
 		def __get__(self):
@@ -2299,40 +2308,35 @@ cdef class Submit:
 			return u'%s' % self._data.inFile
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.inFile=v
+			self._data.inFile=self._copy(self._data.inFile, v)
 
 	property outFile:
 		def __get__(self):
 			return u'%s' % self._data.outFile
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.outFile=v
+			self._data.outFile=self._copy(self._data.outFile, v)
 
 	property errFile:
 		def __get__(self):
 			return u'%s' % self._data.errFile
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.errFile=v
+			self._data.errFile=self._copy(self._data.errFile, v)
 
 	property command:
 		def __get__(self):
 			return u'%s' % self._data.command
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.command=v
+			self._data.command=self._copy(self._data.command, v)
 
 	property newCommand:
 		def __get__(self):
 			return u'%s' % self._data.newCommand
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.newCommand=v
+			self._data.newCommand=self._copy(self._data.newCommand, v)
 
 	property chkpntPeriod:
 		def __get__(self):
@@ -2347,8 +2351,7 @@ cdef class Submit:
 			return u'%s' % self._data.chkpntDir
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.chkpntDir=v
+			self._data.chkpntDir=self._copy(self._data.chkpntDir, v)
 
 	property nxf:
 		def __get__(self):
@@ -2387,16 +2390,14 @@ cdef class Submit:
 			return u'%s' % self._data.preExecCmd
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.preExecCmd=v
+			self._data.preExecCmd=self._copy(self._data.preExecCmd, v)
 
 	property mailUser:
 		def __get__(self):
 			return u'%s' % self._data.mailUser
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.mailUser=v
+			self._data.mailUser=self._copy(self._data.mailUser, v)
 
 	property delOptions:
 		def __get__(self):
@@ -2419,8 +2420,7 @@ cdef class Submit:
 			return u'%s' % self._data.projectName
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.projectName=v
+			self._data.projectName=self._copy(self._data.projectName, v)
 
 	property maxNumProcessors:
 		def __get__(self):
@@ -2435,8 +2435,7 @@ cdef class Submit:
 			return u'%s' % self._data.loginShell
 		def __set__(self,v):
 			self._check_set()
-			v=str(v)
-			self._data.loginShell=v
+			self._data.loginShell=self._copy(self._data.loginShell, v)
 
 	property userPriority:
 		def __get__(self):
