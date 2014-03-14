@@ -2221,7 +2221,7 @@ cdef class Submit:
 
 	property queue:
 		def __get__(self):
-			return self._data.queue
+			return u"%s" % self._data.queue
 		def __set__(self,v):
 			self._check_set()
 			self._data.queue = self._copy(self._data.queue, v)

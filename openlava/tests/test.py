@@ -93,7 +93,7 @@ class LsBlib(unittest.TestCase):
 
     def test_jobs(self):
         num_jobs = lsblib.lsb_openjobinfo()
-        self.assertEqual(lsblib.get_lserrno(), lsblib.LSBE_NO_ERROR)
+        self.assertEqual(lsblib.get_lsberrno(), lsblib.LSBE_NO_ERROR)
         for i in range(num_jobs):
             job = lsblib.lsb_readjobinfo()
             self.check_job(job)
@@ -103,7 +103,6 @@ class LsBlib(unittest.TestCase):
             filename = lsblib.lsb_peekjob(job.jobId)
 
         lsblib.lsb_closejobinfo()
-        self.assertEqual(lsblib.get_lserrno(), lsblib.LSBE_NO_ERROR)
 
     def check_job(self, job):
         self.assertIsInstance(job, lsblib.JobInfoEnt)
@@ -376,7 +375,7 @@ class LsLib(unittest.TestCase):
             self.assertGreaterEqual(host.nRes, 0)
 
             for resource in host.resources:
-                self.check_resource(resource)
+				self.assertIsInstance(resource, unicode)
             self.assertIsInstance(host.windows, unicode)
             self.assertNotEqual(host.windows, "")
             self.assertIsNotNone(host.windows)
