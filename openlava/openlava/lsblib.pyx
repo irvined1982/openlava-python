@@ -2185,7 +2185,7 @@ cdef class Submit:
 	cdef char * _copy(self, char * dest, src_p):
 		src_p=str(src_p)
 		cdef char * src
-		length = len(src_p)
+		length = len(src_p) + 1
 		src = src_p
 		if dest != NULL:
 			free(dest)

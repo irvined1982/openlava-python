@@ -65,6 +65,7 @@ def makeExtension(extName):
 
 
 setup(
+	extra_compile_args=["-g"],
 	name="openlava-bindings",
 	version="1.0",
 	description="Bindings for OpenLava",
