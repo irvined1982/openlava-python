@@ -1,0 +1,201 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; Openlava Python Bindings 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Openlava Python Bindings 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="lslib" href="lslib.html" />
+    <link rel="prev" title="Contents" href="index.html" />
+<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			  ga('create', 'UA-51064094-1', 'clusterfsck.io');
+			    ga('send', 'pageview');
+
+			</script>
+ 
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lslib.html" title="lslib"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Installation is done as follows:</p>
+<ol class="arabic">
+<li><p class="first">Download or Clone the repository:</p>
+<ol class="arabic">
+<li><p class="first"><a class="reference external" href="https://github.com/irvined1982/openlava-python/archive/master.zip">Download Zip</a></p>
+</li>
+<li><p class="first">git clone <a class="reference external" href="https://github.com/irvined1982/openlava-python.git">https://github.com/irvined1982/openlava-python.git</a>:</p>
+<div class="highlight-python"><pre>$ git clone https://github.com/irvined1982/openlava-python.git
+Cloning into 'openlava-python'...
+remote: Reusing existing pack: 412, done.
+remote: Total 412 (delta 0), reused 0 (delta 0)
+Receiving objects: 100% (412/412), 2.22 MiB | 317 KiB/s, done.
+Resolving deltas: 100% (282/282), done.
+$</pre>
+</div>
+</li>
+</ol>
+</li>
+<li><p class="first">Enter the openlava directory:</p>
+<div class="highlight-python"><pre>$ cd openlava-python/openlava/</pre>
+</div>
+</li>
+<li><p class="first">Run setup install:</p>
+<div class="highlight-python"><pre>$ python setup.py install
+running install
+running build
+running build_py
+creating build
+creating build/lib.linux-x86_64-2.7
+creating build/lib.linux-x86_64-2.7/openlava
+copying openlava/__init__.py -&gt; build/lib.linux-x86_64-2.7/openlava
+running build_ext
+skipping 'openlava/lslib.c' Cython extension (up-to-date)
+building 'openlava.lslib' extension
+creating build/temp.linux-x86_64-2.7
+creating build/temp.linux-x86_64-2.7/openlava
+gcc -pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fPIC -I/opt/openlava/include -I. -I/usr/include/python2.7 -c openlava/lslib.c -o build/temp.linux-x86_64-2.7/openlava/lslib.o -O3 -Wall
+gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions -Wl,-z,relro build/temp.linux-x86_64-2.7/openlava/lslib.o /opt/openlava/lib/liblsf.a /opt/openlava/lib/liblsbatch.a -L/opt/openlava/lib -llsf -llsbatch -lnsl -o build/lib.linux-x86_64-2.7/openlava/lslib.so -g
+skipping 'openlava/lsblib.c' Cython extension (up-to-date)
+building 'openlava.lsblib' extension
+gcc -pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fPIC -I/opt/openlava/include -I. -I/usr/include/python2.7 -c openlava/lsblib.c -o build/temp.linux-x86_64-2.7/openlava/lsblib.o -O3 -Wall
+openlava/lsblib.c: In function ‘__pyx_pf_8openlava_6lsblib_6Submit_1_modify’:
+openlava/lsblib.c:13338:13: warning: variable ‘__pyx_v_reply’ set but not used [-Wunused-but-set-variable]
+openlava/lsblib.c: In function ‘__pyx_pf_8openlava_6lsblib_11JobInfoHead_6jobIds___get__’:
+openlava/lsblib.c:19465:3: warning: statement with no effect [-Wunused-value]
+openlava/lsblib.c: In function ‘__pyx_pf_8openlava_6lsblib_11JobInfoHead_9hostNames___get__’:
+openlava/lsblib.c:19627:3: warning: statement with no effect [-Wunused-value]
+gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions -Wl,-z,relro build/temp.linux-x86_64-2.7/openlava/lsblib.o /opt/openlava/lib/liblsf.a /opt/openlava/lib/liblsbatch.a -L/opt/openlava/lib -llsf -llsbatch -lnsl -o build/lib.linux-x86_64-2.7/openlava/lsblib.so -g
+running install_lib
+copying build/lib.linux-x86_64-2.7/openlava/lsblib.so -&gt; /usr/local/lib/python2.7/dist-packages/openlava
+copying build/lib.linux-x86_64-2.7/openlava/__init__.py -&gt; /usr/local/lib/python2.7/dist-packages/openlava
+copying build/lib.linux-x86_64-2.7/openlava/lslib.so -&gt; /usr/local/lib/python2.7/dist-packages/openlava
+byte-compiling /usr/local/lib/python2.7/dist-packages/openlava/__init__.py to __init__.pyc
+running install_egg_info
+Removing /usr/local/lib/python2.7/dist-packages/openlava_bindings-1.0.egg-info
+Writing /usr/local/lib/python2.7/dist-packages/openlava_bindings-1.0.egg-info
+$</pre>
+</div>
+</li>
+<li><p class="first">Test that openlava-python is working correctly:</p>
+<div class="highlight-python"><pre>$ python
+Python 2.7.3 (default, Sep 26 2013, 20:03:06)
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+&gt;&gt;&gt; from openlava import lslib
+&gt;&gt;&gt; lslib.ls_getclustername()
+u'openlava'
+&gt;&gt;&gt;</pre>
+</div>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Contents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lslib.html"
+                        title="next chapter">lslib</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/installation.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lslib.html" title="lslib"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Contents"
+             >previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, David Irvine.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

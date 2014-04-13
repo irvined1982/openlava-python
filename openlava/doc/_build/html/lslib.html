@@ -1,0 +1,1188 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lslib &mdash; Openlava Python Bindings 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Openlava Python Bindings 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="lsbatch" href="lsbatch.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			  ga('create', 'UA-51064094-1', 'clusterfsck.io');
+			    ga('send', 'pageview');
+
+			</script>
+ 
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lsbatch.html" title="lsbatch"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-openlava.lslib">
+<span id="lslib"></span><h1>lslib<a class="headerlink" href="#module-openlava.lslib" title="Permalink to this headline">¶</a></h1>
+<p>This module provides access to the openlava lslib C API.  Lslib enables applications to contact the LIM and RES daemons.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Import the appropriate functions from each module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openlava.lslib</span> <span class="kn">import</span> <span class="n">ls_getclustername</span><span class="p">,</span> <span class="n">ls_getmastername</span><span class="p">,</span> <span class="n">ls_info</span>    
+<span class="kn">import</span> <span class="nn">sys</span>
+</pre></div>
+</div>
+<p>Get and print the clustername, if ls_getclustername() fails, it will return None:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cluster</span> <span class="o">=</span> <span class="n">ls_getclustername</span><span class="p">();</span>
+<span class="k">if</span> <span class="n">cluster</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;Unable to get clustername&quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;My cluster name is &lt;</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span>  <span class="n">cluster</span>
+</pre></div>
+</div>
+<p>Do the same for the master host name:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">master</span> <span class="o">=</span> <span class="n">ls_getmastername</span><span class="p">();</span>
+<span class="k">if</span> <span class="n">master</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;Unable to get master&quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Master host is &lt;</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="n">master</span>
+</pre></div>
+</div>
+<p>Get information about resources on the cluster using ls_info():</p>
+<div class="highlight-python"><pre>lsInfo = ls_info()
+if lsInfo==None:
+    print "Unable to get LSInfo"
+    sys.exit(1)
+
+print "</pre>
+</div>
+<dl class="docutils">
+<dt>%-15.15s %s&#8221; % (&#8220;RESOURCE_NAME&#8221;, &#8220;DESCRIPTION&#8221;)</dt>
+<dd><dl class="first last docutils">
+<dt>for i in range(lsInfo.nRes):</dt>
+<dd>print &#8220;%-15.15s %s&#8221; % ( lsInfo.resTable[i].name, lsInfo.resTable[i].des)</dd>
+</dl>
+</dd>
+</dl>
+</div>
+<div class="section" id="members">
+<h2>Members<a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="openlava.lslib.LS_ISBUSY">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISBUSY</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISBUSY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host is busy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the host is busy, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISLOCKED">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISLOCKED</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISLOCKED" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host is locked for any reason</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the host is locked for any reason, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISLOCKEDM">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISLOCKEDM</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISLOCKEDM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host LIM is locked by the master LIM</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the host LIM is locked by the master LIM, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISLOCKEDU">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISLOCKEDU</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISLOCKEDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host has been locked by an administrator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">if the host has been locked by an administrator, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISLOCKEDW">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISLOCKEDW</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISLOCKEDW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host is locked because its run window is closed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the host is locked because its run window is closed, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISOK">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISOK</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISOK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the host is OK</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the host is OK, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISOKNRES">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISOKNRES</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISOKNRES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true as long as the RES and SBD are not down</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True as long as the RES and SBD are not down, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISRESDOWN">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISRESDOWN</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISRESDOWN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the RES is down on the host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the RES is down on the host, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISSBDDOWN">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISSBDDOWN</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISSBDDOWN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the SBD is down on the host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the SBD is down on the host, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.LS_ISUNAVAIL">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">LS_ISUNAVAIL</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#openlava.lslib.LS_ISUNAVAIL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the LIM on the host is not available.  For example it is not running, or the host is down</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>status</strong> (<em>int</em>) &#8211; status of HostInfo object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if LIM on host is not available, else False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_load</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISUNAVAIL: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISUNAVAIL</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISBUSY: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISBUSY</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDU: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDU</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDW: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDW</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKEDM: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKEDM</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISLOCKED: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISLOCKED</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISRESDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISRESDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISSBDDOWN: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISSBDDOWN</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOK: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOK</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s">: LS_ISOKNRES: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">hostName</span><span class="p">,</span> <span class="n">lslib</span><span class="o">.</span><span class="n">LS_ISOKNRES</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Host: master: LS_ISUNAVAIL: False</span>
+<span class="go">Host: master: LS_ISBUSY: False</span>
+<span class="go">Host: master: LS_ISLOCKEDU: False</span>
+<span class="go">Host: master: LS_ISLOCKEDW: False</span>
+<span class="go">Host: master: LS_ISLOCKEDM: False</span>
+<span class="go">Host: master: LS_ISLOCKED: False</span>
+<span class="go">Host: master: LS_ISRESDOWN: False</span>
+<span class="go">Host: master: LS_ISSBDDOWN: False</span>
+<span class="go">Host: master: LS_ISOK: True</span>
+<span class="go">Host: master: LS_ISOKNRES: True</span>
+<span class="go">Host: comp00: LS_ISUNAVAIL: True</span>
+<span class="go">Host: comp00: LS_ISBUSY: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDU: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDW: False</span>
+<span class="go">Host: comp00: LS_ISLOCKEDM: False</span>
+<span class="go">Host: comp00: LS_ISLOCKED: False</span>
+<span class="go">Host: comp00: LS_ISRESDOWN: False</span>
+<span class="go">Host: comp00: LS_ISSBDDOWN: False</span>
+<span class="go">Host: comp00: LS_ISOK: False</span>
+<span class="go">Host: comp00: LS_ISOKNRES: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.get_lserrno">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">get_lserrno</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lslib.get_lserrno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the lserrno</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">LS Errno</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><pre>LSE_NO_ERR           =   0
+LSE_BAD_XDR          =   1
+LSE_MSG_SYS          =   2
+LSE_BAD_ARGS         =   3
+LSE_MASTR_UNKNW      =   4
+LSE_LIM_DOWN         =   5
+LSE_PROTOC_LIM       =   6
+LSE_SOCK_SYS         =   7
+LSE_ACCEPT_SYS       =   8
+LSE_BAD_TASKF        =   9
+LSE_NO_HOST          =   10
+LSE_NO_ELHOST        =   11
+LSE_TIME_OUT         =   12
+LSE_NIOS_DOWN        =   13
+LSE_LIM_DENIED       =   14
+LSE_LIM_IGNORE       =   15
+LSE_LIM_BADHOST      =   16
+LSE_LIM_ALOCKED      =   17
+LSE_LIM_NLOCKED      =   18
+LSE_LIM_BADMOD       =   19
+LSE_SIG_SYS          =   20
+LSE_BAD_EXP          =   21
+LSE_NORCHILD         =   22
+LSE_MALLOC           =   23
+LSE_LSFCONF          =   24
+LSE_BAD_ENV          =   25
+LSE_LIM_NREG         =   26
+LSE_RES_NREG         =   27
+LSE_RES_NOMORECONN   =   28
+LSE_BADUSER          =   29
+LSE_RES_ROOTSECURE   =   30
+LSE_RES_DENIED       =   31
+LSE_BAD_OPCODE       =   32
+LSE_PROTOC_RES       =   33
+LSE_RES_CALLBACK     =   34
+LSE_RES_NOMEM        =   35
+LSE_RES_FATAL        =   36
+LSE_RES_PTY          =   37
+LSE_RES_SOCK         =   38
+LSE_RES_FORK         =   39
+LSE_NOMORE_SOCK      =   40
+LSE_WDIR             =   41
+LSE_LOSTCON          =   42
+LSE_RES_INVCHILD     =   43
+LSE_RES_KILL         =   44
+LSE_PTYMODE          =   45
+LSE_BAD_HOST         =   46
+LSE_PROTOC_NIOS      =   47
+LSE_WAIT_SYS         =   48
+LSE_SETPARAM         =   49
+LSE_RPIDLISTLEN      =   50
+LSE_BAD_CLUSTER      =   51
+LSE_RES_VERSION      =   52
+LSE_EXECV_SYS        =   53
+LSE_RES_DIR          =   54
+LSE_RES_DIRW         =   55
+LSE_BAD_SERVID       =   56
+LSE_NLSF_HOST        =   57
+LSE_UNKWN_RESNAME    =   58
+LSE_UNKWN_RESVALUE   =   59
+LSE_TASKEXIST        =   60
+LSE_BAD_TID          =   61
+LSE_TOOMANYTASK      =   62
+LSE_LIMIT_SYS        =   63
+LSE_BAD_NAMELIST     =   64
+LSE_LIM_NOMEM        =   65
+LSE_NIO_INIT         =   66
+LSE_CONF_SYNTAX      =   67
+LSE_FILE_SYS         =   68
+LSE_CONN_SYS         =   69
+LSE_SELECT_SYS       =   70
+LSE_EOF              =   71
+LSE_ACCT_FORMAT      =   72
+LSE_BAD_TIME         =   73
+LSE_FORK             =   74
+LSE_PIPE             =   75
+LSE_ESUB             =   76
+LSE_EAUTH            =   77
+LSE_NO_FILE          =   78
+LSE_NO_CHAN          =   79
+LSE_BAD_CHAN         =   80
+LSE_INTERNAL         =   81
+LSE_PROTOCOL         =   82
+LSE_MISC_SYS         =   83
+LSE_RES_RUSAGE       =   84
+LSE_NO_RESOURCE      =   85
+LSE_BAD_RESOURCE     =   86
+LSE_RES_PARENT       =   87
+LSE_I18N_SETLC       =   88
+LSE_I18N_CATOPEN     =   89
+LSE_I18N_NOMEM       =   90
+LSE_NO_MEM           =   91
+LSE_FILE_CLOSE       =   92
+LSE_MASTER_LIM_DOWN  =   93
+LSE_MLS_INVALID      =   94
+LSE_MLS_CLEARANCE    =   95
+LSE_MLS_RHOST        =   96
+LSE_MLS_DOMINATE     =   97
+LSE_HOST_EXIST       =   98
+LSE_NERR             =   99
+
+&gt;&gt;&gt; from openlava import lslib
+&gt;&gt;&gt; lslib.get_lserrno()
+81
+&gt;&gt;&gt; lslib.ls_perror("Test:")
+Test:: Internal library error
+&gt;&gt;&gt; lslib.ls_sysmsg()
+u'Internal library error'
+&gt;&gt;&gt; </pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_clusterinfo">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_clusterinfo</tt><big>(</big><em>resReq=&quot;&quot;</em>, <em>numclusters=0</em>, <em>clusterList=</em><span class="optional">[</span><span class="optional">]</span>, <em>listsize=0</em>, <em>options=0</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_clusterinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of ClusterInfo objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resReq</strong> (<em>str</em>) &#8211; select clusters that can satisfy the resources requested</li>
+<li><strong>numclusters</strong> (<em>int</em>) &#8211; Ignored</li>
+<li><strong>clusterList</strong> (<em>array</em>) &#8211; Array of cluster names, will return only clusters that match</li>
+<li><strong>listsize</strong> (<em>int</em>) &#8211; ignored</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; ignored</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of ClusterInfo objects, or None on error</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Array or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_getclustername">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_getclustername</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lslib.ls_getclustername" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the cluster</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Name of the cluster</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_getclustername</span><span class="p">()</span>
+<span class="go">u&#39;openlava&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_gethostfactor">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_gethostfactor</tt><big>(</big><em>hostname</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_gethostfactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the host factor of the host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hostname</strong> (<em>str</em>) &#8211; Name of host to get hostfactor</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">hostfactor</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_gethostfactor</span><span class="p">(</span><span class="s">&quot;master&quot;</span><span class="p">)</span>
+<span class="go">100.0</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_gethostinfo">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_gethostinfo</tt><big>(</big><em>resReq=&quot;&quot;</em>, <em>hostList=</em><span class="optional">[</span><span class="optional">]</span>, <em>options=0</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_gethostinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of HostInfo objects that meet the criteria specified</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resReq</strong> (<em>str</em>) &#8211; Filter on hosts that meet the following resource request</li>
+<li><strong>hostList</strong> (<em>array</em>) &#8211; return from the following list of hosts</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; Options</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array of HostInfo objects or None on error</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lslib</span><span class="o">.</span><span class="n">ls_gethostinfo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">host</span><span class="o">.</span><span class="n">hostName</span>
+<span class="gp">... </span>
+<span class="go">master</span>
+<span class="go">comp00</span>
+<span class="go">comp01</span>
+<span class="go">comp02</span>
+<span class="go">comp03</span>
+<span class="go">comp04</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_gethostmodel">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_gethostmodel</tt><big>(</big><em>hostname</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_gethostmodel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the model name of the host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hostname</strong> (<em>str</em>) &#8211; Name of host to get host model</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">host model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_gethostmodel</span><span class="p">(</span><span class="s">&quot;master&quot;</span><span class="p">)</span>
+<span class="go">u&#39;IntelI5&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_gethosttype">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_gethosttype</tt><big>(</big><em>hostname</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_gethosttype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the type of the host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hostname</strong> (<em>str</em>) &#8211; Name of host to get host type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">host type</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_gethosttype</span><span class="p">(</span><span class="s">&quot;master&quot;</span><span class="p">)</span>
+<span class="go">u&#39;linux&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_getmastername">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_getmastername</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lslib.ls_getmastername" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the master host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">master host</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_getmastername</span><span class="p">()</span>
+<span class="go">u&#39;master&#39;</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_info">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_info</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lslib.ls_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an LsInfo object for the cluster</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">LsInfo object for the cluster</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">LsInfo</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">info</span><span class="o">=</span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_info</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">info</span><span class="o">.</span><span class="n">hostTypes</span>
+<span class="go">[u&#39;linux&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_load">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_load</tt><big>(</big><em>resreq=None</em>, <em>numhosts=0</em>, <em>options=0</em>, <em>fromhost=None</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of HostLoad objects for hosts that meet the criteria</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resreq</strong> (<em>str</em>) &#8211; Resource request that hosts must satisfy</li>
+<li><strong>numhosts</strong> (<em>int</em>) &#8211; if None, return only one host. if zero, return all matching hosts.</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; flags that affect how the hostlist is created</li>
+<li><strong>fromhost</strong> (<em>str</em>) &#8211; when used with DFT_FROMTYPE option sets the default resource requirements to that of jobs submitted from fromhost</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of HostLoad objects</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><pre>#options
+EXACT                =   0x01
+OK_ONLY              =   0x02
+NORMALIZE            =   0x04
+LOCALITY             =   0x08
+IGNORE_RES           =   0x10
+LOCAL_ONLY           =   0x20
+DFT_FROMTYPE         =   0x40
+ALL_CLUSTERS         =   0x80
+EFFECTIVE            =   0x100
+RECV_FROM_CLUSTERS   =   0x200
+NEED_MY_CLUSTER_NAME =   0x400
+&gt;&gt;&gt; from openlava import lslib
+&gt;&gt;&gt; hosts=lslib.ls_load(options=lslib.OK_ONLY)
+&gt;&gt;&gt; for i in hosts:
+...     print i.hostName
+... 
+master
+&gt;&gt;&gt; </pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_loadinfo">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_loadinfo</tt><big>(</big><em>resreq=None</em>, <em>numhosts=0</em>, <em>options=0</em>, <em>fromhost=None</em>, <em>hostlist=</em><span class="optional">[</span><span class="optional">]</span>, <em>indxnamelist=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#openlava.lslib.ls_loadinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of HostLoad objects for hosts that meet the specified criteria</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>resreq</strong> (<em>str</em>) &#8211; Resource request that hosts must satisfy</li>
+<li><strong>numhosts</strong> (<em>int</em>) &#8211; if None, return only one host. if zero, return all matching hosts.</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; flags that affect how the hostlist is created</li>
+<li><strong>fromhost</strong> (<em>str</em>) &#8211; when used with DFT_FROMTYPE option sets the default resource requirements to that of jobs submitted from fromhost</li>
+<li><strong>hostlist</strong> (<em>array</em>) &#8211; Hostnames to select from</li>
+<li><strong>indxnamelist</strong> (<em>array</em>) &#8211; When empty returns all load indexes, else returns loadindexes specified in indxnamelist</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of HostLoad objects</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><pre>#options
+EXACT                =   0x01
+OK_ONLY              =   0x02
+NORMALIZE            =   0x04
+LOCALITY             =   0x08
+IGNORE_RES           =   0x10
+LOCAL_ONLY           =   0x20
+DFT_FROMTYPE         =   0x40
+ALL_CLUSTERS         =   0x80
+EFFECTIVE            =   0x100
+RECV_FROM_CLUSTERS   =   0x200
+NEED_MY_CLUSTER_NAME =   0x400
+&gt;&gt;&gt; from openlava import lslib
+&gt;&gt;&gt; hosts=lslib.ls_loadinfo(hostlist=['master'])
+&gt;&gt;&gt; print hosts[0].hostName
+master
+&gt;&gt;&gt; </pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_perror">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_perror</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#openlava.lslib.ls_perror" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the lslib error message associated with the lserrno prefixed by message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<em>str</em>) &#8211; User defined error message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">get_lserrno</span><span class="p">()</span>
+<span class="go">81</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_perror</span><span class="p">(</span><span class="s">&quot;Test:&quot;</span><span class="p">)</span>
+<span class="go">Test:: Internal library error</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_sysmsg</span><span class="p">()</span>
+<span class="go">u&#39;Internal library error&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lslib.ls_sysmsg">
+<tt class="descclassname">openlava.lslib.</tt><tt class="descname">ls_sysmsg</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lslib.ls_sysmsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>openlava.lsblib.lsb_sysmsg()</p>
+<p>Get the lslib error message associated with lserrno</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">LSLIB error message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">get_lserrno</span><span class="p">()</span>
+<span class="go">81</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_perror</span><span class="p">(</span><span class="s">&quot;Test:&quot;</span><span class="p">)</span>
+<span class="go">Test:: Internal library error</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lslib</span><span class="o">.</span><span class="n">ls_sysmsg</span><span class="p">()</span>
+<span class="go">u&#39;Internal library error&#39;</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">lslib</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#members">Members</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lsbatch.html"
+                        title="next chapter">lsbatch</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lslib.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lsbatch.html" title="lsbatch"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, David Irvine.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

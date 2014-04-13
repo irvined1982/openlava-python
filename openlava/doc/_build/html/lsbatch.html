@@ -1,0 +1,1078 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lsbatch &mdash; Openlava Python Bindings 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Openlava Python Bindings 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Contributing and Getting Help" href="contributing.html" />
+    <link rel="prev" title="lslib" href="lslib.html" />
+<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			  ga('create', 'UA-51064094-1', 'clusterfsck.io');
+			    ga('send', 'pageview');
+
+			</script>
+ 
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing and Getting Help"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lslib.html" title="lslib"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-openlava.lsblib">
+<span id="lsbatch"></span><h1>lsbatch<a class="headerlink" href="#module-openlava.lsblib" title="Permalink to this headline">¶</a></h1>
+<p>This module provides access to the openlava lsblib C API.  Lsblib enables
+applications to manipulate hosts, users, queues, and jobs.</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Import the appropriate functions from each module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">openlava.lslib</span> <span class="kn">import</span> <span class="n">ls_perror</span>
+<span class="kn">from</span> <span class="nn">openlava.lsblib</span> <span class="kn">import</span> <span class="n">lsb_init</span><span class="p">,</span> <span class="n">lsb_hostinfo</span><span class="p">,</span> 
+</pre></div>
+</div>
+<p>Initialize the openlava library by calling lsb_init, if lsb_init fails, print
+the error message.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;Hosts&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ls_perror</span><span class="p">(</span><span class="s">&quot;lsb_init&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Call the appropriate functions, in this case, get information about each host.
+Where the lsblib function would normally return a struct, or array of structs,
+openlava.lsblib returns an array of python objects with attributes set to the
+data returned within the underlying C structures.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">hosts</span><span class="o">=</span><span class="n">lsb_hostinfo</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">hosts</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+        <span class="n">ls_perror</span><span class="p">(</span><span class="s">&quot;lsb_hostinfo&quot;</span><span class="p">);</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Function calls are kept as close as possible to the original LSB functions,
+generally this means they return -1 or None on failure.  Where &amp;num_x is
+supplied as an output parameter this is generally ignored as this is
+unsupported in python.  Instead use len(returned_array).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hosts</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;Host: </span><span class="si">%s</span><span class="s"> has </span><span class="si">%d</span><span class="s"> jobs&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">numJobs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Openlava reuses memory for many of its internal datastructures, this behavior is the same in the python bindings. 
+Attributes and methods are lazy, that is to say that data is only copied and returned from the underlying struct when
+accessed by the python code.  As such, be careful when creating lists of jobs from readjobinfo() calls.</p>
+</div>
+</div>
+<div class="section" id="members">
+<h2>Members<a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="openlava.lsblib.create_job_id">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">create_job_id</tt><big>(</big><em>job_id</em>, <em>array_index</em><big>)</big><a class="headerlink" href="#openlava.lsblib.create_job_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a job_id, and array_index, and returns the Openlava JOB id specific to that job/array_id combination.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>job_id</strong> (<em>int</em>) &#8211; The job id</li>
+<li><strong>array_index</strong> (<em>int</em>) &#8211; The array index of the job</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">full job id</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">create_job_id</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">4294968296</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.get_array_index">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">get_array_index</tt><big>(</big><em>job_id</em><big>)</big><a class="headerlink" href="#openlava.lsblib.get_array_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an Openlava job id, and returns the array index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>job_id</strong> (<em>int</em>) &#8211; full job id as returned from openlava</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The array index of the job</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">get_array_index</span><span class="p">(</span><span class="mi">4294968296</span><span class="p">)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.get_job_id">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">get_job_id</tt><big>(</big><em>job_id</em><big>)</big><a class="headerlink" href="#openlava.lsblib.get_job_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an Openlava job id, and returns the Job ID</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">get_job_id</span><span class="p">(</span><span class="mi">4294968296</span><span class="p">)</span>
+<span class="go">1000</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.get_lsberrno">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">get_lsberrno</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.get_lsberrno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the lsberrno</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">LSB Errno</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><pre>LSBE_NO_ERROR = 00
+LSBE_NO_JOB = 01
+LSBE_NOT_STARTED = 02
+LSBE_JOB_STARTED = 03
+LSBE_JOB_FINISH = 04
+LSBE_STOP_JOB = 05
+LSBE_DEPEND_SYNTAX = 6
+LSBE_EXCLUSIVE = 7
+LSBE_ROOT = 8
+LSBE_MIGRATION = 9
+LSBE_J_UNCHKPNTABLE = 10
+LSBE_NO_OUTPUT = 11
+LSBE_NO_JOBID = 12
+LSBE_ONLY_INTERACTIVE = 13
+LSBE_NO_INTERACTIVE = 14
+LSBE_NO_USER = 15
+LSBE_BAD_USER = 16
+LSBE_PERMISSION = 17
+LSBE_BAD_QUEUE = 18
+LSBE_QUEUE_NAME = 19
+LSBE_QUEUE_CLOSED = 20
+LSBE_QUEUE_WINDOW = 21
+LSBE_QUEUE_USE = 22
+LSBE_BAD_HOST = 23
+LSBE_PROC_NUM = 24
+LSBE_RESERVE1 = 25
+LSBE_RESERVE2 = 26
+LSBE_NO_GROUP = 27
+LSBE_BAD_GROUP = 28
+LSBE_QUEUE_HOST = 29
+LSBE_UJOB_LIMIT = 30
+LSBE_NO_HOST = 31
+LSBE_BAD_CHKLOG = 32
+LSBE_PJOB_LIMIT = 33
+LSBE_NOLSF_HOST = 34
+LSBE_BAD_ARG = 35
+LSBE_BAD_TIME = 36
+LSBE_START_TIME = 37
+LSBE_BAD_LIMIT = 38
+LSBE_OVER_LIMIT = 39
+LSBE_BAD_CMD = 40
+LSBE_BAD_SIGNAL = 41
+LSBE_BAD_JOB = 42
+LSBE_QJOB_LIMIT = 43
+LSBE_UNKNOWN_EVENT = 44
+LSBE_EVENT_FORMAT = 45
+LSBE_EOF = 46
+LSBE_MBATCHD = 47
+LSBE_SBATCHD = 48
+LSBE_LSBLIB = 49
+LSBE_LSLIB = 50
+LSBE_SYS_CALL = 51
+LSBE_NO_MEM = 52
+LSBE_SERVICE = 53
+LSBE_NO_ENV = 54
+LSBE_CHKPNT_CALL = 55
+LSBE_NO_FORK = 56
+LSBE_PROTOCOL = 57
+LSBE_XDR = 58
+LSBE_PORT = 59
+LSBE_TIME_OUT = 60
+LSBE_CONN_TIMEOUT = 61
+LSBE_CONN_REFUSED = 62
+LSBE_CONN_EXIST = 63
+LSBE_CONN_NONEXIST = 64
+LSBE_SBD_UNREACH = 65
+LSBE_OP_RETRY = 66
+LSBE_USER_JLIMIT = 67
+LSBE_JOB_MODIFY = 68
+LSBE_JOB_MODIFY_ONCE = 69
+LSBE_J_UNREPETITIVE = 70
+LSBE_BAD_CLUSTER = 71
+LSBE_JOB_MODIFY_USED = 72
+LSBE_HJOB_LIMIT = 73
+LSBE_NO_JOBMSG = 74
+LSBE_BAD_RESREQ = 75
+LSBE_NO_ENOUGH_HOST = 76
+LSBE_CONF_FATAL = 77
+LSBE_CONF_WARNING = 78
+LSBE_NO_RESOURCE = 79
+LSBE_BAD_RESOURCE = 80
+LSBE_INTERACTIVE_RERUN = 81
+LSBE_PTY_INFILE = 82
+LSBE_BAD_SUBMISSION_HOST = 83
+LSBE_LOCK_JOB = 84
+LSBE_UGROUP_MEMBER = 85
+LSBE_OVER_RUSAGE = 86
+LSBE_BAD_HOST_SPEC = 87
+LSBE_BAD_UGROUP = 88
+LSBE_ESUB_ABORT = 89
+LSBE_EXCEPT_ACTION = 90
+LSBE_JOB_DEP = 91
+LSBE_JGRP_NULL = 92
+LSBE_JGRP_BAD = 93
+LSBE_JOB_ARRAY = 94
+LSBE_JOB_SUSP = 95
+LSBE_JOB_FORW = 96
+LSBE_BAD_IDX = 97
+LSBE_BIG_IDX = 98
+LSBE_ARRAY_NULL = 99
+LSBE_JOB_EXIST = 100
+LSBE_JOB_ELEMENT = 101
+LSBE_BAD_JOBID = 102
+LSBE_MOD_JOB_NAME = 103
+LSBE_PREMATURE = 104
+LSBE_BAD_PROJECT_GROUP = 105
+LSBE_NO_HOST_GROUP = 106
+LSBE_NO_USER_GROUP = 107
+LSBE_INDEX_FORMAT = 108
+LSBE_SP_SRC_NOT_SEEN = 109
+LSBE_SP_FAILED_HOSTS_LIM = 110
+LSBE_SP_COPY_FAILED = 111
+LSBE_SP_FORK_FAILED = 112
+LSBE_SP_CHILD_DIES = 113
+LSBE_SP_CHILD_FAILED = 114
+LSBE_SP_FIND_HOST_FAILED = 115
+LSBE_SP_SPOOLDIR_FAILED = 116
+LSBE_SP_DELETE_FAILED = 117
+LSBE_BAD_USER_PRIORITY = 118
+LSBE_NO_JOB_PRIORITY = 119
+LSBE_JOB_REQUEUED = 120
+LSBE_MULTI_FIRST_HOST = 121
+LSBE_HG_FIRST_HOST = 122
+LSBE_HP_FIRST_HOST = 123
+LSBE_OTHERS_FIRST_HOST = 124
+LSBE_PROC_LESS = 125
+LSBE_MOD_MIX_OPTS = 126
+LSBE_MOD_CPULIMIT = 127
+LSBE_MOD_MEMLIMIT = 128
+LSBE_MOD_ERRFILE = 129
+LSBE_LOCKED_MASTER = 130
+LSBE_DEP_ARRAY_SIZE = 131
+LSBE_NUM_ERR = 131
+
+&gt;&gt;&gt; from openlava import lsblib, lslib
+&gt;&gt;&gt; lsblib.lsb_init("foo")
+0
+&gt;&gt;&gt; lsblib.lsb_hostcontrol("foo", 2)
+-1
+&gt;&gt;&gt; lsblib.get_lsberrno()
+17
+&gt;&gt;&gt; lsblib.lsb_perror("foo")
+foo: User permission denied
+&gt;&gt;&gt; lsblib.lsb_sysmsg()
+u'User permission denied'
+&gt;&gt;&gt; </pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_closejobinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_closejobinfo</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_closejobinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the connection to the MBD that was opened with lsb_openjobinfo()</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;closejobinfo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">job</span><span class="o">.</span><span class="n">jobId</span>
+<span class="gp">... </span>
+<span class="go">4562</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_closejobinfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_deletejob">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_deletejob</tt><big>(</big><em>job_id</em>, <em>submit_time</em><span class="optional">[</span>, <em>options=0</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_deletejob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a job from the schedluing system.  If the job is running it is killed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>job_id</strong> (<em>str</em>) &#8211; Job ID of the job to kill</li>
+<li><strong>submit_time</strong> (<em>int</em>) &#8211; epoch time of the job submission</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; If options == lsblib.LSB_KILL_REQUEUE job will be requeued with the same job id, else it is completely removed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 on success, -1 on failure</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;deletejob&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Killing job: </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">job</span><span class="o">.</span><span class="n">jobId</span>
+<span class="gp">... </span>    <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_deletejob</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">jobId</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">submitTime</span><span class="p">)</span>
+<span class="gp">... </span>
+<span class="go">Killing job: 4562</span>
+<span class="go">-1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_closejobinfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_hostcontrol">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_hostcontrol</tt><big>(</big><em>host</em>, <em>opCode</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_hostcontrol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens or closes a host, shutsdown or restarts SBD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>host</strong> (<em>str</em>) &#8211; Hostname of host</li>
+<li><strong>opCode</strong> (<em>int</em>) &#8211; Opcode, one of either HOST_CLOSE, HOST_OPEN, HOST_REBOOT, HOST_SHUTDOWN.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 on success, -1 on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;hostcontrol&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_hostcontrol</span><span class="p">(</span><span class="s">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">HOST_OPEN</span><span class="p">)</span>
+<span class="go">-1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_hostinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_hostinfo</tt><big>(</big><em>hosts=</em><span class="optional">[</span><span class="optional">]</span>, <em>numHosts=0</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_hostinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns information about Openlava hosts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hosts</strong> (<em>array</em>) &#8211; Array of hostnames</li>
+<li><strong>numHosts</strong> (<em>int</em>) &#8211; Number of hosts, if set to 1 and hosts is empty, returns information on the local host</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Array of HostInfoEnt objects</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;host test&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_hostinfo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">host</span><span class="o">.</span><span class="n">host</span>
+<span class="gp">... </span>
+<span class="go">master</span>
+<span class="go">comp00</span>
+<span class="go">comp01</span>
+<span class="go">comp02</span>
+<span class="go">comp03</span>
+<span class="go">comp04</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">host</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_hostinfo</span><span class="p">(</span><span class="n">numHosts</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">host</span><span class="o">.</span><span class="n">host</span>
+<span class="gp">... </span>
+<span class="go">master</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_init">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_init</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>openlava.lsblib.lsb_init(appName)</p>
+<p>Initialize the lsb library</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>appName</strong> (<em>str</em>) &#8211; A name for the calling application</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">status - 0 on success, -1 on failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;testing&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_modify">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_modify</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>openlava.lsblib.lsb_modify(jobSubReq, jobSubReply, jobId)       
+Modifies an existing job</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>jobSubReq</strong> (<em>Submit</em>) &#8211; Submit request</li>
+<li><strong>jobSubReply</strong> (<em>SubmitReply</em>) &#8211; Submit reply</li>
+<li><strong>jobId</strong> (<em>int</em>) &#8211; Job ID</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Job ID, -1 on failure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_openjobinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_openjobinfo</tt><big>(</big><em>job_id=0</em>, <em>job_name=&quot;&quot;</em>, <em>user=&quot;all&quot;</em>, <em>queue=&quot;&quot;</em>, <em>host=&quot;&quot;</em>, <em>options=0</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_openjobinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information about jobs that match the specified criteria.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only one parameter may be used at any given time.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>job_id</strong> (<em>int</em>) &#8211; Return jobs with this job id.</li>
+<li><strong>job_name</strong> (<em>str</em>) &#8211; Return jobs with this name</li>
+<li><strong>user</strong> (<em>str</em>) &#8211; Return jobs owned by this user</li>
+<li><strong>host</strong> (<em>str</em>) &#8211; Return jobs on this host</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; Return jobs that match the following options, where option is a bitwise or of the following paramters: ALL_JOB - All jobs; CUR_JOB - All unfinished jobs; DONE_JOB - Jobs that have finished or exited; PEND_JOB - Jobs that are pending; SUSP_JOB - Jobs that are suspended; LAST_JOB - The last submitted job</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Number of jobs that match, -1 on error</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;testing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">job</span><span class="o">.</span><span class="n">jobId</span>
+<span class="gp">... </span>
+<span class="go">4562</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_closejobinfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_peekjob">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_peekjob</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_peekjob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of the file where job output is being spooled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>jobId</strong> (<em>int</em>) &#8211; The ID of the job</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Path to the file, or None if not available</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;peek&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;Job: </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">jobId</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_peekjob</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">jobId</span><span class="p">))</span>
+<span class="gp">... </span>
+<span class="go">Job: 4562: /home/brian/.lsbatch/1390404552.4562</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_pendreason">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_pendreason</tt><big>(</big><em>numReasons</em>, <em>rsTb</em>, <em>jInfoH</em>, <em>ld</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_pendreason" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the reason a job is pending</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>numReasons</strong> (<em>int</em>) &#8211; The length of the reasons array</li>
+<li><strong>rsTb</strong> (<em>list</em>) &#8211; An array of integer reasons</li>
+<li><strong>jInfoH</strong> (<em>JobInfoHead</em>) &#8211; Job info header, may be None</li>
+<li><strong>ld</strong> (<em>LoadIndexLog</em>) &#8211; LoadIndexLog, use to set specific names of load indexes.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of job pending reasons</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;Job Test&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>        <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="n">ld</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">LoadIndexLog</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">&amp;</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">JOB_STAT_PEND</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">... </span>                <span class="k">print</span> <span class="s">&quot;Job </span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">jobId</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_pendreason</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">numReasons</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">reasonTb</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">ld</span><span class="p">))</span>
+<span class="gp">... </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_perror">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_perror</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_perror" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints the lsblib error message associated with the lsberrno prefixed by message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>message</strong> (<em>str</em>) &#8211; User defined error message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span><span class="p">,</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_hostcontrol</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">-1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">get_lsberrno</span><span class="p">()</span>
+<span class="go">17</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_perror</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)</span>
+<span class="go">foo: User permission denied</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_sysmsg</span><span class="p">()</span>
+<span class="go">u&#39;User permission denied&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_queuecontrol">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_queuecontrol</tt><big>(</big><em>queue</em>, <em>opCode</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_queuecontrol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens, closes, activates or inactivates a queue.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>queue</strong> (<em>str</em>) &#8211; Name of queue to control</li>
+<li><strong>opCode</strong> (<em>int</em>) &#8211; OpCode to use, one of either: lslblib.QUEUE_OPEN - open the queue; lsblib.QUEUE_CLOSED - close the queue; QUEUE_ACTIVATE - activate the queue; QUEUE_INACTIVATE - inactivate the queue</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 on success, -1 on failure</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;queuecontrol&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_queuecontrol</span><span class="p">(</span><span class="s">&quot;normal&quot;</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">QUEUE_CLOSED</span><span class="p">)</span>
+<span class="go">-1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_queueinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_queueinfo</tt><big>(</big><em>queues=</em><span class="optional">[</span><span class="optional">]</span>, <em>numqueues=0</em>, <em>hostname=&quot;&quot;</em>, <em>username=&quot;&quot;</em>, <em>options=0</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_queueinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information on specified queues.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>queues</strong> (<em>array</em>) &#8211; list of queue names to get information on</li>
+<li><strong>numqueues</strong> (<em>int</em>) &#8211; number of queues to get information on, if queues is empty, and numqueues=1, gets information on the default queue</li>
+<li><strong>hostname</strong> (<em>str</em>) &#8211; get queues that can execute on hostname</li>
+<li><strong>username</strong> (<em>str</em>) &#8211; get queues that username can submit to</li>
+<li><strong>options</strong> (<em>int</em>) &#8211; Options</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array of QueueInfoEnt objects, None on error.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Unlike the C api, numqueues is not set to to the number of queues returned as this is not supported in Python. Instead use len on the returned array.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;testing&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_queueinfo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">q</span><span class="o">.</span><span class="n">queue</span>
+<span class="gp">... </span>
+<span class="go">normal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_queueinfo</span><span class="p">(</span><span class="n">numqueues</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">q</span><span class="o">.</span><span class="n">queue</span>
+<span class="gp">... </span>
+<span class="go">normal</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_queueinfo</span><span class="p">(</span><span class="n">hostname</span><span class="o">=</span><span class="s">&#39;master&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">q</span><span class="o">.</span><span class="n">queue</span>
+<span class="gp">... </span>
+<span class="go">normal</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_readjobinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_readjobinfo</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_readjobinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the next job in the list from the MBD.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The more parameter is not supported as passing integers as in/out parameters is not supported by Python.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>options</strong> (<em>int</em>) &#8211; Return jobs that match the following options, where option is a bitwise or of the following paramters: ALL_JOB - All jobs; CUR_JOB - All unfinished jobs; DONE_JOB - Jobs that have finished or exited; PEND_JOB - Jobs that are pending; SUSP_JOB - Jobs that are suspended; LAST_JOB - The last submitted job</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JobInfoEnt object or None on error</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">JobInfoEnt</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;testing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>    <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">job</span><span class="o">.</span><span class="n">jobId</span>
+<span class="gp">... </span>
+<span class="go">4562</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_closejobinfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_reconfig">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_reconfig</tt><big>(</big><em>opCode</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_reconfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reloads configuration information for the batch system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>opCode</strong> (<em>int</em>) &#8211; Operation to perform: lsblib.MBD_RESTART - restart the MBD; lsblib.MBD_RECONFIG - Reconfigure the MBD; lsblib.MBD_CKCONFIG - Check the configuration</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">0 on success, -1 on failure</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;mbd control&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_reconfig</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">MBD_CKCONFIG</span><span class="p">)</span>
+<span class="go">-1</span>
+<span class="go">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_requeuejob">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_requeuejob</tt><big>(</big><em>rq</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_requeuejob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requeues a job.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rq</strong> (<em>JobRequeue</em>) &#8211; JobRequeue object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">0 on success, -1 on failure</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;requeue&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rq</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">JobRequeue</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rq</span><span class="o">.</span><span class="n">jobId</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">create_job_id</span><span class="p">(</span><span class="mi">4563</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rq</span><span class="o">.</span><span class="n">status</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">JOB_STAT_PEND</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rq</span><span class="o">.</span><span class="n">options</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">REQUEUE_RUN</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_requeuejob</span><span class="p">(</span><span class="n">rq</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_signaljob">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_signaljob</tt><big>(</big><em>jobId</em>, <em>sigValue</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_signaljob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends the specified signal to the job.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>jobId</strong> (<em>int</em>) &#8211; Id of the job</li>
+<li><strong>sigValue</strong> (<em>int</em>) &#8211; signal to send</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">0 on success, -1 on failure</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;signaljob&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_signaljob</span><span class="p">(</span><span class="mi">4563</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">SIGSTOP</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_signaljob</span><span class="p">(</span><span class="mi">4563</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">SIGCONT</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_submit">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_submit</tt><big>(</big><em>jobSubReq</em>, <em>jobSubReply</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submits a new job into the scheduling environment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>jobSubReq</strong> (<em>Submit</em>) &#8211; Submit object containing job submission information</li>
+<li><strong>jobSubReply</strong> (<em>SubmitReply</em>) &#8211; SubmitReply object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">job_id on success, -1 on failure</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;submit&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">Submit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="o">.</span><span class="n">command</span><span class="o">=</span><span class="s">&quot;hostname&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="o">.</span><span class="n">numProcessors</span><span class="o">=</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span><span class="o">.</span><span class="n">maxNumProcessors</span><span class="o">=</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">srep</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">SubmitReply</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_submit</span><span class="p">(</span><span class="n">sr</span><span class="p">,</span> <span class="n">srep</span><span class="p">)</span>
+<span class="go">Job &lt;4564&gt; is submitted to default queue &lt;normal&gt;.</span>
+<span class="go">4564</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_suspreason">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_suspreason</tt><big>(</big><em>reasons</em>, <em>subreasons</em>, <em>ld</em><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_suspreason" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get reasons why a job is suspended</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reasons</strong> (<em>int</em>) &#8211; reasons from jobinfoent</li>
+<li><strong>subreasons</strong> (<em>int</em>) &#8211; subreasons from jobinfoent</li>
+<li><strong>ld</strong> (<em>LoadIndexLog</em>) &#8211; LoadIndexLog with index names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of why job is pending</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;suspreasons&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_signaljob</span><span class="p">(</span><span class="mi">4563</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">SIGSTOP</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_openjobinfo</span><span class="p">()):</span>
+<span class="gp">... </span>        <span class="n">job</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_readjobinfo</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="n">ld</span><span class="o">=</span><span class="n">lsblib</span><span class="o">.</span><span class="n">LoadIndexLog</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">&amp;</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">JOB_STAT_USUSP</span> <span class="o">!=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">&amp;</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">JOB_STAT_SSUSP</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="gp">... </span>                <span class="k">print</span> <span class="s">&quot;Job </span><span class="si">%d</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">jobId</span><span class="p">,</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_suspreason</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">reasons</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">subreasons</span><span class="p">,</span> <span class="n">ld</span><span class="p">))</span>
+<span class="gp">... </span>
+
+<span class="go">Job 4563:  The job was suspended by user;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_sysmsg">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_sysmsg</tt><big>(</big><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_sysmsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the lsblib error message associated with lsberrno</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">LSBLIB error message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span><span class="p">,</span> <span class="n">lslib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_hostcontrol</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">-1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">get_lsberrno</span><span class="p">()</span>
+<span class="go">17</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_perror</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">)</span>
+<span class="go">foo: User permission denied</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_sysmsg</span><span class="p">()</span>
+<span class="go">u&#39;User permission denied&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="openlava.lsblib.lsb_userinfo">
+<tt class="descclassname">openlava.lsblib.</tt><tt class="descname">lsb_userinfo</tt><big>(</big><em>user_list=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#openlava.lsblib.lsb_userinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get information on specified users</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Unlike in the C API, numusers is not set to the size of the returned array, as this is not supported in Python.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user_list</strong> (<em>array</em>) &#8211; List of usernames to get information on</li>
+<li><strong>numusers</strong> (<em>int</em>) &#8211; ignored unless user_list is empty, if numusers is set to one, then returns information about the current user.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of UserInfoEnt objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">openlava</span> <span class="kn">import</span> <span class="n">lsblib</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_init</span><span class="p">(</span><span class="s">&quot;userinfo&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_userinfo</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">user</span><span class="o">.</span><span class="n">user</span>
+<span class="gp">... </span>
+<span class="go">default</span>
+<span class="go">root</span>
+<span class="go">irvined</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">lsblib</span><span class="o">.</span><span class="n">lsb_userinfo</span><span class="p">(</span><span class="n">user_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">numusers</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">user</span><span class="o">.</span><span class="n">user</span>
+<span class="gp">... </span>
+<span class="go">irvined</span>
+<span class="gp">&gt;&gt;&gt; </span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">lsbatch</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#members">Members</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lslib.html"
+                        title="previous chapter">lslib</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="contributing.html"
+                        title="next chapter">Contributing and Getting Help</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lsbatch.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing and Getting Help"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="lslib.html" title="lslib"
+             >previous</a> |</li>
+        <li><a href="index.html">Openlava Python Bindings 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, David Irvine.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
