@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
+import os
 from openlava import lsblib
 from openlava import lslib
 
@@ -285,12 +286,12 @@ class LsBlib(unittest.TestCase):
             while (True):
                 rec = lsblib.lsb_geteventrec(f, row_num)
                 if rec == None:
-                    if lsblib.get_lsberrno() == LsBlib.LSBE_EOF:
+                    if lsblib.get_lsberrno() == lsblib.LSBE_EOF:
                         break
                 if lsblib.get_lsberrno() == lsblib.LSBE_EVENT_FORMAT:
                     print "Bad Row: %s in %s" % (row_num, fname)
                     continue
-                self.assertEqual(OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
+                self.assertEqual(lsblib.get_lsberrno(), lsblib.LSBE_NO_ERROR)
 
 
 class LsLib(unittest.TestCase):

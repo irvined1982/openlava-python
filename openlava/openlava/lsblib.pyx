@@ -3074,10 +3074,10 @@ cdef class JobNewLog:
             'loginShell',
             'idx',
             'userPriority', ]
-    d={}
-    for f in fields:
-        d[f]=getattr(self,f)
-    return d
+        d={}
+        for f in fields:
+            d[f]=getattr(self,f)
+        return d
 
 
     property jobId:
