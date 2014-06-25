@@ -72,6 +72,17 @@ from cpython cimport bool
 cimport openlava_base
 from openlava.lslib import ls_perror, LSF_RLIM_NLIMITS, DEFAULT_RLIMIT
 
+
+cdef extern from "Python.h":
+    ctypedef struct FILE
+    FILE* PyFile_AsFile(object)
+    void fprintf(FILE* f, char* s, char* s)
+
+cdef extern from "fileobject.h":
+    ctypedef class __builtin__.file [object PyFileObject]:
+        pass
+
+
 cdef extern from "lsbatch.h":
     ctypedef long long int LS_LONG_INT
     ctypedef unsigned long long LS_UNS_LONG_INT
@@ -81,6 +92,399 @@ cdef extern from "lsbatch.h":
 
     extern int lsberrno
 
+    extern struct logSwitchLog:
+        int lastJobId
+
+    extern struct  lsfRusage:
+        double ru_utime
+        double ru_stime
+        double  ru_maxrss
+        double  ru_ixrss
+        double  ru_ismrss
+        double  ru_idrss
+        double  ru_isrss
+        double  ru_minflt
+        double  ru_majflt
+        double  ru_nswap
+        double  ru_inblock
+        double  ru_oublock
+        double  ru_ioch
+        double  ru_msgsnd
+        double  ru_msgrcv
+        double  ru_nsignals
+        double  ru_nvcsw
+        double  ru_nivcsw
+        double  ru_exutime
+
+    extern struct jobNewLog:
+        int    jobId
+        int    userId
+        char   userName[60]
+        int    options
+        int    options2
+        int    numProcessors
+        time_t submitTime
+        time_t beginTime
+        time_t termTime
+        int    sigValue
+        int    chkpntPeriod
+        int    restartPid
+        int    rLimits[11]
+        char   hostSpec[64]
+        float  hostFactor
+        int    umask
+        char   queue[60]
+        char   *resReq
+        char   fromHost[64]
+        char   cwd[265]
+        char   chkpntDir[265]
+        char   inFile[265]
+        char   outFile[265]
+        char   errFile[265]
+        char   inFileSpool[265]
+        char   commandSpool[265]
+        char   jobSpoolDir[4096]
+        char   subHomeDir[265]
+        char   jobFile[265]
+        int    numAskedHosts
+        char   **askedHosts
+        char   *dependCond
+        char   jobName[512]
+        char   command[512]
+        int    nxf
+        xFile *xf
+        char   *preExecCmd
+        char   *mailUser
+        char   *projectName
+        int    niosPort
+        int    maxNumProcessors
+        char   *schedHostType
+        char   *loginShell
+        int    idx
+        int    userPriority
+
+    extern struct jobModLog:
+        char    *jobIdStr
+        int     options
+        int     options2
+        int     delOptions
+        int     delOptions2
+        int     userId
+        char    *userName
+        int     submitTime
+        int     umask
+        int     numProcessors
+        int     beginTime
+        int     termTime
+        int     sigValue
+        int     restartPid
+        char    *jobName
+        char    *queue
+        int     numAskedHosts
+        char    **askedHosts
+        char    *resReq
+        int     rLimits[11]
+        char    *hostSpec
+        char    *dependCond
+        char    *subHomeDir
+        char    *inFile
+        char    *outFile
+        char    *errFile
+        char    *command
+        char    *inFileSpool
+        char    *commandSpool
+        int     chkpntPeriod
+        char    *chkpntDir
+        int     nxf
+        xFile *xf
+        char    *jobFile
+        char    *fromHost
+        char    *cwd
+        char    *preExecCmd
+        char    *mailUser
+        char    *projectName
+        int     niosPort
+        int     maxNumProcessors
+        char    *loginShell
+        char    *schedHostType
+        int     userPriority
+
+    extern struct jobStartLog:
+        int jobId
+        int    jStatus
+        int    jobPid
+        int    jobPGid
+        float  hostFactor
+        int    numExHosts
+        char   **execHosts
+        char   *queuePreCmd
+        char   *queuePostCmd
+        int    jFlags
+        int    idx
+
+    extern struct jobStartAcceptLog:
+        int    jobId
+        int    jobPid
+        int    jobPGid
+        int    idx
+
+    extern struct jobExecuteLog:
+        int    jobId
+        int    execUid
+        char   *execHome
+        char   *execCwd
+        int    jobPGid
+        char   *execUsername
+        int    jobPid
+        int    idx
+
+    extern struct jobStatusLog:
+        int    jobId
+        int    jStatus
+        int    reason
+        int    subreasons
+        float  cpuTime
+        time_t endTime
+        int    ru
+        lsfRusage lsfRusage
+        int   jFlags
+        int   exitStatus
+        int    idx
+
+    extern struct sbdJobStatusLog:
+        int    jobId
+        int    jStatus
+        int    reasons
+        int    subreasons
+        int    actPid
+        int    actValue
+        time_t actPeriod
+        int    actFlags
+        int    actStatus
+        int    actReasons
+        int    actSubReasons
+        int    idx
+
+    extern struct jobSwitchLog:
+        int    userId
+        int jobId
+        char   queue[60]
+        int    idx
+        char   userName[60]
+
+    extern struct jobMoveLog:
+        int    userId
+        int    jobId
+        int    position
+        int    base
+        int    idx
+        char   userName[60]
+
+    extern struct chkpntLog:
+        int jobId
+        time_t period
+        int pid
+        int ok
+        int flags
+        int    idx
+
+    extern struct jobRequeueLog:
+        int jobId
+        int    idx
+
+    extern struct jobCleanLog:
+        int jobId
+        int    idx
+
+    extern struct sigactLog:
+        int jobId
+        time_t period
+        int pid
+        int jStatus
+        int reasons
+        int flags
+        char *signalSymbol
+        int actStatus
+        int    idx
+
+    extern struct migLog:
+        int jobId
+        int numAskedHosts
+        char **askedHosts
+        int userId
+        int    idx
+        char userName[60]
+
+    extern struct signalLog:
+        int userId
+        int jobId
+        char *signalSymbol
+        int runCount
+        int    idx
+        char userName[60]
+
+    extern struct queueCtrlLog:
+        int    opCode
+        char   queue[60]
+        int    userId
+        char   userName[60]
+
+    extern struct newDebugLog:
+        int opCode
+        int level
+        int logclass
+        int turnOff
+        char logFileName[128]
+        int userId
+
+    extern struct hostCtrlLog:
+        int    opCode
+        char   host[64]
+        int    userId
+        char   userName[60]
+
+    extern struct mbdStartLog:
+        char   master[64]
+        char   cluster[128]
+        int    numHosts
+        int    numQueues
+
+    extern struct mbdDieLog:
+        char   master[64]
+        int    numRemoveJobs
+        int    exitCode
+
+    extern struct unfulfillLog:
+        int    jobId
+        int    notSwitched
+        int    sig
+        int    sig1
+        int    sig1Flags
+        time_t chkPeriod
+        int    notModified
+        int    idx
+
+    extern struct jobFinishLog:
+        int    jobId
+        int    userId
+        char   userName[60]
+        int    options
+        int    numProcessors
+        int    jStatus
+        time_t submitTime
+        time_t beginTime
+        time_t termTime
+        time_t startTime
+        time_t endTime
+        char   queue[60]
+        char   *resReq
+        char   fromHost[64]
+        char   cwd[4096]
+        char   inFile[265]
+        char   outFile[265]
+        char   errFile[265]
+        char   inFileSpool[265]
+        char   commandSpool[265]
+        char   jobFile[265]
+        int    numAskedHosts
+        char   **askedHosts
+        float  hostFactor
+        int    numExHosts
+        char   **execHosts
+        float  cpuTime
+        char   jobName[512]
+        char   command[512]
+        lsfRusage lsfRusage
+        char   *dependCond
+        char   *preExecCmd
+        char   *mailUser
+        char   *projectName
+        int    exitStatus
+        int    maxNumProcessors
+        char   *loginShell
+        int    idx
+        int    maxRMem
+        int    maxRSwap
+
+    extern struct loadIndexLog:
+        int nIdx
+        char **name
+
+    extern struct jobMsgLog:
+        int usrId
+        int jobId
+        int msgId
+        int type
+        char *src
+        char *dest
+        char *msg
+        int    idx
+
+    extern struct jobMsgAckLog:
+        int usrId
+        int jobId
+        int msgId
+        int type
+        char *src
+        char *dest
+        char *msg
+        int    idx
+
+    extern struct jobForceRequestLog:
+        int     userId
+        int     numExecHosts
+        char**  execHosts
+        int     jobId
+        int     idx
+        int     options
+        char    userName[60]
+
+
+    extern struct jobAttrSetLog:
+        int       jobId
+        int       idx
+        int       uid
+        int       port
+        char      *hostname
+
+    extern union  eventLog:
+        jobNewLog jobNewLog
+        jobStartLog jobStartLog
+        jobStatusLog jobStatusLog
+        sbdJobStatusLog sbdJobStatusLog
+        jobSwitchLog jobSwitchLog
+        jobMoveLog jobMoveLog
+        queueCtrlLog queueCtrlLog
+        newDebugLog  newDebugLog
+        hostCtrlLog hostCtrlLog
+        mbdStartLog mbdStartLog
+        mbdDieLog mbdDieLog
+        unfulfillLog unfulfillLog
+        jobFinishLog jobFinishLog
+        loadIndexLog loadIndexLog
+        migLog migLog
+        signalLog signalLog
+        jobExecuteLog jobExecuteLog
+        jobMsgLog jobMsgLog
+        jobMsgAckLog jobMsgAckLog
+        jobRequeueLog jobRequeueLog
+        chkpntLog chkpntLog
+        sigactLog sigactLog
+        jobStartAcceptLog jobStartAcceptLog
+        jobCleanLog jobCleanLog
+        jobForceRequestLog jobForceRequestLog
+        logSwitchLog logSwitchLog
+        jobModLog jobModLog
+        jobAttrSetLog jobAttrSetLog
+
+
+
+    extern struct eventRec:
+        char   version[12]
+        int    type
+        time_t eventTime
+        eventLog eventLog
+    
     extern struct submit:
         int     options
         int     options2
@@ -965,12 +1369,16 @@ def lsb_geteventrec(fh, line_number):
     :return: eventRec object
     """
     cdef eventRec * er
-    int ln;
+    cdef int ln
     ln=line_number
-
-    er = openlava_base.lsb_geteventrec(fh, &ln)
+    cdef FILE * cfh
+    cfh=PyFile_AsFile(fh)
+    er = openlava_base.lsb_geteventrec(cfh, &ln)
+    if er == NULL:
+        return None
     rec = EventRecord()
     rec._load_struct(er)
+    return rec
 
 def lsb_hostcontrol(host, opCode):
     """openlava.lsblib.lsb_hostcontrol(host, opCode)
@@ -2759,9 +3167,9 @@ cdef class JobNewLog:
             return self._data.numAskedHosts
 
 
-    property *askedHosts:
+    property askedHosts:
         def __get__(self):
-            return u"%s" % self._data.*askedHosts
+            return [u"%s" % self._data.askedHosts[i] for i in range(self.numAskedHosts)]
 
 
     property dependCond:
@@ -2929,7 +3337,7 @@ cdef class JobModLog:
 
     property askedHosts:
         def __get__(self):
-            return [u"%s" % self._data.askedHosts[s] for s in range(self.numAskedHosts)
+            return [u"%s" % self._data.askedHosts[s] for s in range(self.numAskedHosts)]
 
 
     property resReq:
@@ -3099,9 +3507,9 @@ cdef class JobStartLog:
             return self._data.numExHosts
 
 
-    property *execHosts:
+    property execHosts:
         def __get__(self):
-            return u"%s" % self._data.*execHosts
+            return [u"%s" % self._data.execHosts[i] for i in range(self.numExHosts)]
 
 
     property queuePreCmd:
@@ -3240,10 +3648,11 @@ cdef class JobStatusLog:
         def __get__(self):
             return self._data.ru
 
-##############################
     property lsfRusage:
         def __get__(self):
-            return self._data.lsfRusage
+            ru=LsfRusage()
+            ru._load_struct(&self._data.lsfRusage)
+            return ru
 
 
     property jFlags:
@@ -3574,7 +3983,7 @@ cdef class SignalLog:
             return u"   %s" % self._data.userName
 
 
-cdef class QueueCtrlLog
+cdef class QueueCtrlLog:
     cdef queueCtrlLog * _data
     cdef _load_struct(self, queueCtrlLog * data ):
         self._data=data
@@ -3643,7 +4052,7 @@ cdef class HostCtrlLog:
             return self._data.opCode
 
 
-    property host[64]:
+    property host:
         def __get__(self):
             return u"%s" % self._data.host
 
@@ -3898,7 +4307,9 @@ cdef class JobFinishLog:
 
     property lsfRusage:
         def __get__(self):
-            return self._data.lsfRusage
+            ru=LsfRusage()
+            ru._load_struct(&self._data.lsfRusage)
+            return ru
 
 
     property dependCond:
@@ -3958,11 +4369,17 @@ cdef class LoadIndexLog:
         self._data=data
     property nIdx:
         def __get__(self):
-            return self._data.nIdx
+            if self._data == NULL:
+                return 0
+            else:
+                return self._data.nIdx
 
     property name:
         def __get__(self):
-            return u"%s" % self._data.name
+            if self._data == NULL:
+                return []
+            else:
+                return [u"%s" % self._data.name[i] for i in range(self.nIdx)]
 
 
 cdef class JobMsgLog:
@@ -4029,7 +4446,7 @@ cdef class JobMsgLog:
 
 cdef class JobMsgAckLog:
     cdef jobMsgAckLog * _data
-    def _load_struct(self, jobMsgAckLog * data):
+    cdef _load_struct(self, jobMsgAckLog * data):
         self._data=data
 
     property usrId:
@@ -4073,7 +4490,7 @@ cdef class JobMsgAckLog:
 
 cdef class JobForceRequestLog:
     cdef jobForceRequestLog * _data
-    def _load_struct(self, jobForceRequestLog * data):
+    cdef _load_struct(self, jobForceRequestLog * data):
         self._data=data
 
     property userId:
@@ -4104,10 +4521,10 @@ cdef class JobForceRequestLog:
         def __get__(self):
             return u"%s" % self._data.userName
 
-cdef class JobAttrSetLog
+cdef class JobAttrSetLog:
     cdef jobAttrSetLog * _data
 
-    def _load_struct(self, jobAttrSetLog * data):
+    cdef _load_struct(self, jobAttrSetLog * data):
         self._data=data
 
     property jobId:
@@ -4132,7 +4549,7 @@ cdef class JobAttrSetLog
 
 
 cdef class EventRecord:
-    cdef eventRecord * _data
+    cdef eventRec * _data
 
     cdef _load_struct(self, eventRec * data ):
         self._data=data
@@ -4151,183 +4568,264 @@ cdef class EventRecord:
 
     property eventLog:
         def __get__(self):
-            cdef eventLog * el
-            el = self._data.eventLog
-            eventLog._load_struct(el)
-            return eventLog
+            EL=EventLog()
+            EL._load_struct(&self._data.eventLog)
+            return EL
 
 
 cdef class EventLog:
     cdef eventLog * _data
-    cdef _load_struct(self, eventlog * data ):
+    cdef _load_struct(self, eventLog * data ):
         self._data=data
 
     property jobNewLog:
         def __get__(self):
             a=JobNewLog()
-            a._load_struct(self._data.jobNewLog)
+            a._load_struct(&self._data.jobNewLog)
             return a
 
     property jobStartLog:
         def __get__(self):
             a=JobStartLog()
-            a._load_struct(self._data.jobStartLog)
+            a._load_struct(&self._data.jobStartLog)
             return a
 
     property jobStatusLog:
         def __get__(self):
             a=JobStatusLog()
-            a._load_struct(self._data.jobStatusLog)
+            a._load_struct(&self._data.jobStatusLog)
             return a
 
     property sbdJobStatusLog:
         def __get__(self):
             a=SbdJobStatusLog()
-            a._load_struct(self._data.sbdJobStatusLog)
+            a._load_struct(&self._data.sbdJobStatusLog)
             return a
 
     property jobSwitchLog:
         def __get__(self):
             a=JobSwitchLog()
-            a._load_struct(self._data.jobSwitchLog)
+            a._load_struct(&self._data.jobSwitchLog)
             return a
 
     property jobMoveLog:
         def __get__(self):
             a=JobMoveLog()
-            a._load_struct(self._data.jobMoveLog)
+            a._load_struct(&self._data.jobMoveLog)
             return a
 
     property queueCtrlLog:
         def __get__(self):
             a=QueueCtrlLog()
-            a._load_struct(self._data.queueCtrlLog)
+            a._load_struct(&self._data.queueCtrlLog)
             return a
 
     property newDebugLog:
         def __get__(self):
             a=NewDebugLog()
-            a._load_struct(self._data.newDebugLog)
+            a._load_struct(&self._data.newDebugLog)
             return a
 
     property hostCtrlLog:
         def __get__(self):
             a=HostCtrlLog()
-            a._load_struct(self._data.hostCtrlLog)
+            a._load_struct(&self._data.hostCtrlLog)
             return a
 
     property mbdStartLog:
         def __get__(self):
             a=MbdStartLog()
-            a._load_struct(self._data.mbdStartLog)
+            a._load_struct(&self._data.mbdStartLog)
             return a
 
     property mbdDieLog:
         def __get__(self):
             a=MbdDieLog()
-            a._load_struct(self._data.mbdDieLog)
+            a._load_struct(&self._data.mbdDieLog)
             return a
 
     property unfulfillLog:
         def __get__(self):
             a=UnfulfillLog()
-            a._load_struct(self._data.unfulfillLog)
+            a._load_struct(&self._data.unfulfillLog)
             return a
 
     property jobFinishLog:
         def __get__(self):
             a=JobFinishLog()
-            a._load_struct(self._data.jobFinishLog)
+            a._load_struct(&self._data.jobFinishLog)
             return a
 
     property loadIndexLog:
         def __get__(self):
             a=LoadIndexLog()
-            a._load_struct(self._data.loadIndexLog)
+            a._load_struct(&self._data.loadIndexLog)
             return a
 
     property migLog:
         def __get__(self):
             a=MigLog()
-            a._load_struct(self._data.migLog)
+            a._load_struct(&self._data.migLog)
             return a
 
     property signalLog:
         def __get__(self):
             a=SignalLog()
-            a._load_struct(self._data.signalLog)
+            a._load_struct(&self._data.signalLog)
             return a
 
     property jobExecuteLog:
         def __get__(self):
             a=JobExecuteLog()
-            a._load_struct(self._data.jobExecuteLog)
+            a._load_struct(&self._data.jobExecuteLog)
             return a
 
     property jobMsgLog:
         def __get__(self):
             a=JobMsgLog()
-            a._load_struct(self._data.jobMsgLog)
+            a._load_struct(&self._data.jobMsgLog)
             return a
 
     property jobMsgAckLog:
         def __get__(self):
             a=JobMsgAckLog()
-            a._load_struct(self._data.jobMsgAckLog)
+            a._load_struct(&self._data.jobMsgAckLog)
             return a
 
     property jobRequeueLog:
         def __get__(self):
             a=JobRequeueLog()
-            a._load_struct(self._data.jobRequeueLog)
+            a._load_struct(&self._data.jobRequeueLog)
             return a
 
     property chkpntLog:
         def __get__(self):
             a=ChkpntLog()
-            a._load_struct(self._data.chkpntLog)
+            a._load_struct(&self._data.chkpntLog)
             return a
 
     property sigactLog:
         def __get__(self):
             a=SigactLog()
-            a._load_struct(self._data.sigactLog)
+            a._load_struct(&self._data.sigactLog)
             return a
 
     property jobStartAcceptLog:
         def __get__(self):
             a=JobStartAcceptLog()
-            a._load_struct(self._data.jobStartAcceptLog)
+            a._load_struct(&self._data.jobStartAcceptLog)
             return a
 
     property jobCleanLog:
         def __get__(self):
             a=JobCleanLog()
-            a._load_struct(self._data.jobCleanLog)
+            a._load_struct(&self._data.jobCleanLog)
             return a
 
     property jobForceRequestLog:
         def __get__(self):
             a=JobForceRequestLog()
-            a._load_struct(self._data.jobForceRequestLog)
+            a._load_struct(&self._data.jobForceRequestLog)
             return a
 
     property logSwitchLog:
         def __get__(self):
             a=LogSwitchLog()
-            a._load_struct(self._data.logSwitchLog)
+            a._load_struct(&self._data.logSwitchLog)
             return a
 
     property jobModLog:
         def __get__(self):
             a=JobModLog()
-            a._load_struct(self._data.jobModLog)
+            a._load_struct(&self._data.jobModLog)
             return a
 
     property jobAttrSetLog:
         def __get__(self):
             a=JobAttrSetLog()
-            a._load_struct(self._data.jobAttrSetLog)
+            a._load_struct(&self._data.jobAttrSetLog)
             return a
 
+
+cdef class LsfRusage:
+    cdef lsfRusage * _data
+
+    cdef _load_struct(self, lsfRusage * data ):
+        self._data=data
+
+    property ru_utime:
+        def __get__(self):
+            return self._data.ru_utime
+
+    property ru_stime:
+        def __get__(self):
+            return self._data.ru_stime
+
+    property ru_maxrss:
+        def __get__(self):
+            return self._data.ru_maxrss
+
+    property ru_ixrss:
+        def __get__(self):
+            return self._data.ru_ixrss
+
+    property ru_ismrss:
+        def __get__(self):
+            return self._data.ru_ismrss
+
+    property ru_idrss:
+        def __get__(self):
+            return self._data.ru_idrss
+
+    property ru_isrss:
+        def __get__(self):
+            return self._data.ru_isrss
+
+    property ru_minflt:
+        def __get__(self):
+            return self._data.ru_minflt
+
+    property ru_majflt:
+        def __get__(self):
+            return self._data.ru_majflt
+
+    property ru_nswap:
+        def __get__(self):
+            return self._data.ru_nswap
+
+    property ru_inblock:
+        def __get__(self):
+            return self._data.ru_inblock
+
+    property ru_oublock:
+        def __get__(self):
+            return self._data.ru_oublock
+
+    property ru_ioch:
+        def __get__(self):
+            return self._data.ru_ioch
+
+    property ru_msgsnd:
+        def __get__(self):
+            return self._data.ru_msgsnd
+
+    property ru_msgrcv:
+        def __get__(self):
+            return self._data.ru_msgrcv
+
+    property ru_nsignals:
+        def __get__(self):
+            return self._data.ru_nsignals
+
+    property ru_nvcsw:
+        def __get__(self):
+            return self._data.ru_nvcsw
+
+    property ru_nivcsw:
+        def __get__(self):
+            return self._data.ru_nivcsw
+
+    property ru_exutime:
+        def __get__(self):
+            return self._data.ru_exutime
 

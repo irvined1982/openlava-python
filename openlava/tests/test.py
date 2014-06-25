@@ -375,7 +375,7 @@ class LsLib(unittest.TestCase):
             self.assertGreaterEqual(host.nRes, 0)
 
             for resource in host.resources:
-				self.assertIsInstance(resource, unicode)
+                self.assertIsInstance(resource, unicode)
             self.assertIsInstance(host.windows, unicode)
             self.assertNotEqual(host.windows, "")
             self.assertIsNotNone(host.windows)

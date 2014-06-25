@@ -1,3 +1,4 @@
+#!/bin/bash
 sudo rm -rf /usr/local/lib/python2.7/dist-packages/openlava*; 
 sudo rm -rf build/; 
 rm -rf openlava.c ;
