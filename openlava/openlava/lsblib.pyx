@@ -2867,7 +2867,6 @@ cdef class Submit:
             self._check_set()
             v=int(v)
             self._data.userPriority=v
->>>>>>> 874823a8797c08a81879df03546fe61ff1164aba
 
 
 class SubmitReply:
