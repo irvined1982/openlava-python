@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with openlava-python.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
+import os
 from openlava import lsblib
 from openlava import lslib
 
@@ -269,6 +270,29 @@ class LsBlib(unittest.TestCase):
     def check_host(self, host):
         self.assertIsInstance(host, lsblib.HostInfoEnt)
 
+    def test_lsbaccts(self):
+        # Find lsbatch
+        try:
+            lsfdir = os.environ['LSF_ENVDIR']
+            lsfdir = os.path.join(libdir, "..")
+
+        except:
+            lsfdir = '/opt/openlava'
+
+        for fname in ['lsb.acct', 'lsb.events']:
+            acct_file = os.path.join(lsfdir, "work", "logdir", fname)
+            f = open(acct_file)
+            row_num = 0
+            while (True):
+                rec = lsblib.lsb_geteventrec(f, row_num)
+                if rec == None:
+                    if lsblib.get_lsberrno() == lsblib.LSBE_EOF:
+                        break
+                if lsblib.get_lsberrno() == lsblib.LSBE_EVENT_FORMAT:
+                    print "Bad Row: %s in %s" % (row_num, fname)
+                    continue
+                self.assertEqual(lsblib.get_lsberrno(), lsblib.LSBE_NO_ERROR)
+
 
 class LsLib(unittest.TestCase):
     def test_clustername(self):
@@ -375,7 +399,7 @@ class LsLib(unittest.TestCase):
             self.assertGreaterEqual(host.nRes, 0)
 
             for resource in host.resources:
-				self.assertIsInstance(resource, unicode)
+                self.assertIsInstance(resource, unicode)
             self.assertIsInstance(host.windows, unicode)
             self.assertNotEqual(host.windows, "")
             self.assertIsNotNone(host.windows)
