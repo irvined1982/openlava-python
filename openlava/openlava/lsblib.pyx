@@ -2927,6 +2927,15 @@ cdef class XFile:
     cdef xFile * _data
     cdef bool _tainted
 
+    def __to_dict(self):
+        fields=[
+            'subFn','execFn','options'
+        ]
+        d={}
+        for f in fields:
+            d[f]=getattr(self,f)
+        return d
+
     def __cinit__(self):
         self._tainted=False
 
@@ -3017,6 +3026,59 @@ cdef class JobNewLog:
     cdef jobNewLog * _data
     cdef _load_struct(self, jobNewLog * data ):
         self._data=data
+
+    def __to_dict(self):
+        fields = [
+            'jobId',
+            'userId',
+            'userName',
+            'options',
+            'options2',
+            'numProcessors',
+            'submitTime',
+            'beginTime',
+            'termTime',
+            'sigValue',
+            'chkpntPeriod',
+            'restartPid',
+            'rLimits',
+            'hostSpec',
+            'hostFactor',
+            'umask',
+            'queue',
+            'resReq',
+            'fromHost',
+            'cwd',
+            'chkpntDir',
+            'inFile',
+            'outFile',
+            'errFile',
+            'inFileSpool',
+            'commandSpool',
+            'jobSpoolDir',
+            'subHomeDir',
+            'jobFile',
+            'numAskedHosts',
+            'askedHosts',
+            'dependCond',
+            'jobName',
+            'command',
+            'nxf',
+            'xf',
+            'preExecCmd',
+            'mailUser',
+            'projectName',
+            'niosPort',
+            'maxNumProcessors',
+            'schedHostType',
+            'loginShell',
+            'idx',
+            'userPriority', ]
+    d={}
+    for f in fields:
+        d[f]=getattr(self,f)
+    return d
+
 
     property jobId:
         def __get__(self):
@@ -4160,6 +4222,54 @@ cdef class JobFinishLog:
     cdef _load_struct(self, jobFinishLog * data ):
         self._data=data
 
+    def __to_dict(self):
+        fields=[
+            'jobId',
+            'userId',
+            'userName',
+            'options',
+            'numProcessors',
+            'jStatus',
+            'submitTime',
+            'beginTime',
+            'termTime',
+            'startTime',
+            'endTime',
+            'queue',
+            'resReq',
+            'fromHost',
+            'cwd',
+            'inFile',
+            'outFile',
+            'errFile',
+            'inFileSpool',
+            'commandSpool',
+            'jobFile',
+            'numAskedHosts',
+            'askedHosts',
+            'hostFactor',
+            'numExHosts',
+            'execHosts',
+            'cpuTime',
+            'jobName',
+            'command',
+            'lsfRusage',
+            'dependCond',
+            'preExecCmd',
+            'mailUser',
+            'projectName',
+            'exitStatus',
+            'maxNumProcessors',
+            'loginShell',
+            'idx',
+            'maxRMem',
+            'maxRSwap', ]
+        d = {}
+        for f in fields:
+            d[f] = getattr(self, f)
+        return d
+
+
     property jobId:
         def __get__(self):
             return self._data.jobId
@@ -4572,6 +4682,52 @@ cdef class EventRecord:
             EL._load_struct(&self._data.eventLog)
             return EL
 
+    def __to_dict(self):
+        d={}
+
+        for i in ['version','type','eventTime',]:
+            d[i] = getattr(self, i)
+
+        l={
+            'jobNewLog':None,
+            'jobStartLog':None,
+            'jobStatusLog':None,
+            'sbdJobStatusLog':None,
+            'jobSwitchLog':None,
+            'jobMoveLog':None,
+            'queueCtrlLog':None,
+            'newDebugLog':None,
+            'hostCtrlLog':None,
+            'mbdStartLog':None,
+            'mbdDieLog':None,
+            'unfulfillLog':None,
+            'jobFinishLog':None,
+            'loadIndexLog':None,
+            'migLog':None,
+            'signalLog':None,
+            'jobExecuteLog':None,
+            'jobMsgLog':None,
+            'jobMsgAckLog':None,
+            'jobRequeueLog':None,
+            'chkpntLog':None,
+            'sigactLog':None,
+            'jobStartAcceptLog':None,
+            'jobCleanLog':None,
+            'jobForceRequestLog':None,
+            'logSwitchLog':None,
+            'jobModLog':None,
+            'jobAttrSetLog':None,
+        }
+        if self.type == EVENT_JOB_NEW:
+            l['jobNewLog'] = self.eventLog.jobNewLog
+        elif self.type == EVENT_JOB_FINISH:
+            l['jobFinishLog'] = self.eventLog.jobFinishLog
+
+        d['eventLog']=l
+        return d
+
+
+
 
 cdef class EventLog:
     cdef eventLog * _data
@@ -4752,6 +4908,34 @@ cdef class LsfRusage:
 
     cdef _load_struct(self, lsfRusage * data ):
         self._data=data
+
+    def __to_dict(self):
+        fields=[
+
+         'ru_utime',
+          'ru_stime',
+           'ru_maxrss',
+           'ru_ixrss',
+           'ru_ismrss',
+           'ru_idrss',
+           'ru_isrss',
+           'ru_minflt',
+           'ru_majflt',
+           'ru_nswap',
+           'ru_inblock',
+           'ru_oublock',
+           'ru_ioch',
+           'ru_msgsnd',
+           'ru_msgrcv',
+           'ru_nsignals',
+           'ru_nvcsw',
+           'ru_nivcsw',
+           'ru_exutime',
+        ]
+        d={}
+        for f in fields:
+            d[f]=getattr(self,f)
+        return d
 
     property ru_utime:
         def __get__(self):

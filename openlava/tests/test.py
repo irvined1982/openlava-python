@@ -269,6 +269,29 @@ class LsBlib(unittest.TestCase):
     def check_host(self, host):
         self.assertIsInstance(host, lsblib.HostInfoEnt)
 
+    def test_lsbaccts(self):
+        # Find lsbatch
+        try:
+            lsfdir = os.environ['LSF_ENVDIR']
+            lsfdir = os.path.join(libdir, "..")
+
+        except:
+            lsfdir = '/opt/openlava'
+
+        for fname in ['lsb.acct', 'lsb.events']:
+            acct_file = os.path.join(lsfdir, "work", "logdir", fname)
+            f = open(acct_file)
+            row_num = 0
+            while (True):
+                rec = lsblib.lsb_geteventrec(f, row_num)
+                if rec == None:
+                    if lsblib.get_lsberrno() == LsBlib.LSBE_EOF:
+                        break
+                if lsblib.get_lsberrno() == lsblib.LSBE_EVENT_FORMAT:
+                    print "Bad Row: %s in %s" % (row_num, fname)
+                    continue
+                self.assertEqual(OpenLavaCAPI.get_lsberrno(), OpenLavaCAPI.LSBE_NO_ERROR)
+
 
 class LsLib(unittest.TestCase):
     def test_clustername(self):
