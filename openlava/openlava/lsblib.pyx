@@ -1758,6 +1758,8 @@ Get the next job in the list from the MBD.
     cdef int * more
     more=NULL
     j=openlava_base.lsb_readjobinfo(more)
+    if j == NULL:
+        return None
     a=JobInfoEnt()
     a._load_struct(j)
     return a
