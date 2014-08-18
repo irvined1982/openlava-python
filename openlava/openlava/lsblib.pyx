@@ -1070,7 +1070,7 @@ LSBE_LOCKED_MASTER = 130
 LSBE_DEP_ARRAY_SIZE = 131
 LSBE_NUM_ERR = 131
 
-_openjobinfocount = False
+openjobinfocount = False
 
 def create_job_id(job_id, array_index):
     """openlava.lsblib.create_job_id(job_id, array_index)
@@ -1333,7 +1333,7 @@ Closes the connection to the MBD that was opened with lsb_openjobinfo()
     >>> lsblib.lsb_closejobinfo()
 
 """
-    lsblib._openjobinfocount = False
+    lsblib.openjobinfocount = False
     openlava_base.lsb_closejobinfo()
 
 def lsb_deletejob(job_id, submit_time, options=0):
@@ -1522,9 +1522,9 @@ Get information about jobs that match the specified criteria.
 
 
 """
-    if lsblib._openjobinfocount:
+    if lsblib.openjobinfocount:
         raise Exception("closejobinfo has not been called after previous openjobinfo call")
-    lsblib._openjobinfocount = True
+    lsblib.openjobinfocount = True
     cdef int numJob
     numJobs=openlava_base.lsb_openjobinfo(job_id,job_name,user,queue,host,options)
     return numJobs
