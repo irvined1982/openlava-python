@@ -42,3 +42,6 @@ nosetests.xml
 _build
 build.sh
 debug.sh
+
+*lslib.c
+*lsblib.c

@@ -65,6 +65,7 @@ Members
 
 import cython
 cimport openlava_base
+from traceback import print_stack
 from libc.stdlib cimport realloc, malloc, free
 from libc.string cimport strcmp, memset, strcpy
 from cpython.string cimport PyString_AsString
@@ -1525,6 +1526,7 @@ Get information about jobs that match the specified criteria.
 """
     global _OPENJOBINFO_COUNT
     if _OPENJOBINFO_COUNT:
+        print_stack()
         raise Exception("closejobinfo has not been called after previous openjobinfo call")
     _OPENJOBINFO_COUNT = True
     cdef int numJob
