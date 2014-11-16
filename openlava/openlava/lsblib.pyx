@@ -1604,10 +1604,10 @@ Get the name of the file where job output is being spooled.
     >>>
 
 """
-    jobId=int(jobId)
+    jobId = long(jobId)
     cdef char * fname
-    fname=openlava_base.lsb_peekjob(jobId)
-    if fname==NULL:
+    fname = openlava_base.lsb_peekjob(jobId)
+    if fname == NULL:
         return None
     else:
         return fname

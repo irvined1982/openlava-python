@@ -3,6 +3,7 @@ sudo rm -rf /usr/local/lib/python2.7/dist-packages/openlava*;
 sudo rm -rf build/; 
 rm -rf openlava.c ;
 rm -rf openlava/lslib.c ; 
+rm -rf openlava/lsblib.c ; 
 sudo python setup.py install
 if [[ $? -ne 0 ]]; then
 	echo "BUILD FAILED"

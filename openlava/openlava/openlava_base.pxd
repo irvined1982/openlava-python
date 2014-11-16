@@ -638,7 +638,7 @@ cdef extern from "lsbatch.h":
     extern int          lsb_init (char *appName)
     extern LS_LONG_INT      lsb_modify (submit *, submitReply *, LS_LONG_INT)
     extern int          lsb_openjobinfo (long, char *, char *, char *, char *,int)
-    extern char        *lsb_peekjob(int jobId)
+    extern char        *lsb_peekjob(unsigned long jobId)
     extern char         *lsb_pendreason (int numReasons, int *rsTb, jobInfoHead *jInfoH, loadIndexLog *ld)
     extern void lsb_perror(char *)
     extern int         lsb_queuecontrol(char *queue, int opCode)
