@@ -83,6 +83,8 @@ cdef extern from "fileobject.h":
     ctypedef class __builtin__.file [object PyFileObject]:
         pass
 
+cdef extern from "config.h":
+    cdef int OPENLAVA_VERSION
 
 cdef extern from "lsbatch.h":
     ctypedef long long int LS_LONG_INT
@@ -412,14 +414,15 @@ cdef extern from "lsbatch.h":
         char **name
 
     extern struct jobMsgLog:
-        int usrId
         int jobId
-        int msgId
-        int type
-        char *src
-        char *dest
+        int idx
         char *msg
-        int    idx
+# IF OPENLAVA_PYTHON_VERSION < 32:
+#         int usrId
+#         int msgId
+#         int type
+#         char *src
+#         char *dest
 
     extern struct jobMsgAckLog:
         int usrId
@@ -4507,34 +4510,15 @@ cdef class JobMsgLog:
     cdef jobMsgLog * _data
     cdef _load_struct(self, jobMsgLog * data ):
         self._data=data
-    property usrId:
-        def __get__(self):
-            return self._data.usrId
-
 
     property jobId:
         def __get__(self):
             return self._data.jobId
 
 
-    property msgId:
+    property idx:
         def __get__(self):
-            return self._data.msgId
-
-
-    property type:
-        def __get__(self):
-            return self._data.type
-
-
-    property src:
-        def __get__(self):
-            return u"%s" % self._data.src
-
-
-    property dest:
-        def __get__(self):
-            return u"%s" % self._data.dest
+            return self._data.idx
 
 
     property msg:
@@ -4542,9 +4526,31 @@ cdef class JobMsgLog:
             return u"%s" % self._data.msg
 
 
-    property idx:
-        def __get__(self):
-            return self._data.idx
+    # property usrId:
+    #     def __get__(self):
+    #         return self._data.usrId
+    #
+    #
+    # property msgId:
+    #     def __get__(self):
+    #         return self._data.msgId
+    #
+    #
+    # property type:
+    #     def __get__(self):
+    #         return self._data.type
+    #
+    #
+    # property src:
+    #     def __get__(self):
+    #         return u"%s" % self._data.src
+    #
+    #
+    # property dest:
+    #     def __get__(self):
+    #         return u"%s" % self._data.dest
+
+
 
 
 

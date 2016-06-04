@@ -556,14 +556,17 @@ cdef extern from "lsbatch.h":
         char **name
 
     extern struct jobMsgLog:
-        int usrId
         int jobId
-        int msgId
-        int type
-        char *src
-        char *dest
-        char *msg
         int    idx
+        char *msg
+        # IF
+        # int usrId
+        # int msgId
+        # int type
+        # char *src
+        # char *dest
+
+
 
     extern struct jobMsgAckLog:
         int usrId
