@@ -21,7 +21,7 @@ from Cython.Distutils import build_ext
 
 # Find lsbatch
 try:
-	lsfdir=os.environ['LSF_ENVDIR']
+	libdir=os.environ['LSF_ENVDIR']
 	lsfdir=os.path.join(libdir,"..")
 
 except:
